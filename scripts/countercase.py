@@ -46,7 +46,7 @@ class CounterCaser:
                 counter += 1
 
                 if counter % blocksize == 0:
-                    print(counter)
+                    print(f"Tested {counter} cases.")
 
 
     def run_one(self, run_num):
