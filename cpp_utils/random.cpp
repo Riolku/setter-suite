@@ -1,3 +1,6 @@
+#pragma once
+
+#include <algorithm>
 #include <random>
 #include <exception>
 #include <stdexcept>
@@ -7,15 +10,12 @@ using namespace std;
 
 #include "types.hpp"
 
-using default_rng = linear_congruential_engine<ull, 16807, 0, 1'000'000'000'000'000'000>;
+using default_rng = linear_congruential_engine<ull, 16807, 0, 1000LL * 1000 * 1000 * 1000 * 1000 * 1000>;
 
 static default_rng * _random_engine = 0;
 
 void init_engine(ull seed) {
-
   _random_engine = new default_rng(seed);
-
-  return *_random_engine;
 }
 
 default_rng& get_engine() {
@@ -34,9 +34,8 @@ ld randreal(ld a, ld b) {
   return uniform_real_distribution<ld>(a, b)(get_engine());
 }
 
-template<typename T>
-int weighted_integer(vector<T> weights) {
-  return discrete_distribution<T>(weights)(get_engine());
+int weighted_integer(initializer_list<double> weights) {
+  return discrete_distribution<int>(weights)(get_engine());
 }
 
 template<typename T1, typename T2>
@@ -60,4 +59,9 @@ T choice(vector<T> elements) {
 template<typename IT>
 void shuffle(IT start, IT end) {
   shuffle(start, end, get_engine());
+}
+
+template<typename T>
+void shuffle(vector<T>& v) {
+  shuffle(v.begin(), v.end());
 }

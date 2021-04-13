@@ -21,3 +21,14 @@ vector<ld> rand_array(int N, ld a, ld b) {
 
   return ret;
 }
+
+vector<int> permutation(int N) {
+  vector<int> ret(N, 0);
+  for(int i = 0; i < N; i++) {
+    ret[i] = i + 1;
+  }
+
+  shuffle(ret);
+
+  return ret;
+}
