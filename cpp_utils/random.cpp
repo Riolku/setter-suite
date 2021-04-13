@@ -1,13 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <random>
-#include <exception>
-#include <stdexcept>
-#include <utility>
-#include <vector>
-using namespace std;
-
 #include "types.hpp"
 
 using default_rng = linear_congruential_engine<ull, 16807, 0, 1000LL * 1000 * 1000 * 1000 * 1000 * 1000>;

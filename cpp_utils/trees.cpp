@@ -1,4 +1,4 @@
-#include <cmath>
+#pragma once
 
 #include "types.hpp"
 #include "random.cpp"
@@ -17,6 +17,12 @@ struct tree {
       edges[i] = {perm[edges[i].first - 1], perm[edges[i].second - 1]};
     }
   }
+
+  void print_edges(FILE* stream = stdout) {
+    for(int i = 0; i < N - 1; i++) {
+      fprintf(stream, "%d %d\n", edges[i].first, edges[i].second);
+    }
+  }
 };
 
 tree true_random_tree(int N) {
@@ -31,7 +37,7 @@ tree true_random_tree(int N) {
   return ret;
 }
 
-tree perfect_star_graph(int N) {
+tree perfect_star_tree(int N) {
   tree ret(N);
 
   for(int i = 1; i < N; i++) {
@@ -43,7 +49,7 @@ tree perfect_star_graph(int N) {
   return ret;
 }
 
-tree perfect_line_graph(int N) {
+tree perfect_line_tree(int N) {
   tree ret(N);
 
   for(int i = 1; i < N; i++) {
@@ -55,7 +61,7 @@ tree perfect_line_graph(int N) {
   return ret;
 }
 
-tree rough_line_graph(int N) {
+tree rough_line_tree(int N) {
   tree ret(N);
 
   for(int i = 1; i < N; i++) {
@@ -74,7 +80,7 @@ tree rough_line_graph(int N) {
   return ret;
 }
 
-tree rough_star_graph(int N) {
+tree rough_star_tree(int N) {
   tree ret(N);
 
   for(int i = 1; i < N; i++) {
@@ -93,28 +99,25 @@ tree rough_star_graph(int N) {
   return ret;
 }
 
-tree random_tree(int N) {
-  switch(weighted_integer({1, 1, 1, 1, 1})) {
-    case 0:
-      return perfect_line_graph(N);
+enum { PERFECT_LINE_TREE, PERFECT_STAR_TREE, ROUGH_LINE_TREE, ROUGH_STAR_TREE, TRUE_RANDOM_TREE } tree_type;
 
-    case 1:
-      return perfect_star_graph(N);
+tree get_tree(int N, int tp) {
+  switch(tp) {
+    case PERFECT_LINE_TREE: return perfect_line_tree(N);
 
-    case 2:
-      return rough_line_graph(N);
+    case PERFECT_STAR_TREE: return perfect_star_tree(N);
 
-    case 3:
-      return rough_star_graph(N);
+    case ROUGH_LINE_TREE: return rough_line_tree(N);
 
-    case 4:
-      return true_random_tree(N);
+    case ROUGH_STAR_TREE: return rough_star_tree(N);
+
+    case TRUE_RANDOM_TREE: return true_random_tree(N);
 
     default:
-      throw runtime_error("weighted_integer returned an invalid value.");
+      throw runtime_error("Invalid tree type passed to get_tree");
   }
 }
 
-int main() {
-  init_engine(0);
+tree random_tree(int N) {
+  return get_tree(N, choice(vector<int>({ PERFECT_LINE_TREE, PERFECT_STAR_TREE, ROUGH_LINE_TREE, ROUGH_STAR_TREE, TRUE_RANDOM_TREE })));
 }
