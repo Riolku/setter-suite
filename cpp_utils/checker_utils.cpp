@@ -9,7 +9,7 @@ namespace CheckerCodes {
 
 using namespace CheckerCodes;
 
-void checker_handler(enum BasicReader::error_type e) {
+void __attribute__((noreturn)) checker_handler(enum BasicReader::error_type e) {
   switch(e) {
     case BasicReader::error_type::INTERNAL_RANGE:
     case BasicReader::error_type::EXTERNAL_RANGE:

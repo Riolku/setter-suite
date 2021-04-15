@@ -8,13 +8,13 @@ namespace BasicReader {
 
   enum error_type {INTERNAL_RANGE, EXTERNAL_RANGE, INVALID_ARGUMENT, WRONG_WHITESPACE};
 
-  typedef void(*error_handler)(enum error_type e);
+  typedef void __attribute__((noreturn)) (*error_handler)(enum error_type e);
 
-  void default_handler(error_type e) {
+  void __attribute__((noreturn)) default_handler(error_type e) {
     throw runtime_error(to_string(e));
   }
 
-  [[noreturn]] error_handler handler = default_handler;
+  error_handler handler = default_handler;
 
   void set_error_handler(error_handler f) {
     handler = f;
