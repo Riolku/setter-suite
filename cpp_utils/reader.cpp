@@ -1,18 +1,12 @@
-#include <iostream>
-#include <limits>
-#include <vector>
-#include <array>
-using namespace std;
+#include "types.hpp"
 
 // modified from a template by wleung_bvg
-
-using ll=long long;using ld=long double;
 
 namespace BasicReader {
   bool _hasLast = false;
   char _last;
 
-  enum error_type {INTERNAL_RANGE, EXTERNAL_RANGE, INVALID_ARGUMENT, WRONG_CHAR};
+  enum error_type {INTERNAL_RANGE, EXTERNAL_RANGE, INVALID_ARGUMENT, WRONG_WHITESPACE};
 
   typedef void(*error_handler)(enum error_type e);
 
@@ -84,15 +78,15 @@ namespace BasicReader {
   }
 
   void readSpace() {
-    if(_getChar() != ' ') handler(WRONG_CHAR);
+    if(_getChar() != ' ') handler(WRONG_WHITESPACE);
   }
 
   void readNewLine() {
-    if(_getChar() != '\n') handler(WRONG_CHAR);
+    if(_getChar() != '\n') handler(WRONG_WHITESPACE);
   }
 
   void readEOF() {
-    if(_getChar() != char_traits<char>::eof()) handler(WRONG_CHAR);
+    if(_getChar() != char_traits<char>::eof()) handler(WRONG_WHITESPACE);
   }
 }
 
@@ -117,18 +111,18 @@ namespace AdvancedReader {
   }
 
   template<int length>
-  array<ll, length> readLongTuple(ll lo, ll hi) {
+  array<ll, length> readIntTuple(ll lo, ll hi) {
     array<ll, length> res;
 
     return _fill_arr(res, length, lo, hi);
   }
 
-  vector<ll> readLongArray(int N, ll lo, ll hi) {
+  vector<ll> readIntArray(int N, ll lo, ll hi) {
     vector<ll> res(N, 0);
 
     return _fill_arr(res, N, lo, hi);
   }
 }
 
-using AdvancedReader::readLongArray;
-using AdvancedReader::readLongTuple;
+using AdvancedReader::readIntArray;
+using AdvancedReader::readIntTuple;
