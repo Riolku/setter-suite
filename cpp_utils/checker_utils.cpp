@@ -5,7 +5,7 @@ namespace CheckerCodes {
   int WA = 1;
   int PE = 2;
   int IE = 7;
-};
+}
 
 using namespace CheckerCodes;
 

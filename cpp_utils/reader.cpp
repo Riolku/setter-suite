@@ -20,33 +20,31 @@ namespace Reader {
   class FileReader {
 
   private:
-    bool _hasLast = false;
-    char _last;
-
     FILE* stream;
 
-    char _peekChar() {
-      _last = _hasLast ? _last : getc(stream);
-      _hasLast = true;
-      return _last;
-    }
-
-    char _getChar() {
-      char ret = _peekChar();
-      _hasLast = false;
-      return ret;
-    }
+    bool hasLast;
+    char lastChar;
 
   public:
-    FileReader(FILE* f) : stream(f) {}
+    FileReader(FILE* f) : stream(f), hasLast(false), lastChar(0) {}
 
-    char readChar() {
-      return _getChar();
+    char peekChar() {
+      if(!hasLast) {
+        lastChar = getc(stream);
+        hasLast = true;
+      }
+      return lastChar;
+    }
+
+    char getChar() {
+      char ret = peekChar();
+      hasLast = false;
+      return ret;
     }
 
     ll readInt(ll minValid, ll maxValid) {
       string token = "";
-      while (isdigit(_peekChar()) || _peekChar() == '-') token.push_back(_getChar());
+      while (isdigit(peekChar()) || peekChar() == '-') token.push_back(getChar());
       try {
         ll ret = stoll(token);
 
@@ -54,17 +52,17 @@ namespace Reader {
 
         return ret;
       }
-      catch(out_of_range e) {
+      catch(const out_of_range& e) {
         handler(EXTERNAL_RANGE);
       }
-      catch(invalid_argument e) {
+      catch(const invalid_argument& e) {
         handler(INVALID_ARGUMENT);
       }
     }
 
     ld readFloat(ld minValid, ld maxValid) {
       string token = "";
-      while (isdigit(_peekChar()) || _peekChar() == '-' || _peekChar() == '.') token.push_back(_getChar());
+      while (isdigit(peekChar()) || peekChar() == '-' || peekChar() == '.') token.push_back(getChar());
 
       try {
         ld ret = stold(token);
@@ -73,32 +71,32 @@ namespace Reader {
 
         return ret;
       }
-      catch(out_of_range e) {
+      catch(const out_of_range& e) {
         handler(EXTERNAL_RANGE);
       }
-      catch(invalid_argument e) {
+      catch(const invalid_argument& e) {
         handler(INVALID_ARGUMENT);
       }
     }
 
     string readLine() {
       string token = "";
-      while (_peekChar() != '\n') token.push_back(_getChar());
-      _getChar();
+      while (peekChar() != '\n') token.push_back(getChar());
+      getChar();
 
       return token;
     }
 
     void readSpace() {
-      if(_getChar() != ' ') handler(WRONG_WHITESPACE);
+      if(getChar() != ' ') handler(WRONG_WHITESPACE);
     }
 
     void readNewLine() {
-      if(_getChar() != '\n') handler(WRONG_WHITESPACE);
+      if(getChar() != '\n') handler(WRONG_WHITESPACE);
     }
 
     void readEOF() {
-      if(_getChar() != char_traits<char>::eof()) handler(WRONG_WHITESPACE);
+      if(getChar() != char_traits<char>::eof()) handler(WRONG_WHITESPACE);
     }
 
   private:
