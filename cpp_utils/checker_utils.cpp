@@ -9,14 +9,14 @@ namespace CheckerCodes {
 
 using namespace CheckerCodes;
 
-void __attribute__((noreturn)) checker_handler(enum BasicReader::error_type e) {
+void __attribute__((noreturn)) checker_handler(enum Reader::error_type e) {
   switch(e) {
-    case BasicReader::error_type::INTERNAL_RANGE:
-    case BasicReader::error_type::EXTERNAL_RANGE:
-    case BasicReader::error_type::INVALID_ARGUMENT:
+    case Reader::error_type::INTERNAL_RANGE:
+    case Reader::error_type::EXTERNAL_RANGE:
+    case Reader::error_type::INVALID_ARGUMENT:
       exit(WA);
 
-    case BasicReader::error_type::WRONG_WHITESPACE:
+    case Reader::error_type::WRONG_WHITESPACE:
       exit(PE);
 
     default:
@@ -26,5 +26,5 @@ void __attribute__((noreturn)) checker_handler(enum BasicReader::error_type e) {
 
 __attribute__((constructor))
 void set_checker_handler() {
-  BasicReader::set_error_handler(checker_handler);
+  Reader::set_error_handler(checker_handler);
 }
