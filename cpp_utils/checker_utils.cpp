@@ -13,9 +13,9 @@ void __attribute__((noreturn)) checker_handler(enum Reader::error_type e) {
   switch(e) {
     case Reader::error_type::INTERNAL_RANGE:
     case Reader::error_type::EXTERNAL_RANGE:
-    case Reader::error_type::INVALID_ARGUMENT:
       exit(WA);
 
+    case Reader::error_type::INVALID_ARGUMENT:
     case Reader::error_type::WRONG_WHITESPACE:
       exit(PE);
 

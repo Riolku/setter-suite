@@ -50,10 +50,15 @@ class CounterCaser:
 
 
     def run_one(self, run_num):
-        case = self.generator.run()
+        case = self.generator.run(timeout = 10)
 
-        out1 = self.sol_1.run(input = case.stdout)
-        out2 = self.sol_2.run(input = case.stdout)
+        try:
+            out1 = self.sol_1.run(input = case.stdout, timeout = 10)
+            out2 = self.sol_2.run(input = case.stdout, timeout = 10)
+
+        except RuntimeError:
+            print(f"==input===\n{case.stdout}===")
+            raise
 
         if out1.stdout != out2.stdout:
             return f"===CASE===\n{case.stdout}==={self.sol_1.file}===\n{out1.stdout}==={self.sol_2.file}===\n{out2.stdout}=======\n"

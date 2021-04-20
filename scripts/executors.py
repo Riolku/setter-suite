@@ -32,6 +32,6 @@ class Executor:
         ret = subprocess.run(self.exec + args, **kwargs)
 
         if kwargs.get('check_success', True) != False and ret.returncode != 0:
-            raise RuntimeError(f"{self.file} failed with {ret.returncode}\n{ret.stderr}")
+            raise RuntimeError(f"{self.file} called with {args} failed with {ret.returncode}\n{ret.stderr}")
 
         return ret
