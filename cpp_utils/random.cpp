@@ -2,7 +2,7 @@
 
 #include "types.hpp"
 
-using default_rng = linear_congruential_engine<ull, 16807, 0, 1000LL * 1000 * 1000 * 1000 * 1000 * 1000>;
+using default_rng = mt19937_64;
 
 static default_rng * _random_engine = 0;
 

@@ -79,12 +79,30 @@ namespace Reader {
       }
     }
 
-    string readLine() {
-      string token = "";
-      while (peekChar() != '\n') token.push_back(getChar());
-      getChar();
+    string readFile() {
+      string ret = "";
+      while(peekChar() != char_traits<char>::eof()) {
+        ret.push_back(getChar());
+      }
 
-      return token;
+      readEOF();
+    }
+
+    string readString(int N) {
+      string ret = "";
+      for(int i = 0; i < N; i++) {
+        ret.push_back(getChar());
+      }
+
+      return ret;
+    }
+
+    string readLine() {
+      string ret = "";
+      while (peekChar() != '\n') ret.push_back(getChar());
+      readNewLine();
+
+      return ret;
     }
 
     void readSpace() {
