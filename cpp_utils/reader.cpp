@@ -3,12 +3,18 @@
 // modified from a template by wleung_bvg
 
 namespace Reader {
-  enum error_type {INTERNAL_RANGE, EXTERNAL_RANGE, INVALID_ARGUMENT, WRONG_WHITESPACE};
+  const int ERROR_COUNT = 4;
+
+  enum error_type {INTERNAL_RANGE = 0, EXTERNAL_RANGE, INVALID_ARGUMENT, WRONG_WHITESPACE};
+
+  const char* error_names[ERROR_COUNT] = {"INTERNAL_RANGE", "EXTERNAL_RANGE", "INVALID_ARGUMENT", "WRONG_WHITESPACE"};
 
   typedef void __attribute__((noreturn)) (*error_handler)(enum error_type e);
 
   void __attribute__((noreturn)) default_handler(error_type e) {
-    throw runtime_error(to_string(e));
+    if(e >= ERROR_COUNT) throw runtime_error("Unknown error in FileReader");
+
+    throw runtime_error(error_names[e]);
   }
 
   static error_handler handler = default_handler;
@@ -86,6 +92,8 @@ namespace Reader {
       }
 
       readEOF();
+
+      return ret;
     }
 
     string readString(int N) {
@@ -99,7 +107,7 @@ namespace Reader {
 
     string readLine() {
       string ret = "";
-      while (peekChar() != '\n') ret.push_back(getChar());
+      while (peekChar() != '\n' && peekChar() != char_traits<char>::eof()) ret.push_back(getChar());
       readNewLine();
 
       return ret;
