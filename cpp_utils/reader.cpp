@@ -42,15 +42,26 @@ namespace Reader {
       return lastChar;
     }
 
-    char getChar() {
+    char readChar() {
       char ret = peekChar();
       hasLast = false;
       return ret;
     }
 
+
+    bool eof() {
+      return peekChar() == char_traits<char>::eof();
+    }
+
+    void trim() {
+      while(isspace(peekChar()) && !eof()) {
+        readChar();
+      }
+    }
+
     ll readInt(ll minValid, ll maxValid) {
       string token = "";
-      while (isdigit(peekChar()) || peekChar() == '-') token.push_back(getChar());
+      while (isdigit(peekChar()) || peekChar() == '-') token.push_back(readChar());
       try {
         ll ret = stoll(token);
 
@@ -68,7 +79,7 @@ namespace Reader {
 
     ld readFloat(ld minValid, ld maxValid) {
       string token = "";
-      while (isdigit(peekChar()) || peekChar() == '-' || peekChar() == '.') token.push_back(getChar());
+      while (isdigit(peekChar()) || peekChar() == '-' || peekChar() == '.') token.push_back(readChar());
 
       try {
         ld ret = stold(token);
@@ -87,8 +98,8 @@ namespace Reader {
 
     string readFile() {
       string ret = "";
-      while(peekChar() != char_traits<char>::eof()) {
-        ret.push_back(getChar());
+      while(!eof()) {
+        ret.push_back(readChar());
       }
 
       readEOF();
@@ -99,7 +110,7 @@ namespace Reader {
     string readString(int N) {
       string ret = "";
       for(int i = 0; i < N; i++) {
-        ret.push_back(getChar());
+        ret.push_back(readChar());
       }
 
       return ret;
@@ -107,22 +118,30 @@ namespace Reader {
 
     string readLine() {
       string ret = "";
-      while (peekChar() != '\n' && peekChar() != char_traits<char>::eof()) ret.push_back(getChar());
+      while (peekChar() != '\n' && !eof()) ret.push_back(readChar());
       readNewLine();
 
       return ret;
     }
 
     void readSpace() {
-      if(getChar() != ' ') handler(WRONG_WHITESPACE);
+      if(readChar() != ' ') handler(WRONG_WHITESPACE);
     }
 
     void readNewLine() {
-      if(getChar() != '\n') handler(WRONG_WHITESPACE);
+      if(readChar() != '\n') handler(WRONG_WHITESPACE);
     }
 
     void readEOF() {
-      if(getChar() != char_traits<char>::eof()) handler(WRONG_WHITESPACE);
+      if(readChar() != char_traits<char>::eof()) handler(WRONG_WHITESPACE);
+    }
+
+    string readToken() {
+      string token = "";
+
+      while(!isspace(peekChar()) && !eof()) token.push_back(readChar());
+
+      return token;
     }
 
   private:

@@ -40,10 +40,12 @@ vector<int> permutation(int N) {
 vector<ll> distinct_array(int N, ll l, ll r) {
   vector<ll> ret;
 
+  assert(N <= K);
+
   ll K = r - l + 1;
 
   if(2 * N > K) {
-    vector<ll> perm = shuffled_range(0, K - 1);
+    vector<int> perm = shuffled_range(0, K - 1);
 
     for(int i = 0; i < N; i++) {
       ret.push_back(l + perm[i]);

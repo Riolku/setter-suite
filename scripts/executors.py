@@ -28,6 +28,7 @@ class Executor:
         kwargs.setdefault("text", True)
         kwargs.setdefault("stdout", PIPE)
         kwargs.setdefault("stderr", PIPE)
+        kwargs.setdefault("timeout", 10)
 
         ret = subprocess.run(self.exec + args, **kwargs)
 

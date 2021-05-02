@@ -7,24 +7,28 @@ namespace CheckerCodes {
   int IE = 7;
 }
 
-using namespace CheckerCodes;
-
 void __attribute__((noreturn)) checker_handler(enum Reader::error_type e) {
   switch(e) {
     case Reader::error_type::INTERNAL_RANGE:
     case Reader::error_type::EXTERNAL_RANGE:
-      exit(WA);
+      exit(CheckerCodes::WA);
 
     case Reader::error_type::INVALID_ARGUMENT:
     case Reader::error_type::WRONG_WHITESPACE:
-      exit(PE);
+      exit(CheckerCodes::PE);
 
     default:
-      exit(IE);
+      exit(CheckerCodes::IE);
   }
 }
 
 __attribute__((constructor))
 void set_checker_handler() {
   Reader::set_error_handler(checker_handler);
+}
+
+void assertWA(bool cond) {
+  if(!cond) {
+    exit(CheckerCodes::WA);
+  }
 }
