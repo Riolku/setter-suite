@@ -19,10 +19,13 @@ default_rng& get_engine() {
 }
 
 ll randint(ll a, ll b) {
+  assert(a <= b);
   return uniform_int_distribution<ll>(a, b)(get_engine());
 }
 
+// [a, b)
 ld randreal(ld a, ld b) {
+  assert(a <= b);
   return uniform_real_distribution<ld>(a, b)(get_engine());
 }
 

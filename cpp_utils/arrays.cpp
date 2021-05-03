@@ -37,41 +37,24 @@ vector<int> permutation(int N) {
   return shuffled_range(1, N);
 }
 
-vector<ll> distinct_array(int N, ll l, ll r) {
-  vector<ll> ret;
+// get an array such that each element is at least `d` apart
+vector<ll> array_with_min_dist(int N, ll l, ll r, ll d) {
+  vector<ll> ret = rand_array(N, l, r - (N - 1) * d);
 
-  assert(N <= K);
-
-  ll K = r - l + 1;
-
-  if(2 * N > K) {
-    vector<int> perm = shuffled_range(0, K - 1);
-
-    for(int i = 0; i < N; i++) {
-      ret.push_back(l + perm[i]);
-    }
-
-    return ret;
-  }
-  else {
-    unordered_set<ll> seen;
-
-    for(int i = 0; i < N; i++) {
-      int x;
-      do {
-        x = randint(l, r);
-      } while(seen.count(x));
-
-      ret.push_back(x);
-      seen.insert(x);
-    }
+  for(int i = 0; i < N; i++) {
+    ret[i] += d * i;
   }
 
   return ret;
 }
 
+vector<ll> distinct_array(int N, ll l, ll r) {
+  return array_with_min_dist(N, l, r, 1);
+}
+
 vector<ll> array_with_sum(int N, ll K) {
-  vector<ll> splits = distinct_array(N - 1, 1, K - 1);
+  vector<ll> splits = rand_array(N - 1, 0, K);
+
   splits.push_back(K);
 
   sort(splits.begin(), splits.end());
