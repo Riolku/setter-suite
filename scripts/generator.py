@@ -9,10 +9,14 @@ import zipfile
 def main(args, env):
     gen = Generator(env)
 
+    os.system("rm -r old-data")
+
     try:
-        os.mkdir('data')
-    except FileExistsError:
+        os.rename("data", "old-data")
+    except FileNotFoundError:
         pass
+
+    os.mkdir('data')
 
     CASE_COUNTS = env['case_counts']
 
