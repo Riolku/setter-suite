@@ -9,7 +9,8 @@ import zipfile
 def main(args, env):
     gen = Generator(env)
 
-    os.system("rm -r old-data")
+    if os.path.exists("old-data"):
+        os.system("rm -r old-data")
 
     try:
         os.rename("data", "old-data")
