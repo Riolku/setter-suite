@@ -2,7 +2,7 @@ struct graph {
   int N, M;
   vector<pair<int, int>> edges;
 
-  tree(int N, int M) : N(N), M(M), edges(M, {0, 0}) {}
+  graph(int N, int M) : N(N), M(M), edges(M, {0, 0}) {}
 
   void permute() {
     vector<int> perm = permutation(N);
