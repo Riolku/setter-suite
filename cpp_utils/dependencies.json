@@ -7,17 +7,20 @@
     "random.cpp" : ["types.hpp"],
     "graphs.cpp" : [],
     "reader.cpp" : ["types.hpp"],
-    "trees.cpp" : ["random.cpp", "arrays.cpp"]
+    "trees.cpp" : ["random.cpp", "arrays.cpp"],
+    "sol_entry.cpp" : ["types.hpp", "reader.cpp"],
+    "gen_entry.cpp" : ["trees.cpp", "arrays.cpp", "random.cpp", "geo.cpp", "graphs.cpp", "types.hpp"],
+    "checker_entry.cpp" : ["checker_utils.cpp"]
   },
 
   "templates" : {
     "solution" : {
       "name" : "sol.cpp",
-      "deps" : ["types.hpp", "reader.cpp"]
+      "deps" : ["sol_entry.cpp"]
     },
     "generator" : {
       "name" : "gen.cpp",
-      "deps" : ["trees.cpp", "arrays.cpp", "random.cpp", "geo.cpp", "types.hpp"]
+      "deps" : ["gen_entry.cpp"]
     },
     "checker" : {
       "name" : "checker.cpp",
