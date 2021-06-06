@@ -2,7 +2,8 @@ import os
 
 def main(args, env):
 
-    os.system("rm -r old-build")
+    if os.path.exists("old-build"):
+        os.system("rm -r old-build")
 
     try:
         os.rename("build", "old-build")
