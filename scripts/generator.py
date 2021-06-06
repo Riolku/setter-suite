@@ -58,17 +58,26 @@ class Generator:
         suite, case = arg
         with open(f"data/{suite}.{case}.in", "w") as in_f:
             with open(f"data/{suite}.{case}.out", "w") as out_f:
-                self.generator_executor.run([str(suite), str(case)], stdout = in_f, stderr = out_f)
+                try:
+                    self.generator_executor.run([str(suite), str(case)], stdout = in_f, stderr = out_f)
+                except:
+                    raise RuntimeError(f"Failed generating case {suite}.{case}")
 
         return suite, case
 
     def generate_double(self, arg):
         suite, case = arg
         with open(f"data/{suite}.{case}.in", "w") as in_f:
-            self.generator_executor.run([str(suite), str(case)], stdout = in_f)
+            try:
+                self.generator_executor.run([str(suite), str(case)], stdout = in_f)
+            except:
+                raise RuntimeError(f"Failed generating case {suite}.{case}")
 
         with open(f"data/{suite}.{case}.in", "r") as in_f:
             with open(f"data/{suite}.{case}.out", "w") as out_f:
-                self.solution_executor.run(stdin = in_f, stdout = out_f)
+                try:
+                    self.solution_executor.run(stdin = in_f, stdout = out_f)
+                except:
+                    raise RuntimeError(f"Failed generating case {suite}.{case}")
 
         return suite, case

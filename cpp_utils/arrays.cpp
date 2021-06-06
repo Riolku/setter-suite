@@ -1,11 +1,5 @@
-#pragma once
-
-#include "types.hpp"
-
-#include "random.cpp"
-
 vector<ll> rand_array(int N, ll a, ll b) {
-  vector<ll> ret(0, N);
+  vector<ll> ret(N, 0);
 
   for(int i = 0; i < N; i++) {
     ret[i] = randint(a, b);
@@ -15,7 +9,7 @@ vector<ll> rand_array(int N, ll a, ll b) {
 }
 
 vector<ld> rand_array(int N, ld a, ld b) {
-  vector<ld> ret(0, N);
+  vector<ld> ret(N, 0);
 
   for(int i = 0; i < N; i++) {
     ret[i] = randreal(a, b);

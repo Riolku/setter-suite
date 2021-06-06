@@ -1,5 +1,3 @@
-#include "arrays.cpp"
-
 vector<pair<ll, ll>> convex_polygon(int N, ll xl, ll xh, ll yl, ll yh) {
   int pxc = max(min(xh - xl, randint(1, N - 1)), N - xh + xl);
 

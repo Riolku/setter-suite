@@ -1,5 +1,3 @@
-#include "types.hpp"
-
 // modified from a template by wleung_bvg
 
 namespace Reader {
@@ -11,16 +9,10 @@ namespace Reader {
 
   typedef void __attribute__((noreturn)) (*error_handler)(enum error_type e);
 
-  void __attribute__((noreturn)) default_handler(error_type e) {
+  void __attribute__((noreturn)) runtime_error_handler(error_type e) {
     if(e >= ERROR_COUNT) throw runtime_error("Unknown error in FileReader");
 
     throw runtime_error(error_names[e]);
-  }
-
-  static error_handler handler = default_handler;
-
-  void set_error_handler(error_handler f) {
-    handler = f;
   }
 
   class FileReader {
@@ -31,8 +23,10 @@ namespace Reader {
     bool hasLast;
     char lastChar;
 
+    error_handler handler;
+
   public:
-    FileReader(FILE* f) : stream(f), hasLast(false), lastChar(0) {}
+    FileReader(FILE* f, error_handler handler) : stream(f), hasLast(false), lastChar(0), handler(handler) {}
 
     char peekChar() {
       if(!hasLast) {

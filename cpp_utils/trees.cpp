@@ -1,9 +1,3 @@
-#pragma once
-
-#include "types.hpp"
-#include "random.cpp"
-#include "arrays.cpp"
-
 struct tree {
   int N;
   vector<pair<int, int>> edges;
@@ -18,7 +12,9 @@ struct tree {
     }
   }
 
-  void print_edges(FILE* stream = stdout) {
+  void print_edges(bool shuffle_edges = true, FILE* stream = stdout) {
+    if(shuffle_edges) permute();
+
     for(int i = 0; i < N - 1; i++) {
       fprintf(stream, "%d %d\n", edges[i].first, edges[i].second);
     }

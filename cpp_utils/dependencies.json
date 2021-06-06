@@ -1,0 +1,27 @@
+{
+  "files" : {
+    "types.hpp" : [],
+    "arrays.cpp" : ["types.hpp", "random.cpp"],
+    "checker_utils.cpp" : ["reader.cpp"],
+    "geo.cpp" : ["arrays.cpp"],
+    "random.cpp" : ["types.hpp"],
+    "graphs.cpp" : [],
+    "reader.cpp" : ["types.hpp"],
+    "trees.cpp" : ["random.cpp", "arrays.cpp"]
+  },
+
+  "templates" : {
+    "solution" : {
+      "name" : "sol.cpp",
+      "deps" : ["types.hpp", "reader.cpp"]
+    },
+    "generator" : {
+      "name" : "gen.cpp",
+      "deps" : ["trees.cpp", "arrays.cpp", "random.cpp", "geo.cpp", "types.hpp"]
+    },
+    "checker" : {
+      "name" : "checker.cpp",
+      "deps" : ["checker_utils.cpp"]
+    }
+  }
+}

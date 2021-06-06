@@ -1,7 +1,3 @@
-#pragma once
-
-#include "types.hpp"
-
 using default_rng = mt19937_64;
 
 static default_rng * _random_engine = 0;

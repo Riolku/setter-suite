@@ -1,5 +1,3 @@
-#include "reader.cpp"
-
 namespace CheckerCodes {
   int AC = 0;
   int WA = 1;
@@ -20,11 +18,6 @@ void __attribute__((noreturn)) checker_handler(enum Reader::error_type e) {
     default:
       exit(CheckerCodes::IE);
   }
-}
-
-__attribute__((constructor))
-void set_checker_handler() {
-  Reader::set_error_handler(checker_handler);
 }
 
 void assertWA(bool cond) {

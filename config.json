@@ -1,9 +1,0 @@
-{
-	"blocksize" : 70,
-	"case_counts" : [10, 10, 10],
-	"generator_type" : "double",
-	"generator_file" : "tests/gen.cpp",
-	"solutions" : [
-			"tests/sol.cpp"
-	]
-}
