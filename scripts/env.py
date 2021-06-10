@@ -17,6 +17,8 @@ def parse_env(args):
 
     while i < len(args):
         if args[i].startswith("-"):
+            assert i + 1 < len(args), f"option {args[i]} requires an argument"
+
             if args[i][1] == '-':
                 env[args[i][2:]] = args[i + 1]
             else:
