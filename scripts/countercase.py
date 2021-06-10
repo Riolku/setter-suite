@@ -17,7 +17,7 @@ def main(args, env):
     sol_1 = Executor(args[1])
     sol_2 = Executor(args[2])
 
-    CC = CounterCaser(generator, sol_1, sol_2)
+    CC = CounterCaser(generator, sol_1, sol_2, env.get("workers"))
 
     CC.run(blocksize)
 
@@ -28,15 +28,19 @@ def inf_iter():
         c += 1
 
 class CounterCaser:
-    def __init__(self, generator, sol_1, sol_2):
+    def __init__(self, generator, sol_1, sol_2, workers):
         self.generator = generator
         self.sol_1 = sol_1
         self.sol_2 = sol_2
+        self.workers = workers
+
+        if workers:
+            self.workers = int(workers)
 
     def run(self, blocksize):
         counter = 0
 
-        with Pool() as p:
+        with Pool(self.workers) as p:
             for feedback in p.imap_unordered(self.run_one, inf_iter()):
                 if feedback is not None:
                     print(feedback, end = "")

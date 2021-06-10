@@ -4,7 +4,7 @@ arr = list(map(int, input().split()))
 
 arr.sort()
 
-if randint(0, 200) == 0:
+if randint(0, 10000) == 0:
     arr[0] = -1
 
 print(*arr)

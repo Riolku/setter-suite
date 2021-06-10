@@ -25,7 +25,11 @@ def main(args, env):
 
     case_iter = [(suite + 1, case_num + 1) for suite in range(SUITE_COUNT) for case_num in range(CASE_COUNTS[suite])]
 
-    with Pool() as p:
+    workers = env.get("workers")
+
+    if workers: workers = int(workers)
+
+    with Pool(workers) as p:
         for suite, case in p.imap_unordered(gen.generate, case_iter):
             print("Generated    %.2d.%.2d" % (suite, case))
 
