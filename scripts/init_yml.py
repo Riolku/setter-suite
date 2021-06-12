@@ -66,6 +66,8 @@ def add_cases(ret, env):
     else:
         assert init_type == "zip", "Unknown init_type"
 
+        ret['archive'] = 'data.zip'
+
         ret['test_cases'] = dict(
             input_format = case_regex,
             case_points = env['case_points']
