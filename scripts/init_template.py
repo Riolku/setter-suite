@@ -14,7 +14,7 @@ def main(args, env):
         return -1
 
     if args[0] not in templates:
-        print(f"Invalid template '${args[0]}'")
+        print(f"Invalid template '{args[0]}'")
         return -1
 
     template_conf = templates[args[0]]
