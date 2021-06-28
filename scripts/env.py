@@ -1,12 +1,23 @@
-import json
+import json, yaml
 
 def parse_config():
+    conf = {}
+
     try:
         with open("config.json", "r") as f:
-            return json.load(f)
+            conf.update(json.load(f))
 
     except FileNotFoundError:
-        return {}
+        pass
+
+    try:
+        with open("config.yml", "r") as f:
+            conf.update(yaml.safe_load(f))
+
+    except FileNotFoundError:
+        pass
+
+    return conf
 
 def parse_env(args):
     i = 0

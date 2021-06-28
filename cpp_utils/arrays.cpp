@@ -8,7 +8,7 @@ vector<ll> rand_array(int N, ll a, ll b) {
   return ret;
 }
 
-vector<ld> rand_array(int N, ld a, ld b) {
+vector<ld> rand_double_array(int N, ld a, ld b) {
   vector<ld> ret(N, 0);
 
   for(int i = 0; i < N; i++) {
@@ -57,6 +57,20 @@ vector<ll> array_with_sum(int N, ll K) {
 
   for(int i = 1; i < N; i++) {
     ret.push_back(splits[i] - splits[i - 1]);
+  }
+
+  return ret;
+}
+
+using ArrayBuilder = vector<tuple<int, ll, ll>>;
+
+vector<ll> build_array(ArrayBuilder ab) {
+  vector<ll> ret;
+
+  for(auto [c, l, r] : ab) {
+    for(int i = 0; i < c; i++) {
+      ret.push_back(randint(l, r));
+    }
   }
 
   return ret;
