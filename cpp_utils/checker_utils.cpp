@@ -2,7 +2,8 @@ namespace CheckerCodes {
   int AC = 0;
   int WA = 1;
   int PE = 2;
-  int IE = 7;
+  int IE = 3;
+  int PARTIAL = 7;
 }
 
 void __attribute__((noreturn)) checker_handler(enum Reader::error_type e) {
