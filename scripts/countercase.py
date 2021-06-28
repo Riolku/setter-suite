@@ -60,9 +60,8 @@ class CounterCaser:
             out1 = self.sol_1.run(input = case.stdout, timeout = 10)
             out2 = self.sol_2.run(input = case.stdout, timeout = 10)
 
-        except RuntimeError:
-            print(f"==input===\n{case.stdout}===")
-            raise
+        except RuntimeError as e:
+            raise RuntimeError(f"==input===\n{case.stdout}=======\n")
 
         if out1.stdout != out2.stdout:
             return f"===CASE===\n{case.stdout}==={self.sol_1.file}===\n{out1.stdout}==={self.sol_2.file}===\n{out2.stdout}=======\n"
