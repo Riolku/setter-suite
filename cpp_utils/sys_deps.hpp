@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include <functional>
+
 #include <exception>
 #include <stdexcept>
 #include <cassert>

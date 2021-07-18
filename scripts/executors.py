@@ -30,9 +30,11 @@ class Executor:
         kwargs.setdefault("stderr", PIPE)
         kwargs.setdefault("timeout", 10)
 
+        check_success = kwargs.pop('check_success', True)
+
         ret = subprocess.run(self.exec + args, **kwargs)
 
-        if kwargs.get('check_success', True) != False and ret.returncode != 0:
+        if check_success != False and ret.returncode != 0:
             raise RuntimeError(f"{self.file} called with {args} failed with {ret.returncode}\n{ret.stderr}")
 
         return ret
