@@ -3,21 +3,25 @@ import multiprocessing
 from multiprocessing import Pool
 
 from .executors import Executor
+from .checkers import Checker, AC
 
 DEFAULT_BLOCKSIZE = 100
 
 def main(args, env):
     if len(args) < 3:
-        print("generator and two solutions required.")
+        print("generator, a solution and a reference sol required.")
         return -1
 
     blocksize = int(env.get("b", env.get("blocksize", DEFAULT_BLOCKSIZE)))
 
     generator = Executor(args[0])
+
     sol_1 = Executor(args[1])
     sol_2 = Executor(args[2])
 
-    CC = CounterCaser(generator, sol_1, sol_2, env.get("workers"))
+    checker = Checker.get(env['checker'])
+
+    CC = CounterCaser(generator, sol_1, sol_2, checker, workers = env.get("workers"))
 
     CC.run(blocksize)
 
@@ -28,13 +32,15 @@ def inf_iter():
         c += 1
 
 class CounterCaser:
-    def __init__(self, generator, sol_1, sol_2, workers):
+    def __init__(self, generator, sol_1, sol_2, checker, workers = None):
         self.generator = generator
         self.sol_1 = sol_1
         self.sol_2 = sol_2
-        self.workers = workers
+        self.checker = checker
 
-        if workers:
+        self.workers = None
+
+        if workers is not None:
             self.workers = int(workers)
 
     def run(self, blocksize):
@@ -63,7 +69,9 @@ class CounterCaser:
         except RuntimeError as e:
             raise RuntimeError(f"==input===\n{case.stdout}=======\n")
 
-        if out1.stdout != out2.stdout:
-            return f"===CASE===\n{case.stdout}==={self.sol_1.file}===\n{out1.stdout}==={self.sol_2.file}===\n{out2.stdout}=======\n"
+        checker_res = self.checker.check(case.stdout, out1.stdout, out2.stdout)
+
+        if checker_res != AC:
+            return f"===CASE===\n{case.stdout}==={self.sol_1.file}===\n{out1.stdout}==={self.sol_2.file}===\n{out2.stdout}===CHECKER===\n{checker_res}\n=========\n"
 
         return None

@@ -19,12 +19,19 @@ def main(args, env):
 
     template_conf = templates[args[0]]
 
-    write_template(template_conf)
+    if len(args) > 1:
+        write_template(template_conf, args[1])
 
-def write_template(conf):
+    else:
+        write_template(template_conf, args[0])
+
+def write_template(conf, fname = None):
     deps = get_deps(conf['deps'])
 
-    with open(conf['name'], "w") as out_file:
+    if fname is None:
+        fname = conf['default_name']
+
+    with open(fname, "w") as out_file:
         for file_name in deps:
             with open(f"{SETTER_DIR}/cpp_utils/{file_name}") as source_file:
                 print(source_file.read(), file = out_file)

@@ -35,9 +35,13 @@ vector<int> permutation(int N) {
 vector<ll> array_with_min_dist(int N, ll l, ll r, ll d) {
   vector<ll> ret = rand_array(N, l, r - (N - 1) * d);
 
+  sort(ret.begin(), ret.end());
+
   for(int i = 0; i < N; i++) {
     ret[i] += d * i;
   }
+
+  shuffle(ret);
 
   return ret;
 }
@@ -62,16 +66,21 @@ vector<ll> array_with_sum(int N, ll K) {
   return ret;
 }
 
-using ArrayBuilder = vector<tuple<int, ll, ll>>;
+class ArrayBuilder {
+public:
+  vector<tuple<ll, ll, ll>> ab;
 
-vector<ll> build_array(ArrayBuilder ab) {
-  vector<ll> ret;
-
-  for(auto [c, l, r] : ab) {
-    for(int i = 0; i < c; i++) {
-      ret.push_back(randint(l, r));
-    }
+  ArrayBuilder(vector<tuple<ll, ll, ll>> ab) {
+    this->ab = ab;
   }
 
-  return ret;
-}
+  vector<ll> build_normal() {
+    vector<ll> ans;
+
+    for(auto [len, lo, hi] : ab) {
+      for(int i = 0; i < len; i++) ans.push_back(randint(lo, hi));
+    }
+
+    return ans;
+  }
+};

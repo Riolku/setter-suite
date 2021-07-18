@@ -30,7 +30,7 @@ def main(args, env):
     if workers: workers = int(workers)
 
     with Pool(workers) as p:
-        for suite, case in p.imap_unordered(gen.generate, case_iter):
+        for suite, case in p.imap(gen.generate, case_iter):
             print("Generated    %.2d.%.2d" % (suite, case))
 
     print("---Creating Zip---")
