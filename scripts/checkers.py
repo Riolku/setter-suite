@@ -21,7 +21,7 @@ class BuiltinChecker:
 
     def get(id):
         if id == "identical":
-            return IdenticalChecker(id)
+            return IdenticalChecker()
 
         raise NotImplementedError(f"no such checker '{id}'")
 
@@ -30,7 +30,7 @@ class IdenticalChecker:
         pass
 
     def check(self, inp, out, expected_out):
-        if inp == out:
+        if out == expected_out:
             return AC;
 
         return WA
