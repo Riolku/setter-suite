@@ -32,3 +32,20 @@ vector<R> map(function<R(T)> func, const vector<T> arr) {
 
   return ret;
 }
+
+template<typename T>
+vector<T> distinct(vector<T> arr) {
+  vector<T> sarr = arr;
+
+  sort(sarr.begin(), sarr.end());
+
+  vector<T> ret;
+
+  for(int i = 0; i < sarr.size(); i++) {
+    if(i == 0 || sarr[i] != sarr[i - 1]) {
+      ret.push_back(sarr[i]);
+    }
+  }
+
+  return ret;
+}
