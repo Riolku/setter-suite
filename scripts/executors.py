@@ -12,7 +12,7 @@ class Executor:
         if file.endswith(CPP_EXT):
             file_root = file[:-len(CPP_EXT)]
 
-            assert subprocess.run(["g++", "-O2", "-Wall", "-std=c++17", "-o", file_root, file]).returncode == 0
+            assert subprocess.run(["g++", "-O2", "-Wall", "-g", "-std=c++17", "-o", file_root, file]).returncode == 0
 
             self.exec = ["./" + file_root]
 
