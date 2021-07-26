@@ -17,7 +17,7 @@ class Executor:
             self.exec = ["./" + file_root]
 
         else:
-            assert file.endswith(PY_EXT)
+            assert file.endswith(PY_EXT), f"Refusing to run '{file}' with unknown extension"
 
             self.exec = ["pypy3", file]
 

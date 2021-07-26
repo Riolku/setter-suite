@@ -3,13 +3,13 @@ import multiprocessing
 from multiprocessing import Pool
 
 from .executors import Executor
-from .checkers import Checker, AC
+from .checkers import Checker, codes
 
 DEFAULT_BLOCKSIZE = 100
 
 def main(args, env):
-    if len(args) < 3:
-        print("generator, a solution and a reference sol required.")
+    if len(args) < 2:
+        print("generator and a solution required.")
         return -1
 
     blocksize = int(env.get("b", env.get("blocksize", DEFAULT_BLOCKSIZE)))
@@ -17,7 +17,7 @@ def main(args, env):
     generator = Executor(args[0])
 
     sol_1 = Executor(args[1])
-    sol_2 = Executor(args[2])
+    sol_2 = Executor(env['solutions'][0])
 
     checker = Checker.get(env['checker'])
 
@@ -71,7 +71,7 @@ class CounterCaser:
 
         checker_res = self.checker.check(case.stdout, out1.stdout, out2.stdout)
 
-        if checker_res != AC:
+        if checker_res != codes['AC']:
             return f"===CASE===\n{case.stdout}==={self.sol_1.file}===\n{out1.stdout}==={self.sol_2.file}===\n{out2.stdout}===CHECKER===\n{checker_res}\n=========\n"
 
         return None

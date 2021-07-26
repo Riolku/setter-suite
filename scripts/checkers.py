@@ -2,10 +2,17 @@ import multiprocessing, os
 
 from .executors import Executor
 
-AC = 0
-WA = 1
-PE = 2
-IE = 7
+codes = dict(
+    AC = 0,
+    WA = 1,
+    PE = 2,
+    IE = 3,
+    PARTIAL = 7,
+    TLE = 1000,
+    RTE = 2000
+)
+
+rcodes = { b : a for a, b in codes.items() }
 
 class Checker:
     def get(id):
@@ -31,9 +38,9 @@ class IdenticalChecker:
 
     def check(self, inp, out, expected_out):
         if out == expected_out:
-            return AC;
+            return codes['AC'];
 
-        return WA
+        return codes['WA']
 
 class CustomChecker:
     def __init__(self, filename):
