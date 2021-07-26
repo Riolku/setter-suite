@@ -5,6 +5,7 @@ from .generator import main as generator_main
 from .init_template import main as init_template_main
 from .init_yml import main as init_yml_main
 from .build import main as build_main
+from .judge import main as judge_main
 
 def main(args):
     newargs, env = parse_env(args)
@@ -27,6 +28,9 @@ def main(args):
 
     elif newargs[0] == "build":
         return build_main(newargs[1:], env)
+
+    elif newargs[0] == "judge":
+        return judge_main(newargs[1:], env)
 
     print(f"Invalid operation '{newargs[0]}'!")
     return -1
