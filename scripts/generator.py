@@ -1,13 +1,12 @@
-import multiprocessing, os
+import os
 
-from multiprocessing import Pool
-
+from .env import env
 from .executors import Executor
 
 import zipfile
 
-def main(args, env):
-    gen = Generator(env)
+def main(args):
+    gen = Generator()
 
     if os.path.exists("old-data"):
         os.system("rm -r old-data")
@@ -19,25 +18,16 @@ def main(args, env):
 
     os.mkdir('data')
 
-    CASE_COUNTS = env['case_counts']
-
-    SUITE_COUNT = len(CASE_COUNTS)
-
-    case_iter = [(suite + 1, case_num + 1) for suite in range(SUITE_COUNT) for case_num in range(CASE_COUNTS[suite])]
-
-    workers = env.get("workers")
-
-    if workers: workers = int(workers)
-
-    with Pool(workers) as p:
-        for suite, case in p.imap(gen.generate, case_iter):
+    with env.pool() as p:
+        for suite, case in p.imap(gen.generate, env.case_iter):
             print("Generated    %.2d.%.2d" % (suite, case))
 
     print("---Creating Zip---")
 
     # I really don't think this can be parallelized effectively
+    # Nor is it slow
     with zipfile.ZipFile("data/data.zip", "w") as zf:
-        for suite, case_num in case_iter:
+        for suite, case_num in env.case_iter:
             print("Adding       %.2d.%.2d" % (suite, case_num))
 
             with open(f"data/{suite}.{case_num}.in", "rb") as data_f:
@@ -51,17 +41,15 @@ def main(args, env):
     print("---Done---")
 
 class Generator:
-    def __init__(self, env):
-        assert env['generator_type'] in ['single', 'double'], f"Unrecognized generator type '{env['generator_type']}'"
+    def __init__(self):
+        self.generator_executor = Executor(env['generator'])
 
-        if env['generator_type'] == 'single':
-            self.generate = self.generate_single
-            self.generator_executor = Executor(env['generator_file'])
-
-        elif env['generator_type'] == 'double':
+        if env.get('generator_type') == 'double':
             self.generate = self.generate_double
-            self.generator_executor = Executor(env['generator_file'])
-            self.solution_executor = Executor(env['solutions'][0])
+            self.solution_executor = env.reference_sol
+
+        else:
+            self.generate = self.generate_single
 
     def generate_single(self, arg):
         suite, case = arg

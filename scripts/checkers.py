@@ -14,6 +14,9 @@ codes = dict(
 
 rcodes = { b : a for a, b in codes.items() }
 
+def display_code(code):
+    return rcodes.get(code, code)
+
 class Checker:
     def get(id):
         if id.endswith("cpp"):

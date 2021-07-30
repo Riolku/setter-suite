@@ -1,44 +1,100 @@
-import json, yaml
+import json, yaml, multiprocessing
 
-def parse_config():
-    conf = {}
+from cached_property import cached_property
 
-    try:
-        with open("config.json", "r") as f:
-            conf.update(json.load(f))
+from .executors import Executor
+from .checkers import Checker
+from .validator_base import Validator
 
-    except FileNotFoundError:
-        pass
+class Env:
+    def __init__(self):
+        self.env = {}
 
-    try:
-        with open("config.yml", "r") as f:
-            conf.update(yaml.safe_load(f))
+    def parse_from_config(self):
+        try:
+            with open("config.json", "r") as f:
+                self.env.update(json.load(f))
 
-    except FileNotFoundError:
-        pass
+        except FileNotFoundError:
+            pass
 
-    return conf
+        try:
+            with open("config.yml", "r") as f:
+                self.env.update(yaml.safe_load(f))
 
-def parse_env(args):
-    i = 0
+        except FileNotFoundError:
+            pass
 
-    env = parse_config()
+    def setup_env(self, args):
+        i = 0
 
-    newargs = []
+        self.parse_from_config()
 
-    while i < len(args):
-        if args[i].startswith("-"):
-            assert i + 1 < len(args), f"option {args[i]} requires an argument"
+        newargs = []
 
-            if args[i][1] == '-':
-                env[args[i][2:]] = args[i + 1]
+        while i < len(args):
+            if args[i].startswith("-"):
+                assert i + 1 < len(args), f"option {args[i]} requires an argument"
+
+                if args[i][1] == '-':
+                    self.env[args[i][2:]] = args[i + 1]
+                else:
+                    self.env[args[i][1]] = args[i + 1]
+
+                i += 2
             else:
-                env[args[i][1]] = args[i + 1]
+                newargs.append(args[i])
 
-            i += 2
+                i += 1
+
+        return newargs
+
+    @cached_property
+    def reference_sol(self):
+        return Executor(self.env['solutions'][0])
+
+    @cached_property
+    def checker(self):
+        return Checker.get(self.env['checker'])
+
+    @cached_property
+    def validator(self):
+        return Validator(self.env['validator'])
+
+    @property
+    def timeout(self):
+        if "timelimit" in self.env:
+            return int(self.env['timelimit'])
+
         else:
-            newargs.append(args[i])
+            return 5
 
-            i += 1
+    @property
+    def case_counts(self):
+        return self.env['case_counts']
 
-    return newargs, env
+    @property
+    def case_iter(self):
+        cc = self.case_counts
+
+        return [(suite + 1, case_num + 1) for suite in range(len(cc)) for case_num in range(cc[suite])]
+
+    def pool(self):
+        if 'workers' in self.env:
+            workers = int(self.env['workers'])
+
+        else:
+            workers = None
+
+        return multiprocessing.Pool(workers)
+
+    def __getitem__(self, key):
+        return self.env[key]
+
+    def get(self, key, backup = None):
+        if key in self.env:
+            return self.env[key]
+
+        return backup
+
+env = Env()

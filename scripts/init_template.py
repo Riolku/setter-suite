@@ -8,7 +8,7 @@ templates = dependencies['templates']
 
 files = dependencies['files']
 
-def main(args, env):
+def main(args):
     if not args:
         print("Please specify a template.")
         return -1
