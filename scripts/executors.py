@@ -1,4 +1,4 @@
-import subprocess
+import subprocess, os
 from subprocess import PIPE
 from sys import exit
 
@@ -12,7 +12,7 @@ class Executor:
         if file.endswith(CPP_EXT):
             file_root = file[:-len(CPP_EXT)]
 
-            assert subprocess.run(["g++", "-O2", "-Wall", "-g", "-std=c++17", "-o", file_root, file]).returncode == 0
+            self.compile(file, file_root)
 
             self.exec = ["./" + file_root]
 
@@ -23,6 +23,14 @@ class Executor:
 
             if use_cpy:
                 self.exec[0] = "python3"
+
+    def compile(self, file, file_root):
+        compiled_stat_info = os.stat(file_root)
+        source_stat_info = os.stat(file)
+
+        # compile only if the source file is more recent than the executable
+        if source_stat_info.st_mtime >= compiled_stat_info.st_mtime:
+            assert subprocess.run(["g++", "-O2", "-Wall", "-g", "-std=c++17", "-o", file_root, file]).returncode == 0
 
     def run(self, args = [], **kwargs):
         kwargs.setdefault("text", True)

@@ -1,27 +1,20 @@
-import multiprocessing
-
-from multiprocessing import Pool
-
+from .invoke import Invoker
+from .env import env
 from .executors import Executor
-from .checkers import Checker, codes
+from .checkers import codes, display_code
 
 DEFAULT_BLOCKSIZE = 100
 
-def main(args, env):
-    if len(args) < 2:
-        print("generator and a solution required.")
-        return -1
+def main(args):
+    assert len(args) >= 1, "solution required"
 
     blocksize = int(env.get("b", env.get("blocksize", DEFAULT_BLOCKSIZE)))
 
-    generator = Executor(args[0])
+    generator = Executor(env['random_gen'])
 
-    sol_1 = Executor(args[1])
-    sol_2 = Executor(env['solutions'][0])
+    invoker = Invoker(args[0])
 
-    checker = Checker.get(env['checker'])
-
-    CC = CounterCaser(generator, sol_1, sol_2, checker, workers = env.get("workers"))
+    CC = CounterCaser(generator, invoker)
 
     CC.run(blocksize)
 
@@ -32,21 +25,15 @@ def inf_iter():
         c += 1
 
 class CounterCaser:
-    def __init__(self, generator, sol_1, sol_2, checker, workers = None):
+    def __init__(self, generator, invoker):
         self.generator = generator
-        self.sol_1 = sol_1
-        self.sol_2 = sol_2
-        self.checker = checker
-
-        self.workers = None
-
-        if workers is not None:
-            self.workers = int(workers)
+        self.invoker = invoker
+        self.validator = env.validator
 
     def run(self, blocksize):
         counter = 0
 
-        with Pool(self.workers) as p:
+        with env.pool() as p:
             for feedback in p.imap_unordered(self.run_one, inf_iter()):
                 if feedback is not None:
                     print(feedback, end = "")
@@ -60,18 +47,22 @@ class CounterCaser:
 
 
     def run_one(self, run_num):
-        case = self.generator.run(timeout = 10)
+        generator_res = self.generator.run(timeout = 10)
+
+        case = generator_res.stdout
+
+        if not self.validator.validate(case):
+            return f"===CASE===\n{case}===CASE INVALID==="
 
         try:
-            out1 = self.sol_1.run(input = case.stdout, timeout = 10)
-            out2 = self.sol_2.run(input = case.stdout, timeout = 10)
 
+            result = self.invoker.invoke(case)
+
+            checker_res = result['checker_result']
+
+            if checker_res != codes['AC']:
+                return f"===CASE===\n{case}==={self.invoker.program.file}===\n{result['process_result'].stdout}===Reference===\n{result['reference_result'].stdout}===CHECKER===\n{display_code(checker_res)}\n=========\n"
+
+            return None
         except RuntimeError as e:
-            raise RuntimeError(f"==input===\n{case.stdout}=======\n")
-
-        checker_res = self.checker.check(case.stdout, out1.stdout, out2.stdout)
-
-        if checker_res != codes['AC']:
-            return f"===CASE===\n{case.stdout}==={self.sol_1.file}===\n{out1.stdout}==={self.sol_2.file}===\n{out2.stdout}===CHECKER===\n{checker_res}\n=========\n"
-
-        return None
+            raise RuntimeError(f"==input===\n{case}=======\n")

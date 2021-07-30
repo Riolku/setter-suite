@@ -1,24 +1,26 @@
 import yaml
 
+from .env import env
+
 case_regex = '(?P<batch>\d+)\.(?P<case>\d+).in'
 
-def main(main, env):
+def main(main):
     ret = {}
 
-    add_base(ret, env)
-    add_checker(ret, env)
-    add_cases(ret, env)
+    add_base(ret)
+    add_checker(ret)
+    add_cases(ret)
 
     with open("init.yml", "w") as f:
         f.write(yaml.dump(ret))
 
     return 0
 
-def add_base(ret, env):
+def add_base(ret):
     ret['output_limit_length'] = env.get('output_limit_length', 10 ** 6)
     ret['output_prefix_length'] = env.get('output_prefix_length', 0)
 
-def add_checker(ret, env):
+def add_checker(ret):
     checker = env['checker']
 
     if checker.endswith('cpp'):
@@ -38,15 +40,15 @@ def add_checker(ret, env):
 
         ret['checker'] = checker
 
-def add_cases(ret, env):
+def add_cases(ret,):
     init_type = env['init_type']
 
     assert len(env['case_counts']) == len(env['case_points']), "must have the same number of cases in case_counts and case_points"
 
     if init_type == "generator":
-        assert env.get("generator_type") == "single", "Cannot use 'double' generator config with 'generator' init_type"
+        assert env.get("generator_type", "single") == "single", "Cannot use 'double' generator config with 'generator' init_type"
 
-        ret['generator'] = env['generator_file']
+        ret['generator'] = env['generator']
 
         test_cases = []
 
