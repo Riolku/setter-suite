@@ -52,7 +52,7 @@ class CounterCaser:
         case = generator_res.stdout
 
         if not self.validator.validate(case):
-            return f"===CASE===\n{case}===CASE INVALID==="
+            return f"===CASE===\n{case}===CASE INVALID===\n"
 
         try:
 

@@ -25,12 +25,20 @@ class Executor:
                 self.exec[0] = "python3"
 
     def compile(self, file, file_root):
-        compiled_stat_info = os.stat(file_root)
-        source_stat_info = os.stat(file)
+        try:
+            compiled_stat_info = os.stat(file_root)
+            source_stat_info = os.stat(file)
 
-        # compile only if the source file is more recent than the executable
-        if source_stat_info.st_mtime >= compiled_stat_info.st_mtime:
-            assert subprocess.run(["g++", "-O2", "-Wall", "-g", "-std=c++17", "-o", file_root, file]).returncode == 0
+            # compile only if the source file is more recent than the executable
+            if source_stat_info.st_mtime >= compiled_stat_info.st_mtime:
+                self.force_compile(file, file_root)
+
+        except FileNotFoundError:
+            self.force_compile(file, file_root)
+
+    def force_compile(self, file, file_root):
+        assert subprocess.run(["g++", "-O2", "-Wall", "-g", "-std=c++17", "-o", file_root, file]).returncode == 0
+
 
     def run(self, args = [], **kwargs):
         kwargs.setdefault("text", True)
