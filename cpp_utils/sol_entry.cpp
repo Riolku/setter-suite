@@ -1,1 +1,1 @@
-FileReader in_r(stdin, Reader::runtime_error_handler);
+ValidatingReader in_r(stdin);

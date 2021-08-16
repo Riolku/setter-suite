@@ -1,20 +1,97 @@
-void print(vector<ll> arr, FILE* stream = stdout) {
-  for(int i = 0; i < arr.size(); i++) {
-    fprintf(stream, "%lld", arr[i]);
+namespace Printer {
+  FILE* stream = stdout;
 
-    if(i + 1 == arr.size()) {
-      fprintf(stream, "\n");
-    }
-    else {
-      fprintf(stream, " ");
+  void set_stream(FILE* st) {
+    stream = st;
+  }
+
+  void print_impl(const int x) {
+    fprintf(stream, "%d", x);
+  }
+
+  void print_impl(const ll x) {
+    fprintf(stream, "%lld", x);
+  }
+
+  void print_impl(const char* x) {
+    fprintf(stream, "%s", x);
+  }
+
+  void print_impl(string x) {
+    print_impl(x.c_str());
+  }
+
+  void print_impl(char x) {
+    fprintf(stream, "%c", x);
+  }
+
+  template<typename A, typename B>
+  void print_impl(pair<A, B> p) {
+    print_many(p.first, p.second);
+  }
+
+  template<typename T, size_t... I>
+  void print_tuple(T t, index_sequence<I...>) {
+    (... , (
+      print_impl(I == 0 ? "" : " "),
+      print_impl(get<I>(t))
+    ));
+  }
+
+  template<typename ... Ts>
+  void print_impl(const tuple<Ts...> a) {
+    print_tuple(a, std::make_index_sequence<sizeof...(Ts)>());
+  }
+
+  template<typename T>
+  void print_impl(T arr) {
+    bool first = true;
+
+    for(auto x : arr) {
+      if(!first) {
+        print_impl(" ");
+      }
+      first = false;
+
+      print_impl(x);
     }
   }
-}
 
-void print(ll a, ll b, FILE* stream = stdout) {
-  print(vector<ll>{a, b}, stream);
-}
+  void print_many() {}
 
-void print(pair<ll, ll> p, FILE* stream = stdout) {
-  print(p.first, p.second, stream);
-}
+  template<typename T>
+  void print_many(T arg) {
+    print_impl(arg);
+  }
+
+  template<typename T, typename ...Ts>
+  void print_many(T arg, Ts... args) {
+    print_impl(arg);
+
+    printf(" ");
+
+    print_many(args...);
+  }
+
+  void print() {
+    fprintf(stream, "\n");
+  }
+
+  template<typename ...Ts>
+  void print(Ts... args) {
+    print_many(args...);
+
+    print();
+  }
+
+  template<typename T>
+  void print_items(T arg) {
+    for(auto x : arg) {
+      print(x);
+    }
+  }
+};
+
+using Printer::print;
+using Printer::print_items;
+using Printer::set_stream;

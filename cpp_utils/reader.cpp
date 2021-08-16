@@ -7,14 +7,6 @@ namespace Reader {
 
   const char* error_names[ERROR_COUNT] = {"INTERNAL_RANGE", "EXTERNAL_RANGE", "INVALID_ARGUMENT", "WRONG_WHITESPACE"};
 
-  typedef void __attribute__((noreturn)) (*error_handler)(enum error_type e);
-
-  void __attribute__((noreturn)) runtime_error_handler(error_type e) {
-    if(e >= ERROR_COUNT) throw runtime_error("Unknown error in FileReader");
-
-    throw runtime_error(error_names[e]);
-  }
-
   class FileReader {
 
   private:
@@ -23,10 +15,12 @@ namespace Reader {
     bool hasLast;
     char lastChar;
 
-    error_handler handler;
-
   public:
-    FileReader(FILE* f, error_handler handler) : stream(f), hasLast(false), lastChar(0), handler(handler) {}
+    FileReader(FILE* f) : stream(f), hasLast(false), lastChar(0) {}
+
+    FileReader(char* path) : FileReader(fopen(path, "r")) {}
+
+    virtual void __attribute__((noreturn)) errorHandler(error_type e) = 0;
 
     char peekChar() {
       if(!hasLast) {
@@ -59,15 +53,15 @@ namespace Reader {
       try {
         ll ret = stoll(token);
 
-        if(minValid > ret || maxValid < ret) handler(INTERNAL_RANGE);
+        if(minValid > ret || maxValid < ret) errorHandler(INTERNAL_RANGE);
 
         return ret;
       }
       catch(const out_of_range& e) {
-        handler(EXTERNAL_RANGE);
+        errorHandler(EXTERNAL_RANGE);
       }
       catch(const invalid_argument& e) {
-        handler(INVALID_ARGUMENT);
+        errorHandler(INVALID_ARGUMENT);
       }
     }
 
@@ -78,15 +72,15 @@ namespace Reader {
       try {
         ld ret = stold(token);
 
-        if(minValid > ret || maxValid < ret) handler(INTERNAL_RANGE);
+        if(minValid > ret || maxValid < ret) errorHandler(INTERNAL_RANGE);
 
         return ret;
       }
       catch(const out_of_range& e) {
-        handler(EXTERNAL_RANGE);
+        errorHandler(EXTERNAL_RANGE);
       }
       catch(const invalid_argument& e) {
-        handler(INVALID_ARGUMENT);
+        errorHandler(INVALID_ARGUMENT);
       }
     }
 
@@ -119,15 +113,15 @@ namespace Reader {
     }
 
     void readSpace() {
-      if(readChar() != ' ') handler(WRONG_WHITESPACE);
+      if(readChar() != ' ') errorHandler(WRONG_WHITESPACE);
     }
 
     void readNewLine() {
-      if(readChar() != '\n') handler(WRONG_WHITESPACE);
+      if(readChar() != '\n') errorHandler(WRONG_WHITESPACE);
     }
 
     void readEOF() {
-      if(readChar() != char_traits<char>::eof()) handler(WRONG_WHITESPACE);
+      if(readChar() != char_traits<char>::eof()) errorHandler(WRONG_WHITESPACE);
     }
 
     string readToken() {
@@ -165,6 +159,16 @@ namespace Reader {
       return _fill_arr(res, N, lo, hi);
     }
   };
+
+  class ValidatingReader : public FileReader {
+    using FileReader::FileReader;
+
+    void __attribute__((noreturn)) errorHandler(error_type e) {
+      if(e >= ERROR_COUNT) throw runtime_error("Unknown error in FileReader");
+
+      throw runtime_error(error_names[e]);
+    }
+  };
 }
 
-using Reader::FileReader;
+using Reader::ValidatingReader;

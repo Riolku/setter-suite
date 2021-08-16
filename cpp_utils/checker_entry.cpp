@@ -1,5 +1,5 @@
 int main(int argc, char** argv) {
-  FileReader in_r(fopen(argv[1], "r"), Reader::runtime_error_handler), prog_r(fopen(argv[2], "r"), checker_handler);
-
+  CheckerReader in_r(argv[2]);
+  ValidatingReader prog_r(argv[1]), sol_r(argv[3]);
 
 }

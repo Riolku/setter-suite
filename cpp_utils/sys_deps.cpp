@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <cassert>
 
+#include <initializer_list>
 #include <array>
 #include <utility>
 #include <vector>

@@ -6,20 +6,24 @@ namespace CheckerCodes {
   int PARTIAL = 7;
 }
 
-void __attribute__((noreturn)) checker_handler(enum Reader::error_type e) {
-  switch(e) {
-    case Reader::error_type::INTERNAL_RANGE:
-    case Reader::error_type::EXTERNAL_RANGE:
-      exit(CheckerCodes::WA);
+class CheckerReader : public FileReader {
+  using FileReader::FileReader;
 
-    case Reader::error_type::INVALID_ARGUMENT:
-    case Reader::error_type::WRONG_WHITESPACE:
-      exit(CheckerCodes::PE);
+  void __attribute__((noreturn)) checker_handler(enum Reader::error_type e) {
+    switch(e) {
+      case Reader::error_type::INTERNAL_RANGE:
+      case Reader::error_type::EXTERNAL_RANGE:
+        exit(CheckerCodes::WA);
 
-    default:
-      exit(CheckerCodes::IE);
+      case Reader::error_type::INVALID_ARGUMENT:
+      case Reader::error_type::WRONG_WHITESPACE:
+        exit(CheckerCodes::PE);
+
+      default:
+        exit(CheckerCodes::IE);
+    }
   }
-}
+};
 
 void assertWA(bool cond) {
   if(!cond) {

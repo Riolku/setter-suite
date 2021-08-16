@@ -1,0 +1,38 @@
+arrays:
+- sys_deps
+
+checker_entry:
+- checker_utils
+
+checker_utils:
+- reader
+
+gen_entry:
+- random_arrays
+- output
+
+output:
+- sys_deps
+
+random_arrays:
+- random
+- arrays
+
+random:
+- sys_deps
+- types
+
+reader:
+- sys_deps
+- types
+
+sol_entry:
+- reader
+- output
+
+sys_deps: []
+
+trees:
+- random_arrays
+
+types: []
