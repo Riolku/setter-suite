@@ -46,3 +46,8 @@ All the utilities are in `cpp_utils`. Dependency lists can be seen in `dependenc
 - `sys_deps.cpp`: System file dependencies.
 - `trees.cpp`: Generating trees.
 - `types.cpp`: Type aliases.
+
+## Dependencies
+- `g++`
+- `python3`
+  - `cached_property`
