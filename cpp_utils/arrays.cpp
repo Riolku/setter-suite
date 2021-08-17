@@ -155,6 +155,15 @@ struct List : public vector<T> {
     return *this;
   }
 
+  template<typename F>
+  List<T>& sortBy(F f) {
+    ::sort(this->begin(), this->end(), [&](const T& a, const T& b) {
+      return f(a) < f(b);
+    });
+
+    return *this;
+  }
+
   bool isSorted() const {
     return is_sorted(this->begin(), this->end());
   }
