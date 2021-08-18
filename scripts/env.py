@@ -59,7 +59,7 @@ class Env:
 
     @cached_property
     def validator(self):
-        return Validator(self.env['validator'])
+        return Validator(self.env.get('validator'))
 
     @property
     def timeout(self):
