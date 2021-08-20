@@ -39,7 +39,6 @@ class Executor:
     def force_compile(self, file, file_root):
         assert subprocess.run(["g++", "-O2", "-Wall", "-g", "-std=c++17", "-o", file_root, file]).returncode == 0
 
-
     def run(self, args = [], **kwargs):
         kwargs.setdefault("text", True)
         kwargs.setdefault("stdout", PIPE)
@@ -48,9 +47,20 @@ class Executor:
 
         check_success = kwargs.pop('check_success', True)
 
+        kwargs.setdefault('preexec_fn', do_prctl_deathsig)
+
         ret = subprocess.run(self.exec + args, **kwargs)
 
         if check_success != False and ret.returncode != 0:
             raise RuntimeError(f"{self.file} called with {args} failed with {ret.returncode}\n{ret.stderr}")
 
         return ret
+
+
+def do_prctl_deathsig():
+    from ctypes import cdll
+    import signal
+
+    PR_SET_PDEATHSIG = 1
+
+    cdll['libc.so.6'].prctl(PR_SET_PDEATHSIG, signal.SIGKILL)
