@@ -27,8 +27,11 @@ class Judge:
         print("---Judging---")
 
         with env.pool() as p:
-            for suite, case, result in p.imap(self.judge_one, case_iter):
-                print("%.2d.%.2d : %s" % (suite, case, display_code(result)))
+            for suite, case, result, time in p.imap(self.judge_one, case_iter):
+                if time:
+                    print("%.2d.%.2d : %s (%s)" % (suite, case, display_code(result), time))
+                else:
+                    print("%.2d.%.2d : %s" % (suite, case, display_code(result)))
 
         print("---Done---")
 
@@ -39,10 +42,10 @@ class Judge:
             try:
                 result = self.invoker.invoke(in_f.read())
 
-                return suite, case, result['checker_result']
+                return suite, case, result['checker_result'], result['process_time']
 
             except RuntimeError:
-                return suite, case, codes['RTE']
+                return suite, case, codes['RTE'], ''
 
             except subprocess.TimeoutExpired:
-                return suite, case, codes['TLE']
+                return suite, case, codes['TLE'], ''

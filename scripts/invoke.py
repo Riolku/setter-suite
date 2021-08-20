@@ -28,11 +28,11 @@ def main(args):
 
     result = invoker.invoke(inp)
 
-    print(f"---{args[0]}---")
+    print(f"---{args[0]}-- {result['process_time']}s --")
 
     print(result['process_result'].stdout, end = "")
 
-    print(f"---Reference---")
+    print(f"---Reference-- {result['reference_time']}s --")
 
     print(result['reference_result'].stdout, end = "")
 
@@ -49,11 +49,13 @@ class Invoker:
         self.checker = env.checker
 
     def invoke(self, input):
-        process_result = self.program.run(input = input, timeout = env.timeout)
-        reference_result = self.reference_sol.run(input = input, timeout = env.timeout)
+        process_result, process_time = self.program.run(input = input, timeout = env.timeout, return_time = True)
+        reference_result, reference_time = self.reference_sol.run(input = input, timeout = env.timeout, return_time = True)
 
         return dict(
             process_result = process_result,
             reference_result = reference_result,
-            checker_result = self.checker.check(input, process_result.stdout, reference_result.stdout)
+            checker_result = self.checker.check(input, process_result.stdout, reference_result.stdout),
+            process_time = process_time,
+            reference_time = reference_time
         )
