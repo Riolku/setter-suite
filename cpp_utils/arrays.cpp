@@ -17,7 +17,7 @@ struct List : public vector<T> {
   using vector<T>::vector;
 
   template<typename O>
-  List(O other) : List(other.begin(), other.end()) {}
+  List(O other) requires Iterable<O> : List(other.begin(), other.end()) {}
 
   int get_start() {
     return index_start;
@@ -56,26 +56,26 @@ struct List : public vector<T> {
   }
 
   template<typename OT>
-  List<T>& extend(OT other) {
+  List<T>& extend(OT other) requires Iterable<OT> {
     this->insert(this->end(), other.begin(), other.end());
 
     return *this;
   }
 
   template<typename OT>
-  List<T>& operator+=(OT other) {
+  List<T>& operator+=(OT other) requires Iterable<OT> {
     return extend(other);
   }
 
   template<typename OT>
-  List<T> operator+(OT other) {
+  List<T> operator+(OT other) requires Iterable<OT> {
     List<T> ret(this->begin(), this->end());
 
     return ret.extend(other).set_index(index_start);
   }
 
   template<typename NT>
-  List<T> operator*(NT times) {
+  List<T> operator*(NT times) requires is_integral<NT>::value {
     List<T> ret;
 
     auto n = this->size();
@@ -90,7 +90,7 @@ struct List : public vector<T> {
   }
 
   template<typename R, typename F>
-  List<R> map(F f) const {
+  List<R> map(F f) const requires is_function<F>::value {
     List<R> ret;
 
     ret.resize(this->size());
@@ -101,7 +101,7 @@ struct List : public vector<T> {
   }
 
   template<typename F>
-  List<T>& forEach(F f) {
+  List<T>& forEach(F f) requires is_function<F>::value {
     for_each(this->begin(), this->end(), f);
 
     return *this;
@@ -118,7 +118,7 @@ struct List : public vector<T> {
   }
 
   template<typename F>
-  List<T> filter(F f) {
+  List<T> filter(F f) requires Predicate<F, T> {
     List<T> cpy(this->begin(), this->end());
 
     cpy.erase(remove_if(cpy.begin(), cpy.end(), [&](const T& v) {
@@ -156,7 +156,7 @@ struct List : public vector<T> {
   }
 
   template<typename F>
-  List<T>& sortBy(F f) {
+  List<T>& sortBy(F f) requires Predicate<F, T> {
     ::sort(this->begin(), this->end(), [&](const T& a, const T& b) {
       return f(a) < f(b);
     });
@@ -168,7 +168,7 @@ struct List : public vector<T> {
     return is_sorted(this->begin(), this->end());
   }
 
-  List<T> getDistinct() {
+  List<T> getDistinct() const {
     List<T> cpy(this->begin(), this->end());
 
     cpy.sort();
@@ -189,7 +189,7 @@ struct List : public vector<T> {
   T sum() const {
     T ans;
 
-    for(T& x : *this) {
+    for(const T&& x : *this) {
       ans += x;
     }
 
@@ -216,13 +216,16 @@ List<T> range(T x) {
 
 template<typename T>
 List<T> range(T l, T r) {
+  return range(l, r, 1);
+}
+
+template<typename T>
+List<T> range(T l, T r, T i) {
   List<T> ret;
 
-  ret.resize(r - l);
-
-  generate(ret.begin(), ret.end(), [&]() {
-    return l++;
-  });
+  for(; l < r; l += i) {
+    ret.append(l);
+  }
 
   return ret;
 }

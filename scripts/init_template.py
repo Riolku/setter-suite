@@ -6,12 +6,12 @@ dependencies = yaml.safe_load(open(f"{SETTER_DIR}/cpp_utils/dependencies.yml"))
 
 def main(args):
     if not args:
-        print("Please specify a list of files to include.")
+        print("Please specify a list of files to include.", file = "stderr")
         return -1
 
     for x in args:
         if x not in dependencies:
-            print(f"{x} is not a valid file name")
+            print(f"{x} is not a valid file name", file = sys.stderr)
             return -1
 
     write_template(args)
