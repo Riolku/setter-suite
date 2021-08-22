@@ -187,7 +187,7 @@ struct List : public vector<T> {
   }
 
   T sum() const {
-    T ans;
+    T ans = T();
 
     for(const T& x : *this) {
       ans += x;
