@@ -1,5 +1,6 @@
 arrays:
 - sys_deps
+- concepts
 
 checker_entry:
 - checker_utils
@@ -7,12 +8,16 @@ checker_entry:
 checker_utils:
 - reader
 
+concepts:
+- sys_deps
+
 gen_entry:
 - random_arrays
 - output
 
 output:
 - sys_deps
+- concepts
 
 random_arrays:
 - random

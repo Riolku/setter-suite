@@ -27,7 +27,11 @@ namespace Printer {
 
   template<typename A, typename B>
   void print_impl(pair<A, B> p) {
-    print_many(p.first, p.second);
+    print_impl(p.first);
+
+    print_impl(' ');
+
+    print_impl(p.second);
   }
 
   template<typename T, size_t... I>
@@ -44,7 +48,7 @@ namespace Printer {
   }
 
   template<typename T>
-  void print_impl(T arr) {
+  void print_impl(T arr) requires Iterable<T> {
     bool first = true;
 
     for(auto x : arr) {
@@ -68,7 +72,7 @@ namespace Printer {
   void print_many(T arg, Ts... args) {
     print_impl(arg);
 
-    printf(" ");
+    print_impl(' ');
 
     print_many(args...);
   }
@@ -85,7 +89,7 @@ namespace Printer {
   }
 
   template<typename T>
-  void print_items(T arg) {
+  void print_items(T arg) requires Iterable<T> {
     for(auto x : arg) {
       print(x);
     }
