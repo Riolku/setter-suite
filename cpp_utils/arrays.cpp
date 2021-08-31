@@ -90,7 +90,7 @@ struct List : public vector<T> {
   }
 
   template<typename R, typename F>
-  List<R> map(F f) const requires is_function<F>::value {
+  List<R> map(F f) const requires Monad<F, T> {
     List<R> ret;
 
     ret.resize(this->size());
@@ -101,7 +101,7 @@ struct List : public vector<T> {
   }
 
   template<typename F>
-  List<T>& forEach(F f) requires is_function<F>::value {
+  List<T>& forEach(F f) requires Monad<F, T> {
     for_each(this->begin(), this->end(), f);
 
     return *this;
@@ -187,13 +187,7 @@ struct List : public vector<T> {
   }
 
   T sum() const {
-    T ans = T();
-
-    for(const T& x : *this) {
-      ans += x;
-    }
-
-    return ans;
+    return reduce(this->begin(), this->end());
   }
 
   T max() const {
@@ -209,15 +203,6 @@ struct List : public vector<T> {
   }
 };
 
-template<typename T>
-List<T> range(T x) {
-  return range(T(), x);
-}
-
-template<typename T>
-List<T> range(T l, T r) {
-  return range(l, r, 1);
-}
 
 template<typename T>
 List<T> range(T l, T r, T i) {
@@ -228,6 +213,19 @@ List<T> range(T l, T r, T i) {
   }
 
   return ret;
+}
+
+template<typename T>
+List<T> range(T l, T r) {
+  T one = T();
+  one++;
+
+  return range(l, r, one);
+}
+
+template<typename T>
+List<T> range(T x) {
+  return range(T(), x);
 }
 
 template<typename T1, typename T2>

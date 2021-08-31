@@ -145,18 +145,40 @@ namespace Reader {
       return res;
     }
 
+    template<typename T>
+    void readIntArg(T& a) {
+      a = readInt(numeric_limits<T>::min(), numeric_limits<T>::max());
+    }
+
   public:
-    template<int length>
-    array<ll, length> readIntTuple(ll lo, ll hi) {
-      array<ll, length> res;
+    template<typename T, int length>
+    array<T, length> readIntTuple(T lo, T hi) {
+      array<T, length> res;
 
       return _fill_arr(res, length, lo, hi);
     }
 
-    vector<ll> readIntArray(int N, ll lo, ll hi) {
-      vector<ll> res(N, 0);
+    template<typename T>
+    vector<T> readIntArray(int N, T lo, T hi) {
+      vector<T> res(N, 0);
 
       return _fill_arr(res, N, lo, hi);
+    }
+
+    template<typename T, typename ...Ts>
+    void readInts(T& arg, Ts&&... args) {
+      readIntArg(arg);
+
+      readSpace();
+
+      readInts(args...);
+    }
+
+    template<typename T>
+    void readInts(T& arg) {
+      readIntArg(arg);
+
+      readNewLine();
     }
   };
 
