@@ -9,6 +9,7 @@ from .judge import main as judge_main
 from .invoke import main as invoke_main
 from .validate import main as validate_main
 
+
 def main(args):
     newargs = env.setup_env(args)
 
@@ -16,13 +17,13 @@ def main(args):
         print("An operation is required.")
         return -1
 
-    if newargs[0] == 'countercase':
+    if newargs[0] == "countercase":
         return countercase_main(newargs[1:])
 
-    elif newargs[0] == 'generate':
+    elif newargs[0] == "generate":
         return generator_main(newargs[1:])
 
-    elif newargs[0] == 'init-template':
+    elif newargs[0] == "init-template":
         return init_template_main(newargs[1:])
 
     elif newargs[0] == "init-yml":

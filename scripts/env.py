@@ -6,6 +6,7 @@ from .executors import Executor
 from .checkers import Checker
 from .validator_base import Validator
 
+
 class Env:
     def __init__(self):
         self.env = {}
@@ -36,7 +37,7 @@ class Env:
             if args[i].startswith("-"):
                 assert i + 1 < len(args), f"option {args[i]} requires an argument"
 
-                if args[i][1] == '-':
+                if args[i][1] == "-":
                     self.env[args[i][2:]] = args[i + 1]
                 else:
                     self.env[args[i][1]] = args[i + 1]
@@ -51,37 +52,41 @@ class Env:
 
     @cached_property
     def reference_sol(self):
-        return Executor(self.env['solutions'][0])
+        return Executor(self.env["solutions"][0])
 
     @cached_property
     def checker(self):
-        return Checker.get(self.env['checker'])
+        return Checker.get(self.env["checker"])
 
     @cached_property
     def validator(self):
-        return Validator(self.env.get('validator'))
+        return Validator(self.env.get("validator"))
 
     @property
     def timeout(self):
         if "timelimit" in self.env:
-            return int(self.env['timelimit'])
+            return int(self.env["timelimit"])
 
         else:
             return 5
 
     @property
     def case_counts(self):
-        return self.env['case_counts']
+        return self.env["case_counts"]
 
     @property
     def case_iter(self):
         cc = self.case_counts
 
-        return [(suite + 1, case_num + 1) for suite in range(len(cc)) for case_num in range(cc[suite])]
+        return [
+            (suite + 1, case_num + 1)
+            for suite in range(len(cc))
+            for case_num in range(cc[suite])
+        ]
 
     def pool(self):
-        if 'workers' in self.env:
-            workers = int(self.env['workers'])
+        if "workers" in self.env:
+            workers = int(self.env["workers"])
 
         else:
             workers = None
@@ -91,10 +96,11 @@ class Env:
     def __getitem__(self, key):
         return self.env[key]
 
-    def get(self, key, backup = None):
+    def get(self, key, backup=None):
         if key in self.env:
             return self.env[key]
 
         return backup
+
 
 env = Env()

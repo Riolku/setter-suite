@@ -1,5 +1,6 @@
 from .executors import Executor
 
+
 class Validator:
     def __init__(self, file):
         if not file:
@@ -15,7 +16,7 @@ class Validator:
             return True
 
         else:
-            return self.validator.run(input = input, check_success = False).returncode == 0
+            return self.validator.run(input=input, check_success=False).returncode == 0
 
     def assertValid(self, input):
         assert self.validate(input), "Invalid input!"

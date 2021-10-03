@@ -2,6 +2,7 @@ import os
 
 from .env import env
 
+
 def main(args):
 
     if os.path.exists("old-build"):
@@ -18,8 +19,10 @@ def main(args):
     link_data()
     link_checker()
 
+
 def link_init():
     os.symlink(f"../init.yml", f"build/init.yml")
+
 
 def link_data():
     init_type = env["init_type"]
@@ -29,6 +32,7 @@ def link_data():
 
     os.symlink(f"../{env['generator']}", f"build/{env['generator']}")
 
+
 def link_checker():
-    if env['checker'].endswith('cpp'):
+    if env["checker"].endswith("cpp"):
         os.symlink(f"../{env['checker']}", f"build/{env['checker']}")

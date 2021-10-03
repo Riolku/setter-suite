@@ -5,6 +5,7 @@ from .executors import Executor
 
 import zipfile
 
+
 def main(args):
     gen = Generator()
 
@@ -16,7 +17,7 @@ def main(args):
     except FileNotFoundError:
         pass
 
-    os.mkdir('data')
+    os.mkdir("data")
 
     with env.pool() as p:
         for suite, case in p.imap(gen.generate, env.case_iter):
@@ -40,11 +41,12 @@ def main(args):
 
     print("---Done---")
 
+
 class Generator:
     def __init__(self):
-        self.generator_executor = Executor(env['generator'])
+        self.generator_executor = Executor(env["generator"])
 
-        if env.get('generator_type') == 'double':
+        if env.get("generator_type") == "double":
             self.generate = self.generate_double
             self.solution_executor = env.reference_sol
 
@@ -56,7 +58,9 @@ class Generator:
         with open(f"data/{suite}.{case}.in", "w") as in_f:
             with open(f"data/{suite}.{case}.out", "w") as out_f:
                 try:
-                    self.generator_executor.run([str(suite), str(case)], stdout = in_f, stderr = out_f)
+                    self.generator_executor.run(
+                        [str(suite), str(case)], stdout=in_f, stderr=out_f
+                    )
                 except:
                     raise RuntimeError(f"Failed generating case {suite}.{case}")
 
@@ -66,14 +70,14 @@ class Generator:
         suite, case = arg
         with open(f"data/{suite}.{case}.in", "w") as in_f:
             try:
-                self.generator_executor.run([str(suite), str(case)], stdout = in_f)
+                self.generator_executor.run([str(suite), str(case)], stdout=in_f)
             except:
                 raise RuntimeError(f"Failed generating case {suite}.{case}")
 
         with open(f"data/{suite}.{case}.in", "r") as in_f:
             with open(f"data/{suite}.{case}.out", "w") as out_f:
                 try:
-                    self.solution_executor.run(stdin = in_f, stdout = out_f)
+                    self.solution_executor.run(stdin=in_f, stdout=out_f)
                 except:
                     raise RuntimeError(f"Failed generating case {suite}.{case}")
 
