@@ -19,6 +19,10 @@ output:
 - sys_deps
 - concepts
 
+pairs:
+- sys_deps
+- types
+
 random_arrays:
 - random
 - arrays
