@@ -1,196 +1,193 @@
 // modified from a template by wleung_bvg
 
 namespace Reader {
-  const int ERROR_COUNT = 4;
+const int ERROR_COUNT = 4;
 
-  enum error_type {INTERNAL_RANGE = 0, EXTERNAL_RANGE, INVALID_ARGUMENT, WRONG_WHITESPACE};
+enum error_type { INTERNAL_RANGE = 0, EXTERNAL_RANGE, INVALID_ARGUMENT, WRONG_WHITESPACE };
 
-  const char* error_names[ERROR_COUNT] = {"INTERNAL_RANGE", "EXTERNAL_RANGE", "INVALID_ARGUMENT", "WRONG_WHITESPACE"};
+const char *error_names[ERROR_COUNT] = {"INTERNAL_RANGE", "EXTERNAL_RANGE", "INVALID_ARGUMENT", "WRONG_WHITESPACE"};
 
-  class FileReader {
+class FileReader {
 
   private:
-    FILE* stream;
+    FILE *stream;
 
     bool hasLast;
     char lastChar;
 
   public:
-    FileReader(FILE* f) : stream(f), hasLast(false), lastChar(0) {}
+    FileReader(FILE *f) : stream(f), hasLast(false), lastChar(0) {}
 
-    FileReader(char* path) : FileReader(fopen(path, "r")) {}
+    FileReader(char *path) : FileReader(fopen(path, "r")) {}
 
     virtual void __attribute__((noreturn)) errorHandler(error_type e) = 0;
 
     char peekChar() {
-      if(!hasLast) {
-        lastChar = getc(stream);
-        hasLast = true;
-      }
-      return lastChar;
+        if (!hasLast) {
+            lastChar = getc(stream);
+            hasLast = true;
+        }
+        return lastChar;
     }
 
     char readChar() {
-      char ret = peekChar();
-      hasLast = false;
-      return ret;
+        char ret = peekChar();
+        hasLast = false;
+        return ret;
     }
 
-
-    bool eof() {
-      return peekChar() == char_traits<char>::eof();
-    }
+    bool eof() { return peekChar() == char_traits<char>::eof(); }
 
     void trim() {
-      while(isspace(peekChar()) && !eof()) {
-        readChar();
-      }
+        while (isspace(peekChar()) && !eof()) {
+            readChar();
+        }
     }
 
     ll readInt(ll minValid, ll maxValid) {
-      string token = "";
-      while (isdigit(peekChar()) || peekChar() == '-') token.push_back(readChar());
-      try {
-        ll ret = stoll(token);
+        string token = "";
+        while (isdigit(peekChar()) || peekChar() == '-')
+            token.push_back(readChar());
+        try {
+            ll ret = stoll(token);
 
-        if(minValid > ret || maxValid < ret) errorHandler(INTERNAL_RANGE);
+            if (minValid > ret || maxValid < ret)
+                errorHandler(INTERNAL_RANGE);
 
-        return ret;
-      }
-      catch(const out_of_range& e) {
-        errorHandler(EXTERNAL_RANGE);
-      }
-      catch(const invalid_argument& e) {
-        errorHandler(INVALID_ARGUMENT);
-      }
+            return ret;
+        } catch (const out_of_range &e) {
+            errorHandler(EXTERNAL_RANGE);
+        } catch (const invalid_argument &e) {
+            errorHandler(INVALID_ARGUMENT);
+        }
     }
 
     ld readFloat(ld minValid, ld maxValid) {
-      string token = "";
-      while (isdigit(peekChar()) || peekChar() == '-' || peekChar() == '.') token.push_back(readChar());
+        string token = "";
+        while (isdigit(peekChar()) || peekChar() == '-' || peekChar() == '.')
+            token.push_back(readChar());
 
-      try {
-        ld ret = stold(token);
+        try {
+            ld ret = stold(token);
 
-        if(minValid > ret || maxValid < ret) errorHandler(INTERNAL_RANGE);
+            if (minValid > ret || maxValid < ret)
+                errorHandler(INTERNAL_RANGE);
 
-        return ret;
-      }
-      catch(const out_of_range& e) {
-        errorHandler(EXTERNAL_RANGE);
-      }
-      catch(const invalid_argument& e) {
-        errorHandler(INVALID_ARGUMENT);
-      }
+            return ret;
+        } catch (const out_of_range &e) {
+            errorHandler(EXTERNAL_RANGE);
+        } catch (const invalid_argument &e) {
+            errorHandler(INVALID_ARGUMENT);
+        }
     }
 
     string readFile() {
-      string ret = "";
-      while(!eof()) {
-        ret.push_back(readChar());
-      }
+        string ret = "";
+        while (!eof()) {
+            ret.push_back(readChar());
+        }
 
-      readEOF();
+        readEOF();
 
-      return ret;
+        return ret;
     }
 
     string readString(int N) {
-      string ret = "";
-      for(int i = 0; i < N; i++) {
-        ret.push_back(readChar());
-      }
+        string ret = "";
+        for (int i = 0; i < N; i++) {
+            ret.push_back(readChar());
+        }
 
-      return ret;
+        return ret;
     }
 
     string readLine() {
-      string ret = "";
-      while (peekChar() != '\n' && !eof()) ret.push_back(readChar());
-      readNewLine();
+        string ret = "";
+        while (peekChar() != '\n' && !eof())
+            ret.push_back(readChar());
+        readNewLine();
 
-      return ret;
+        return ret;
     }
 
     void readSpace() {
-      if(readChar() != ' ') errorHandler(WRONG_WHITESPACE);
+        if (readChar() != ' ')
+            errorHandler(WRONG_WHITESPACE);
     }
 
     void readNewLine() {
-      if(readChar() != '\n') errorHandler(WRONG_WHITESPACE);
+        if (readChar() != '\n')
+            errorHandler(WRONG_WHITESPACE);
     }
 
     void readEOF() {
-      if(readChar() != char_traits<char>::eof()) errorHandler(WRONG_WHITESPACE);
+        if (readChar() != char_traits<char>::eof())
+            errorHandler(WRONG_WHITESPACE);
     }
 
     string readToken() {
-      string token = "";
+        string token = "";
 
-      while(!isspace(peekChar()) && !eof()) token.push_back(readChar());
+        while (!isspace(peekChar()) && !eof())
+            token.push_back(readChar());
 
-      return token;
+        return token;
     }
 
   private:
-    template<typename T>
-    T& _fill_arr(T& res, int N, ll lo, ll hi) {
-      for(int i = 0; i < N; i++) {
-        res[i] = readInt(lo, hi);
+    template <typename T> T &_fill_arr(T &res, int N, ll lo, ll hi) {
+        for (int i = 0; i < N; i++) {
+            res[i] = readInt(lo, hi);
 
-        if(i == N - 1) readNewLine();
-        else readSpace();
-      }
+            if (i == N - 1)
+                readNewLine();
+            else
+                readSpace();
+        }
 
-      return res;
+        return res;
     }
 
-    template<typename T>
-    void readIntArg(T& a) {
-      a = readInt(numeric_limits<T>::min(), numeric_limits<T>::max());
-    }
+    template <typename T> void readIntArg(T &a) { a = readInt(numeric_limits<T>::min(), numeric_limits<T>::max()); }
 
   public:
-    template<typename T, int length>
-    array<T, length> readIntTuple(T lo, T hi) {
-      array<T, length> res;
+    template <typename T, int length> array<T, length> readIntTuple(T lo, T hi) {
+        array<T, length> res;
 
-      return _fill_arr(res, length, lo, hi);
+        return _fill_arr(res, length, lo, hi);
     }
 
-    template<typename T>
-    vector<T> readIntArray(int N, T lo, T hi) {
-      vector<T> res(N, 0);
+    template <typename T> vector<T> readIntArray(int N, T lo, T hi) {
+        vector<T> res(N, 0);
 
-      return _fill_arr(res, N, lo, hi);
+        return _fill_arr(res, N, lo, hi);
     }
 
-    template<typename T, typename ...Ts>
-    void readInts(T& arg, Ts&&... args) {
-      readIntArg(arg);
+    template <typename T, typename... Ts> void readInts(T &arg, Ts &&...args) {
+        readIntArg(arg);
 
-      readSpace();
+        readSpace();
 
-      readInts(args...);
+        readInts(args...);
     }
 
-    template<typename T>
-    void readInts(T& arg) {
-      readIntArg(arg);
+    template <typename T> void readInts(T &arg) {
+        readIntArg(arg);
 
-      readNewLine();
+        readNewLine();
     }
-  };
+};
 
-  class ValidatingReader : public FileReader {
+class ValidatingReader : public FileReader {
     using FileReader::FileReader;
 
     void __attribute__((noreturn)) errorHandler(error_type e) {
-      if(e >= ERROR_COUNT) throw runtime_error("Unknown error in FileReader");
+        if (e >= ERROR_COUNT)
+            throw runtime_error("Unknown error in FileReader");
 
-      throw runtime_error(error_names[e]);
+        throw runtime_error(error_names[e]);
     }
-  };
-}
+};
+} // namespace Reader
 
 using Reader::ValidatingReader;
