@@ -1,5 +1,6 @@
 from .env import env
 
+
 def main(args):
     validator = DataValidator()
 
@@ -12,6 +13,7 @@ def main(args):
 
             else:
                 print(f"Validated   %.2d.%.2d" % (suite, case))
+
 
 class DataValidator:
     def __init__(self):

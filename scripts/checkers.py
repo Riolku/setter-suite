@@ -2,20 +2,14 @@ import multiprocessing, os
 
 from .executors import Executor
 
-codes = dict(
-    AC = 0,
-    WA = 1,
-    PE = 2,
-    IE = 3,
-    PARTIAL = 7,
-    TLE = 1000,
-    RTE = 2000
-)
+codes = dict(AC=0, WA=1, PE=2, IE=3, PARTIAL=7, TLE=1000, RTE=2000)
 
-rcodes = { b : a for a, b in codes.items() }
+rcodes = {b: a for a, b in codes.items()}
+
 
 def display_code(code):
     return rcodes.get(code, code)
+
 
 class Checker:
     def get(id):
@@ -24,6 +18,7 @@ class Checker:
 
         else:
             return BuiltinChecker.get(id)
+
 
 class BuiltinChecker:
     def __init__(self):
@@ -35,15 +30,17 @@ class BuiltinChecker:
 
         raise NotImplementedError(f"no such checker '{id}'")
 
+
 class IdenticalChecker:
     def __init__(self):
         pass
 
     def check(self, inp, out, expected_out):
         if out == expected_out:
-            return codes['AC'];
+            return codes["AC"]
 
-        return codes['WA']
+        return codes["WA"]
+
 
 class CustomChecker:
     def __init__(self, filename):
@@ -61,7 +58,10 @@ class CustomChecker:
         with open(f"/tmp/{pid}.eout", "w") as f:
             f.write(expected_out)
 
-        ret = self.executor.run([f"/tmp/{pid}.in", f"/tmp/{pid}.out", f"/tmp/{pid}.eout"], check_success = False)
+        ret = self.executor.run(
+            [f"/tmp/{pid}.in", f"/tmp/{pid}.out", f"/tmp/{pid}.eout"],
+            check_success=False,
+        )
 
         os.remove(f"/tmp/{pid}.in")
         os.remove(f"/tmp/{pid}.out")
