@@ -45,13 +45,13 @@ template <typename T> struct List : public vector<T> {
 
     template <typename OT> List<T> &operator+=(OT other) requires Iterable<OT> { return extend(other); }
 
-    template <typename OT> List<T> operator+(OT other) requires Iterable<OT> {
+    template <typename OT> List<T> operator+(OT other) const requires Iterable<OT> {
         List<T> ret(this->begin(), this->end());
 
         return ret.extend(other).set_index(index_start);
     }
 
-    template <typename NT> List<T> operator*(NT times) requires is_integral<NT>::value {
+    template <typename NT> List<T> operator*(NT times) const requires is_integral<NT>::value {
         List<T> ret;
 
         auto n = this->size();
@@ -59,10 +59,20 @@ template <typename T> struct List : public vector<T> {
         ret.resize(times * n);
 
         for (int i = 0; i < ret.size(); i++) {
-            ret.at(i) = this->at(i % n + index_start);
+            ret.at(i) = this->at(i % n);
         }
 
         return ret.set_index(index_start);
+    }
+
+    template <typename NT> List<T> &operator*=(NT times) const requires is_integral<NT>::value {
+        int orig_size = this->size();
+
+        for (int i = 0; i < (times - 1) * orig_size; i++) {
+            append(this->at(i % orig_size + index_start));
+        }
+
+        return *this;
     }
 
     template <typename R, typename F> List<R> map(F f) const requires Monad<F, T> {
@@ -75,11 +85,19 @@ template <typename T> struct List : public vector<T> {
         return ret.set_index(index_start);
     }
 
+    template <typename F> List<T> &mapInPlace(F f) requires Monad<F, T> {
+        transform(this->begin(), this->end(), this->begin(), f);
+
+        return *this;
+    }
+
     template <typename F> List<T> &forEach(F f) requires Monad<F, T> {
         for_each(this->begin(), this->end(), f);
 
         return *this;
     }
+
+    List<pair<T, T>> pairs() const { return zip(*this, slice(1)); }
 
     size_t count(T v) const { return ::count(this->begin(), this->end(), v); }
 
@@ -89,7 +107,7 @@ template <typename T> struct List : public vector<T> {
         return *this;
     }
 
-    template <typename F> List<T> filter(F f) requires Predicate<F, T> {
+    template <typename F> List<T> filter(F f) const requires Predicate<F, T> {
         List<T> cpy(this->begin(), this->end());
 
         cpy.erase(remove_if(cpy.begin(), cpy.end(), [&](const T &v) { return !f(v); }), cpy.end());
@@ -112,7 +130,7 @@ template <typename T> struct List : public vector<T> {
     }
 
     List<pair<T, int>> enumerate() const {
-        return zip(*this, range(index_start, index_start + this->size())).set_index(index_start);
+        return zip(*this, range<int>(index_start, index_start + this->size())).set_index(index_start);
     }
 
     List<T> &sort() {
