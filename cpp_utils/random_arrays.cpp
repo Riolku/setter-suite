@@ -19,9 +19,11 @@ template <typename T> List<T> rand_array(int N, T x, T y) {
 }
 
 template <typename T> List<T> distinct_array(int N, T x, T y) {
-    return rand_array(N, x, y - N + 1).sort().enumerate().template map<T>([&](pair<T, int> e) {
+    RandomList<int> arr = rand_array(N, x, y - N + 1).sort().enumerate().template map<T>([&](pair<T, int> e) {
         return e.first + e.second;
     });
+
+    return arr.shuffle();
 }
 
 template <typename T> class ArrayBuilder {
