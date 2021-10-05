@@ -33,7 +33,7 @@ class Executor:
             source_stat_info = os.stat(file)
 
             # compile only if the source file is more recent than the executable
-            if source_stat_info.st_mtime >= compiled_stat_info.st_mtime:
+            if source_stat_info.st_mtime > compiled_stat_info.st_mtime:
                 self.force_compile(file, file_root)
 
         except FileNotFoundError:
