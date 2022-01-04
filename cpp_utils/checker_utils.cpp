@@ -11,7 +11,8 @@ class CheckerReader : public Reader::FileReader {
 
     void __attribute__((noreturn)) errorHandler(enum Reader::error_type e) {
         switch (e) {
-        case Reader::error_type::OUT_OF_RANGE:
+        case Reader::error_type::INTERNAL_RANGE:
+        case Reader::error_type::EXTERNAL_RANGE:
             exit(CheckerCodes::WA);
 
         case Reader::error_type::INVALID_ARGUMENT:
