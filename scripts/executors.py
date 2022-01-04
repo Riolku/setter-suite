@@ -7,7 +7,7 @@ PY_EXT = ".py"
 
 
 class Executor:
-    def __init__(self, file, use_cpy=True):
+    def __init__(self, file):
         self.file = file
 
         if file.endswith(CPP_EXT):
@@ -22,10 +22,9 @@ class Executor:
                 PY_EXT
             ), f"Refusing to run '{file}' with unknown extension"
 
-            self.exec = ["pypy3", file]
+            from .env import env
 
-            if use_cpy:
-                self.exec[0] = "python3"
+            self.exec = [env.python_exec, file]
 
     def compile(self, file, file_root):
         try:
@@ -42,7 +41,7 @@ class Executor:
     def force_compile(self, file, file_root):
         assert (
             subprocess.run(
-                ["g++", "-O2", "-Wall", "-g", "-std=c++20", "-o", file_root, file]
+                ["g++", "-O2", "-Wall", "-std=c++20", "-o", file_root, file]
             ).returncode
             == 0
         )

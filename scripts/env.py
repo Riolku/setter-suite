@@ -75,6 +75,10 @@ class Env:
         return self.env["case_counts"]
 
     @property
+    def python_exec(self):
+        return self.env.get("python_exec", "python3")
+
+    @property
     def case_iter(self):
         cc = self.case_counts
 
@@ -96,11 +100,11 @@ class Env:
     def __getitem__(self, key):
         return self.env[key]
 
-    def get(self, key, backup=None):
-        if key in self.env:
-            return self.env[key]
+    def __contains__(self, key):
+        return key in self.env
 
-        return backup
+    def get(self, key, backup=None):
+        return self.env.get(key, backup)
 
 
 env = Env()
