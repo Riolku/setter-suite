@@ -12,6 +12,9 @@
 
 #include <array>
 #include <initializer_list>
+#include <memory>
+#include <queue>
+#include <ranges>
 #include <unordered_set>
 #include <utility>
 #include <vector>

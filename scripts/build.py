@@ -15,9 +15,15 @@ def main(args):
 
     os.mkdir("build")
 
+    link_config()
     link_init()
     link_data()
     link_checker()
+    link_interactor()
+
+
+def link_config():
+    os.symlink(f"../config.yml", f"build/config.yml")
 
 
 def link_init():
@@ -34,5 +40,10 @@ def link_data():
 
 
 def link_checker():
-    if env["checker"].endswith("cpp"):
+    if "interactor" not in env and env["checker"].endswith("cpp"):
         os.symlink(f"../{env['checker']}", f"build/{env['checker']}")
+
+
+def link_interactor():
+    if "interactor" in env:
+        os.symlink(f"../{env['interactor']}", f"build/{env['interactor']}")

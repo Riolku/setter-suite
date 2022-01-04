@@ -10,6 +10,7 @@ def main(main):
 
     add_base(ret)
     add_checker(ret)
+    add_interactor(ret)
     add_cases(ret)
 
     with open("init.yml", "w") as f:
@@ -23,7 +24,23 @@ def add_base(ret):
     ret["output_prefix_length"] = env.get("output_prefix_length", 0)
 
 
+def add_interactor(ret):
+    if "checker" in env:
+        return
+
+    ret["interactive"] = dict(
+        files=env["interactor"],
+        lang=env.get("interactor_lang", "CPP20"),
+        feedback=env.get("interactor_feedback", True),
+        type=env.get("interactor_type", "coci"),
+        cached=env.get("cached", True),
+    )
+
+
 def add_checker(ret):
+    if "interactor" in env:
+        return
+
     checker = env["checker"]
 
     if checker.endswith("cpp"):
@@ -31,7 +48,7 @@ def add_checker(ret):
             name="bridged",
             args=dict(
                 files=checker,
-                lang=env.get("checker_lang", "CPP17"),
+                lang=env.get("checker_lang", "CPP20"),
                 feedback=env.get("checker_feedback", True),
                 type=env.get("checker_type", "coci"),
                 cached=env.get("cached", True),

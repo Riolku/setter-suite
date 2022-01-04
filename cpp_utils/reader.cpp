@@ -3,7 +3,7 @@
 namespace Reader {
 const int ERROR_COUNT = 4;
 
-enum error_type { INTERNAL_RANGE = 0, EXTERNAL_RANGE, INVALID_ARGUMENT, WRONG_WHITESPACE };
+enum error_type { INTERNAL_RANGE, EXTERNAL_RANGE, INVALID_ARGUMENT, WRONG_WHITESPACE };
 
 const char *error_names[ERROR_COUNT] = {"INTERNAL_RANGE", "EXTERNAL_RANGE", "INVALID_ARGUMENT", "WRONG_WHITESPACE"};
 
@@ -44,15 +44,22 @@ class FileReader {
         }
     }
 
-    ll readInt(ll minValid, ll maxValid) {
+    ll readInt(ll lo = numeric_limits<ll>::min(), ll hi = numeric_limits<ll>::max()) {
         string token = "";
         while (isdigit(peekChar()) || peekChar() == '-')
             token.push_back(readChar());
         try {
             ll ret = stoll(token);
 
-            if (minValid > ret || maxValid < ret)
+            if (lo > ret || hi < ret)
                 errorHandler(INTERNAL_RANGE);
+
+            char c = token[0];
+            if (c == '-')
+                c = token[1];
+
+            if ((token != "0") && ('1' > c || c > '9'))
+                errorHandler(INVALID_ARGUMENT);
 
             return ret;
         } catch (const out_of_range &e) {
@@ -60,9 +67,10 @@ class FileReader {
         } catch (const invalid_argument &e) {
             errorHandler(INVALID_ARGUMENT);
         }
+        throw runtime_error("We should never get here");
     }
 
-    ld readFloat(ld minValid, ld maxValid) {
+    ld readFloat() {
         string token = "";
         while (isdigit(peekChar()) || peekChar() == '-' || peekChar() == '.')
             token.push_back(readChar());
@@ -70,15 +78,13 @@ class FileReader {
         try {
             ld ret = stold(token);
 
-            if (minValid > ret || maxValid < ret)
-                errorHandler(INTERNAL_RANGE);
-
             return ret;
         } catch (const out_of_range &e) {
             errorHandler(EXTERNAL_RANGE);
         } catch (const invalid_argument &e) {
             errorHandler(INVALID_ARGUMENT);
         }
+        throw runtime_error("We should never get here");
     }
 
     string readFile() {
@@ -121,7 +127,7 @@ class FileReader {
     }
 
     void readEOF() {
-        if (readChar() != char_traits<char>::eof())
+        if (!eof())
             errorHandler(WRONG_WHITESPACE);
     }
 
@@ -135,45 +141,40 @@ class FileReader {
     }
 
   private:
-    template <typename T> T &_fill_arr(T &res, int N, ll lo, ll hi) {
-        for (int i = 0; i < N; i++) {
-            res[i] = readInt(lo, hi);
-
-            if (i == N - 1)
-                readNewLine();
-            else
+    template <typename Arr> void _fill_arr(Arr &a, size_t N, ll lo, ll hi) {
+        for (size_t i = 0; i < N; i++) {
+            if (i)
                 readSpace();
+            a[i] = readInt(lo, hi);
         }
+        readNewLine();
+        return;
+    }
 
+  public:
+    template <size_t length, typename T = ll>
+    array<T, length> readIntTuple(ll lo = numeric_limits<ll>::min(), ll hi = numeric_limits<ll>::max()) {
+        array<T, length> res;
+        _fill_arr(res, length, lo, hi);
         return res;
     }
 
-    template <typename T> void readIntArg(T &a) { a = readInt(numeric_limits<T>::min(), numeric_limits<T>::max()); }
-
-  public:
-    template <typename T, int length> array<T, length> readIntTuple(T lo, T hi) {
-        array<T, length> res;
-
-        return _fill_arr(res, length, lo, hi);
+    template <typename T = ll>
+    vector<T> readIntArray(size_t N, ll lo = numeric_limits<ll>::min(), ll hi = numeric_limits<ll>::max()) {
+        vector<T> v;
+        v.resize(N);
+        _fill_arr(v, N, lo, hi);
+        return v;
     }
 
-    template <typename T> vector<T> readIntArray(int N, T lo, T hi) {
-        vector<T> res(N, 0);
-
-        return _fill_arr(res, N, lo, hi);
-    }
-
-    template <typename T, typename... Ts> void readInts(T &arg, Ts &&...args) {
-        readIntArg(arg);
-
+    template <typename T, typename... Ts> void readInts(T &arg, Ts &&... args) {
+        arg = readInt();
         readSpace();
-
         readInts(args...);
     }
 
     template <typename T> void readInts(T &arg) {
-        readIntArg(arg);
-
+        arg = readInt();
         readNewLine();
     }
 };
