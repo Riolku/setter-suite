@@ -24,7 +24,7 @@ template <typename... Ts> void print_impl(const tuple<Ts...> &a) {
     print_tuple(a, std::make_index_sequence<sizeof...(Ts)>());
 }
 
-template <range R> void print_impl(const R &arr) {
+template <typename R> void print_impl(const R &arr) {
     bool first = true;
 
     for (auto x : arr) {
@@ -55,7 +55,7 @@ template <typename... Ts> void print(Ts &&... args) {
     print();
 }
 
-template <range R> void print_items(const R &r) {
+template <typename R> void print_items(const R &r) {
     for (auto x : r) {
         print(x);
     }
