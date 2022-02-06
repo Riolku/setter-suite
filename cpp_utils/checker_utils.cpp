@@ -6,27 +6,25 @@ int IE = 3;
 int PARTIAL = 7;
 } // namespace CheckerCodes
 
-class CheckerReader : public Reader::FileReader {
-    using FileReader::FileReader;
-
-    void __attribute__((noreturn)) errorHandler(enum Reader::error_type e) {
-        switch (e) {
-        case Reader::error_type::INTERNAL_RANGE:
-        case Reader::error_type::EXTERNAL_RANGE:
-            exit(CheckerCodes::WA);
-
-        case Reader::error_type::INVALID_ARGUMENT:
-        case Reader::error_type::WRONG_WHITESPACE:
-            exit(CheckerCodes::PE);
-
-        default:
-            exit(CheckerCodes::IE);
-        }
-    }
-};
-
-void assertWA(bool cond) {
-    if (!cond) {
-        exit(CheckerCodes::WA);
-    }
+void assertOrCode(bool cond, int code) {
+    if (!cond)
+        exit(code);
 }
+void assertWA(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
+void assertPE(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
+
+class CheckerReader : public BaseReader {
+    void externalRangeError() override { exit(CheckerCodes::WA); }
+    void internalRangeError() override { exit(CheckerCodes::WA); }
+    void wrongWhitespaceError() override {
+        puts("Check your Whitespace");
+        exit(CheckerCodes::PE);
+    }
+    void invalidIntegerError() override {
+        puts("Check your Integers");
+        exit(CheckerCodes::PE);
+    }
+
+  public:
+    using BaseReader::BaseReader;
+};

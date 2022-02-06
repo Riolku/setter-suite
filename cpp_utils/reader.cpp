@@ -1,26 +1,19 @@
 // modified from a template by wleung_bvg
 
-namespace Reader {
-const int ERROR_COUNT = 4;
-
-enum error_type { INTERNAL_RANGE, EXTERNAL_RANGE, INVALID_ARGUMENT, WRONG_WHITESPACE };
-
-const char *error_names[ERROR_COUNT] = {"INTERNAL_RANGE", "EXTERNAL_RANGE", "INVALID_ARGUMENT", "WRONG_WHITESPACE"};
-
-class FileReader {
+class BaseReader {
+    const static size_t MAX_TOKEN_SIZE = 1e6;
 
   private:
     FILE *stream;
+    bool streamOpen;
 
     bool hasLast;
     char lastChar;
 
   public:
-    FileReader(FILE *f) : stream(f), hasLast(false), lastChar(0) {}
+    BaseReader(FILE *f) : stream(f), streamOpen(true), hasLast(false), lastChar(0) {}
 
-    FileReader(char *path) : FileReader(fopen(path, "r")) {}
-
-    virtual void __attribute__((noreturn)) errorHandler(error_type e) = 0;
+    BaseReader(char *path) : FileReader(fopen(path, "r")) {}
 
     char peekChar() {
         if (!hasLast) {
@@ -38,109 +31,82 @@ class FileReader {
 
     bool eof() { return peekChar() == char_traits<char>::eof(); }
 
-    void trim() {
-        while (isspace(peekChar()) && !eof()) {
-            readChar();
-        }
-    }
-
     ll readInt(ll lo = numeric_limits<ll>::min(), ll hi = numeric_limits<ll>::max()) {
-        string token = "";
-        while (isdigit(peekChar()) || peekChar() == '-')
-            token.push_back(readChar());
         try {
-            ll ret = stoll(token);
-
-            if (lo > ret || hi < ret)
-                errorHandler(INTERNAL_RANGE);
-
-            char c = token[0];
-            if (c == '-')
-                c = token[1];
-
-            if ((token != "0") && ('1' > c || c > '9'))
-                errorHandler(INVALID_ARGUMENT);
-
-            return ret;
+            ll value = fetchIntegerToken(readToken());
+            if (ret < lo || ret > hi)
+                internalRangeError();
+            return value;
         } catch (const out_of_range &e) {
-            errorHandler(EXTERNAL_RANGE);
-        } catch (const invalid_argument &e) {
-            errorHandler(INVALID_ARGUMENT);
+            externalRangeError();
         }
-        throw runtime_error("We should never get here");
     }
 
-    ld readFloat() {
-        string token = "";
-        while (isdigit(peekChar()) || peekChar() == '-' || peekChar() == '.')
-            token.push_back(readChar());
+  private:
+    ll convertIntegerToken(const string &token) {
+        if (token.size() == 0)
+            invalidIntegerError();
+        if (token == "0")
+            return token;
 
-        try {
-            ld ret = stold(token);
-
-            return ret;
-        } catch (const out_of_range &e) {
-            errorHandler(EXTERNAL_RANGE);
-        } catch (const invalid_argument &e) {
-            errorHandler(INVALID_ARGUMENT);
-        }
-        throw runtime_error("We should never get here");
-    }
-
-    string readFile() {
-        string ret = "";
-        while (!eof()) {
-            ret.push_back(readChar());
+        size_t i = 0;
+        if (token[0] == '-') {
+            ++i;
+            if (token.size() == 1)
+                invalidIntegerError();
         }
 
-        readEOF();
+        if (token[i] > '9' || token[i] < '1')
+            invalidIntegerError();
+        ++i;
 
-        return ret;
-    }
-
-    string readString(int N) {
-        string ret = "";
-        for (int i = 0; i < N; i++) {
-            ret.push_back(readChar());
+        for (; i < token.size(); ++i) {
+            if (token[i] > '9' || token[i] < '0')
+                invalidIntegerError();
         }
 
-        return ret;
+        return stoll(token);
     }
 
-    string readLine() {
-        string ret = "";
-        while (peekChar() != '\n' && !eof())
-            ret.push_back(readChar());
-        readNewLine();
-
-        return ret;
-    }
-
+  public:
     void readSpace() {
         if (readChar() != ' ')
-            errorHandler(WRONG_WHITESPACE);
+            wrongWhitespaceError();
     }
 
     void readNewLine() {
-        if (readChar() != '\n')
-            errorHandler(WRONG_WHITESPACE);
+        if (peekChar() == '\r') {
+            readChar();
+            if (peekChar() == '\n')
+                readChar();
+        } else if (peekChar() == '\n') {
+            readChar();
+        } else {
+            wrongWhitespaceError();
+        }
     }
 
     void readEOF() {
         if (!eof())
-            errorHandler(WRONG_WHITESPACE);
+            wrongWhitespaceError();
     }
 
     string readToken() {
-        string token = "";
-
-        while (!isspace(peekChar()) && !eof())
+        string token;
+        while (!isspace(peekChar()) && !eof() && token.size() <= MAX_TOKEN_SIZE)
             token.push_back(readChar());
-
         return token;
     }
 
-  private:
+    string readString(size_t N) {
+        string token;
+        while (!eof() && token.size() < N) {
+            token.push_back(readChar());
+        }
+        return token;
+    }
+
+  protected:
     template <typename Arr> void _fill_arr(Arr &a, size_t N, ll lo, ll hi) {
         for (size_t i = 0; i < N; i++) {
             if (i)
@@ -148,7 +114,6 @@ class FileReader {
             a[i] = readInt(lo, hi);
         }
         readNewLine();
-        return;
     }
 
   public:
@@ -177,18 +142,20 @@ class FileReader {
         arg = readInt();
         readNewLine();
     }
-};
 
-class ValidatingReader : public FileReader {
-    using FileReader::FileReader;
-
-    void __attribute__((noreturn)) errorHandler(error_type e) {
-        if (e >= ERROR_COUNT)
-            throw runtime_error("Unknown error in FileReader");
-
-        throw runtime_error(error_names[e]);
+    void closeStream() {
+        if (streamOpen) {
+            fclose(stream);
+            streamOpen = false;
+        }
     }
-};
-} // namespace Reader
 
-using Reader::ValidatingReader;
+  protected:
+    virtual void externalRangeError() __attribute__((noreturn)) = 0;
+    virtual void internalRangeError() __attribute__((noreturn)) = 0;
+    virtual void wrongWhitespaceError() __attribute__((noreturn)) = 0;
+    virtual void invalidIntegerError() __attribute__((noreturn)) = 0;
+
+  public:
+    virtual ~BaseReader() { closeStream(); }
+};
