@@ -24,9 +24,17 @@ class StandardCheckerReader : public CheckerReader {
             wrongWhitespaceError(); // wanted a line but got none
     }
 
-    void readSpace() { throw runtime_error("do not call readSpace() under standard checker, use readSpaces()"); }
-    void readNewLine() { throw runtime_error("do not call readLine() under standard checker, use readLines()"); }
-    void readEOF() { throw runtime_error("do not call readEOF() under standard checker"); }
+    void readSpace() override {
+        throw runtime_error("do not call readSpace() under standard checker, use readSpaces()");
+    }
+
+    void readLine() override { throw runtime_error("do not call readLine() under standard checker, use readLines()"); }
+
+    void readEOF() override {
+        skipAllWhitespace();
+        if(!eof())
+            wrongWhitespaceError(); // wanted EOF but found more token
+    }
 
     string readToken() {
         readSpaces();
