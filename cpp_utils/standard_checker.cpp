@@ -24,15 +24,11 @@ class StandardCheckerReader : public CheckerReader {
             wrongWhitespaceError(); // wanted a line but got none
     }
 
-    void readSpace() override {
-        throw runtime_error("do not call readSpace() under standard checker, use readSpaces()");
-    }
-
-    void readLine() override { throw runtime_error("do not call readLine() under standard checker, use readLines()"); }
-
-    void readEOF() override {
+    void readSpace() { throw runtime_error("do not call readSpace() under standard checker, use readSpaces()"); }
+    void readLine() { throw runtime_error("do not call readLine() under standard checker, use readLines()"); }
+    void readEOF() {
         skipAllWhitespace();
-        if(!eof())
+        if (!eof())
             wrongWhitespaceError(); // wanted EOF but found more token
     }
 
@@ -63,7 +59,7 @@ class StandardCheckerReader : public CheckerReader {
         return v;
     }
 
-    template <typename T, typename... Ts> void readInts(T &arg, Ts &&... args) {
+    template <typename T, typename... Ts> void readInts(T &arg, Ts &&...args) {
         arg = readInt();
         readInts(args...);
     }
