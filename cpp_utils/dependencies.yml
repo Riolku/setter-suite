@@ -33,6 +33,7 @@ reader:
 
 sol_entry:
 - reader
+- validation
 - output
 
 standard_checker:
