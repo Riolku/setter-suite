@@ -40,6 +40,7 @@ class BaseReader {
         } catch (const out_of_range &e) {
             externalRangeError();
         }
+        throw runtime_error("We should never get here");
     }
 
   private:
