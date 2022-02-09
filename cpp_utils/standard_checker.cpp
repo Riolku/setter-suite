@@ -12,7 +12,7 @@ class StandardCheckerReader : public CheckerReader {
     }
 
   public:
-    StandardCheckerReader(File *f) : CheckerReader(f) { skipAllWhitespace(); }
+    StandardCheckerReader(FILE *f) : CheckerReader(f) { skipAllWhitespace(); }
     StandardCheckerReader(char *path) : CheckerReader(path) { skipAllWhitespace(); }
 
     void readSpaces() {
@@ -24,15 +24,14 @@ class StandardCheckerReader : public CheckerReader {
             wrongWhitespaceError(); // wanted a line but got none
     }
 
-    void readSpace() override {
-        throw runtime_error("do not call readSpace() under standard checker, use readSpaces()");
+    void readSpace() { throw runtime_error("do not call readSpace() under standard checker, use readSpaces()"); }
+    void readNewLine() { throw runtime_error("do not call readLine() under standard checker, use readLines()"); }
+    void readEOF() { throw runtime_error("do not call readEOF() under standard checker"); }
+
+    string readToken() {
+        readSpaces();
+        return CheckerReader::readToken();
     }
-
-    void readLine() override { throw runtime_error("do not call readLine() under standard checker, use readLines()"); }
-
-    void readEOF() override { throw runtime_error("do not call readEOF() under standard checker"); }
-
-    string readToken() { skipNonLineWhitespace(); }
 
   protected:
     template <typename Arr> void _fill_arr(Arr &a, size_t N, ll lo, ll hi) {
@@ -64,5 +63,8 @@ class StandardCheckerReader : public CheckerReader {
     template <typename T> void readInts(T &arg) { arg = readInt(); }
 
     // PE could be confusing under standard checker
-    void wrongWhitespaceError() override { exit(CheckerCodes::WA); }
+    void wrongWhitespaceError() override {
+        preError();
+        exit(CheckerCodes::WA);
+    }
 };

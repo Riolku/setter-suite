@@ -13,7 +13,7 @@ class BaseReader {
   public:
     BaseReader(FILE *f) : stream(f), streamOpen(true), hasLast(false), lastChar(0) {}
 
-    BaseReader(char *path) : FileReader(fopen(path, "r")) {}
+    BaseReader(char *path) : BaseReader(fopen(path, "r")) {}
 
     char peekChar() {
         if (!hasLast) {
@@ -33,10 +33,10 @@ class BaseReader {
 
     ll readInt(ll lo = numeric_limits<ll>::min(), ll hi = numeric_limits<ll>::max()) {
         try {
-            ll value = fetchIntegerToken(readToken());
+            ll ret = convertIntegerToken(readToken());
             if (ret < lo || ret > hi)
                 internalRangeError();
-            return value;
+            return ret;
         } catch (const out_of_range &e) {
             externalRangeError();
         }
@@ -47,7 +47,7 @@ class BaseReader {
         if (token.size() == 0)
             invalidIntegerError();
         if (token == "0")
-            return token;
+            return 0;
 
         size_t i = 0;
         if (token[0] == '-') {
