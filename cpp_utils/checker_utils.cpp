@@ -14,13 +14,23 @@ void assertWA(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
 void assertPE(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
 
 class CheckerReader : public BaseReader {
-    void externalRangeError() override { exit(CheckerCodes::WA); }
-    void internalRangeError() override { exit(CheckerCodes::WA); }
+  protected:
+    void preError() {}
+    void externalRangeError() override {
+        preError();
+        exit(CheckerCodes::WA);
+    }
+    void internalRangeError() override {
+        preError();
+        exit(CheckerCodes::WA);
+    }
     void wrongWhitespaceError() override {
+        preError();
         puts("Check your Whitespace");
         exit(CheckerCodes::PE);
     }
     void invalidIntegerError() override {
+        preError();
         puts("Check your Integers");
         exit(CheckerCodes::PE);
     }
