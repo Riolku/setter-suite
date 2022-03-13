@@ -55,6 +55,10 @@ def add_checker(ret):
             ),
         )
 
+    elif checker.endsith("py"):
+        assert not env.get("checker_bridged", True), "Why is your checker in Python?"
+        ret["checker"] = checker
+
     else:
         assert (
             checker.find(".") == -1
@@ -72,7 +76,7 @@ def add_cases(
         env["case_points"]
     ), "must have the same number of cases in case_counts and case_points"
 
-    if init_type == "generator":
+    if init_type == "generator" or ("dependencies" in env and init_type == "zip"):
         assert (
             env.get("generator_type", "single") == "single"
         ), "Cannot use 'double' generator config with 'generator' init_type"
@@ -85,12 +89,17 @@ def add_cases(
             test_cases.append(dict(batched=[]))
 
             for case_num in range(env["case_counts"][suite_num]):
+                if init_type == "zip":
+                    base = f"{suite_num + 1}.{case_num + 1}."
+                    case = {"in": base + "in", "out": base + "out"}
+                else:
+                    case = dict(generator_args=[suite_num + 1, case_num + 1])
 
-                test_cases[-1]["batched"].append(
-                    dict(generator_args=[suite_num + 1, case_num + 1])
-                )
+                test_cases[-1]["batched"].append(case)
 
             test_cases[-1]["points"] = env["case_points"][suite_num]
+            if "dependencies" in env:
+                test_cases[-1]["dependencies"] = env["dependencies"][suite_num]
 
         ret["test_cases"] = test_cases
 
