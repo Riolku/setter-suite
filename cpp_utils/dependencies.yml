@@ -1,5 +1,4 @@
 checker_entry:
-- output
 - checker_utils
 - validation
 
@@ -14,22 +13,19 @@ graphs:
 
 output:
 - sys_deps
-- types
-
-offset_range:
-- types
+- utils
 
 pairs:
 - sys_deps
-- types
+- utils
 
 random:
 - sys_deps
-- types
+- utils
 
 reader:
 - sys_deps
-- types
+- utils
 
 sol_entry:
 - reader
@@ -41,10 +37,10 @@ standard_checker:
 
 sys_deps: []
 
-types: []
+utils: []
 
 validation:
-- types
+- utils
 - reader
 
 validator_entry:
