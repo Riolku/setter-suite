@@ -5,13 +5,15 @@ vector<ll> random_array(int N, ll lo, ll hi) {
     return ret;
 }
 
-void shuffle(vector<ll> &arr) { shuffle(arr.begin(), arr.end(), get_engine()); }
+void shuffle(vector<ll> &arr) { shuffle(all(arr), get_engine()); }
 
 vector<ll> with_gaps(int N, ll lo, ll hi, ll gap) {
     vector<ll> ret = random_array(N, lo, hi - gap * N);
-    sort(ret.begin(), ret.end());
-    for (int i = 0; i < N; ++i)
-        ret[i] += i;
-    shuffle(ret);
+    sort(all(ret));
+    int i = -1;
+    transform(all(ret), ret.begin(), [&i](int x) {
+        ++i;
+        return x + i;
+    });
     return ret;
 }
