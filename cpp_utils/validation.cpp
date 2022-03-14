@@ -9,16 +9,20 @@ struct IntegerValidation {
         return true;
     }
 
-    template <typename T, typename... Ts> bool check(const T &arg, Ts &&... args) {
+    template <typename T, typename... Ts> bool check(const T &arg, Ts &&...args) {
         return check(arg) && check(args...);
     }
 };
 
-class ValidatingReader : public BaseReader {
-    using BaseReader::BaseReader;
+class ValidatingReaderBase : public BaseReader {
+  protected:
+    void externalRangeError() override { throw runtime_error("EXTERNAL_RANGE"); }
+    void internalRangeError() override { throw runtime_error("INTERNAL_RANGE"); }
+    void wrongWhitespaceError() override { throw runtime_error("WRONG_WHITESPACE"); }
+    void invalidIntegerError() override { throw runtime_error("INVALID_INTEGER"); }
 
-    void externalRangeError() { throw runtime_error("EXTERNAL_RANGE"); }
-    void internalRangeError() { throw runtime_error("INTERNAL_RANGE"); }
-    void wrongWhitespaceError() { throw runtime_error("WRONG_WHITESPACE"); }
-    void invalidIntegerError() { throw runtime_error("INVALID_INTEGER"); }
+  public:
+    using BaseReader::BaseReader;
 };
+
+using ValidatingReader = ExactWhitespaceMixin<ValidatingReaderBase>;

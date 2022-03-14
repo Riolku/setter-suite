@@ -10,6 +10,16 @@ class BaseReader {
     bool hasLast;
     char lastChar;
 
+  protected:
+    virtual void internalRangeError() = 0;
+    virtual void externalRangeError() = 0;
+    virtual void invalidIntegerError() = 0;
+    virtual void wrongWhitespaceError() = 0;
+
+    virtual void readNewLine() = 0;
+    virtual void readSpace() = 0;
+    virtual void readEOF() = 0;
+
   public:
     BaseReader(FILE *f) : stream(f), streamOpen(true), hasLast(false), lastChar(0) {}
 
@@ -70,28 +80,6 @@ class BaseReader {
     }
 
   public:
-    void readSpace() {
-        if (readChar() != ' ')
-            wrongWhitespaceError();
-    }
-
-    void readNewLine() {
-        if (peekChar() == '\r') {
-            readChar();
-            if (peekChar() == '\n')
-                readChar();
-        } else if (peekChar() == '\n') {
-            readChar();
-        } else {
-            wrongWhitespaceError();
-        }
-    }
-
-    void readEOF() {
-        if (!eof())
-            wrongWhitespaceError();
-    }
-
     string readToken() {
         string token;
         while (!isspace(peekChar()) && !eof() && token.size() <= MAX_TOKEN_SIZE)
@@ -107,7 +95,7 @@ class BaseReader {
         return token;
     }
 
-  protected:
+  private:
     template <typename Arr> void _fill_arr(Arr &a, size_t N, ll lo, ll hi) {
         for (size_t i = 0; i < N; i++) {
             if (i)
@@ -133,7 +121,7 @@ class BaseReader {
         return v;
     }
 
-    template <typename T, typename... Ts> void readInts(T &arg, Ts &&... args) {
+    template <typename T, typename... Ts> void readInts(T &arg, Ts &&...args) {
         arg = readInt();
         readSpace();
         readInts(args...);
@@ -151,12 +139,5 @@ class BaseReader {
         }
     }
 
-  protected:
-    virtual void externalRangeError() __attribute__((noreturn)) = 0;
-    virtual void internalRangeError() __attribute__((noreturn)) = 0;
-    virtual void wrongWhitespaceError() __attribute__((noreturn)) = 0;
-    virtual void invalidIntegerError() __attribute__((noreturn)) = 0;
-
-  public:
     virtual ~BaseReader() { closeStream(); }
 };

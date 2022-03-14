@@ -1,15 +1,21 @@
-checker_entry:
-- checker_utils
-- validation
-
 checker_utils:
 - reader
+
+exact_whitespace_mixin: []
 
 gen_entry:
 - output
 
 graphs:
 - sys_deps
+
+identical_checker_entry:
+- validation
+- identical_checker
+
+identical_checker:
+- checker_utils
+- exact_whitespace_mixin
 
 output:
 - sys_deps
@@ -32,6 +38,10 @@ sol_entry:
 - validation
 - output
 
+standard_checker_entry:
+- validation
+- standard_checker
+
 standard_checker:
 - checker_utils
 
@@ -42,6 +52,7 @@ utils: []
 validation:
 - utils
 - reader
+- exact_whitespace_mixin
 
 validator_entry:
 - validation

@@ -15,7 +15,7 @@ void assertPE(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
 
 class CheckerReader : public BaseReader {
   protected:
-    void preError() {}
+    virtual void preError() {}
     void externalRangeError() override {
         preError();
         exit(CheckerCodes::WA);
