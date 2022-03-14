@@ -50,7 +50,6 @@ sys_deps: []
 utils: []
 
 validation:
-- utils
 - reader
 - exact_whitespace_mixin
 
