@@ -16,6 +16,7 @@ A collection of tools for problem-setting, especially for use with [DMOJ](https:
 - `random_gen`: A generator to generate random test cases
 - `validator`: A file to validate test cases. It should take the case as input, and return `0` on a valid case.
 - `output_limit_length`: corresponds to the init.yml key that limits the output character count.
+- `dependencies`: An array of batch dependencies. It is a list, one list per batch, each of which contains integers indicating the dependencies of the batch.
 
 ## Scripts
 
@@ -34,18 +35,25 @@ All the scripts should be invoked by first running `main.py`. Do not expect the 
 
 All the utilities are in `cpp_utils`. Dependency lists can be seen in `dependencies.yml`.
 
-- `arrays.cpp`: This file contains a custom array class that extends `vector<T>`.
-- `checker_entry.cpp`: A checker template. It pulls various things for checker utilities.
 - `checker_utils.cpp`: Checker utilities, including a Reader subclass and `assertWA`, along with the codes.
-- `gen_entry.cpp`: Like `checker_entry`, but for a generator.
+- `exact_whitespace_mixin.cpp`: A mixin for Reader that implements the whitespace reading methods. It expects perfect whitespace. Used for validators and identical checkers.
+- `gen_entry.cpp`: A starter template for generators. Pulls in some dependencies.
+- `graphs.cpp`: Some graph utilities. Rather primitive.
+- `identical_checker_entry.cpp`: A template for custom identical checkers. Also pulls dependencies.
+- `identical_checker.cpp`: Implementation for a reader with `identical` behaviour.
+- `list.cpp`: A convenience `List<T>` class that extends `vector`.
 - `output.cpp`: Contains printing utilities. Try it with `print(3, 4, 'a', 8)`.
-- `random_arrays.cpp`: Extends `List<T>` for randomized operations. Helpful for generation.
+- `pairs.cpp`: Convert pairs to integers and back. Useful for generating random pairs.
+- `random_arrays.cpp`: Generate some types of random arrays.
 - `random.cpp`: Basic randomness.
-- `reader.cpp`: A reader, good for validating whitespace and implementing safe checkers.
-- `sol_entry.cpp`: Like `sol_entry`, but for solutions.
+- `reader.cpp`: A base reader class, good for validating whitespace and implementing safe checkers.
+- `sol_entry.cpp`: An entry point for solutions.
+- `standard_checker_entry.cpp`: An entry point for custom standard checkers.
+- `standard_checker.cpp`: An implementation of a reader for standard-checker behaviour.
 - `sys_deps.cpp`: System file dependencies.
-- `trees.cpp`: Generating trees.
-- `types.cpp`: Type aliases.
+- `utils.cpp`: Some basic aliases and utilities, used everywhere.
+- `validation.cpp`: Some utilities for validation.
+- `validator_entry.cpp`: An entry point for validators.
 
 ## Dependencies
 - `g++`

@@ -26,12 +26,12 @@ class CheckerReader : public BaseReader {
     }
     void wrongWhitespaceError() override {
         preError();
-        puts("Check your Whitespace");
+        printf("Check your Whitespace");
         exit(CheckerCodes::PE);
     }
     void invalidIntegerError() override {
         preError();
-        puts("Check your Integers");
+        printf("Check your Integers");
         exit(CheckerCodes::PE);
     }
 
