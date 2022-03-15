@@ -17,6 +17,10 @@ identical_checker:
 - checker_utils
 - exact_whitespace_mixin
 
+list:
+- sys_deps
+- utils
+
 output:
 - sys_deps
 - utils
@@ -54,4 +58,4 @@ validation:
 - exact_whitespace_mixin
 
 validator_entry:
-- validation
+  - validation
