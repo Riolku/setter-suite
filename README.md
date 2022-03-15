@@ -41,7 +41,8 @@ All the utilities are in `cpp_utils`. Dependency lists can be seen in `dependenc
 - `graphs.cpp`: Some graph utilities. Rather primitive.
 - `identical_checker_entry.cpp`: A template for custom identical checkers. Also pulls dependencies.
 - `identical_checker.cpp`: Implementation for a reader with `identical` behaviour.
-- `list.cpp`: A convenience `List<T>` class that extends `vector`.
+- `integer_range.cpp`: A container-like class that has no storage cost, representing a range. Not technically restricted to integers.
+- `list.cpp`: A convenience `List<T>` class that extends `vector`. Also contains miscellaneous list-related utils.
 - `output.cpp`: Contains printing utilities. Try it with `print(3, 4, 'a', 8)`.
 - `pairs.cpp`: Convert pairs to integers and back. Useful for generating random pairs.
 - `random_arrays.cpp`: Generate some types of random arrays.
