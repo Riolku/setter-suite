@@ -10,16 +10,6 @@ class BaseReader {
     bool hasLast;
     char lastChar;
 
-  protected:
-    virtual void internalRangeError() = 0;
-    virtual void externalRangeError() = 0;
-    virtual void invalidIntegerError() = 0;
-    virtual void wrongWhitespaceError() = 0;
-
-    virtual void readNewLine() = 0;
-    virtual void readSpace() = 0;
-    virtual void readEOF() = 0;
-
   public:
     BaseReader(FILE *f) : stream(f), streamOpen(true), hasLast(false), lastChar(0) {}
 
@@ -149,4 +139,15 @@ class BaseReader {
     }
 
     virtual ~BaseReader() { closeStream(); }
+
+  protected:
+    virtual void internalRangeError() = 0;
+    virtual void externalRangeError() = 0;
+    virtual void invalidIntegerError() = 0;
+    virtual void wrongWhitespaceError() = 0;
+
+  public:
+    virtual void readNewLine() = 0;
+    virtual void readSpace() = 0;
+    virtual void readEOF() = 0;
 };
