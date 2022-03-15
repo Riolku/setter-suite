@@ -114,6 +114,15 @@ class BaseReader {
     }
 
     template <typename T = ll>
+    pair<T, T> readIntPair(ll lo = numeric_limits<ll>::min(), ll hi = numeric_limits<ll>::max()) {
+        T a = readInt(lo, hi);
+        readSpace();
+        T b = readInt(lo, hi);
+        readNewLine();
+        return {a, b};
+    }
+
+    template <typename T = ll>
     vector<T> readIntArray(size_t N, ll lo = numeric_limits<ll>::min(), ll hi = numeric_limits<ll>::max()) {
         vector<T> v;
         v.resize(N);
