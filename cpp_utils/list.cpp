@@ -53,3 +53,10 @@ template <typename F> auto mapRange(int l, int r, F &f) {
     return ret;
 }
 template <typename F> auto mapRange(int r, F &f) { return mapRange(0, r, f); }
+
+template <typename F> auto generateList(int N, F &f) {
+    List<decltype(declval<F>()())> ret;
+    ret.reserve(N);
+    generate_n(back_inserter(ret), N, f);
+    return ret;
+}
