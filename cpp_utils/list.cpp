@@ -9,10 +9,6 @@ template <typename T> class List : public vector<T> {
         offset = 1;
         return *this;
     }
-    const List<T> &one_indexed() const {
-        offset = 1;
-        return *this;
-    }
 
     T &operator[](size_t x) { return this->at(x - offset); }
     const T &operator[](size_t x) const { return this->at(x - offset); }
@@ -35,11 +31,22 @@ template <typename T> class List : public vector<T> {
     template <typename F> bool any_of(F f) const { return ::any_of(all(*this), f); }
     template <typename F> bool all_of(F f) const { return ::any_of(all(*this), f); }
 
-    void sort() { ::sort(all(*this)); }
+    List<T> &sort() {
+        ::sort(all(*this));
+        return *this;
+    }
 
-    template <typename F> void transform(F f) { ::transform(all(*this), this->begin(), f); }
+    List<T> &reverse() {
+        ::reverse(all(*this));
+        return *this;
+    }
 
-    template <typename F> auto transform_new(F f) const {
+    template <typename F> List<T> &map(F f) {
+        ::transform(all(*this), this->begin(), f);
+        return *this;
+    }
+
+    template <typename F> auto map_new(F f) const {
         List<decltype(declval<F>()(declval<T>()))> ret;
         ret.reserve(this->size());
         ::transform(all(*this), back_inserter(ret), f);
@@ -47,21 +54,10 @@ template <typename T> class List : public vector<T> {
     }
 };
 
-template <typename F> auto mapRange(int l, int r, F f) {
-    List<decltype(declval<F>()(0))> ret;
-    ret.reserve(r - l + 1);
-    for (; l < r; ++l) {
-        ret.push_back(f(l));
-    }
-
-    return ret;
-}
-template <typename F> auto mapRange(int r, F f) { return mapRange(0, r, f); }
-
-template <typename F> auto generateList(int N, F f) {
+template <typename F> auto generate(int N, F f) {
     List<decltype(declval<F>()())> ret;
     ret.reserve(N);
-    generate_n(back_inserter(ret), N, f);
+    ::generate_n(back_inserter(ret), N, move(f));
     return ret;
 }
 

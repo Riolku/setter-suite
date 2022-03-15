@@ -17,6 +17,9 @@ identical_checker:
 - checker_utils
 - exact_whitespace_mixin
 
+integer_range:
+- list
+
 list:
 - sys_deps
 - utils
@@ -38,9 +41,8 @@ reader:
 - utils
 
 sol_entry:
-- reader
-- validation
 - output
+- validation
 
 standard_checker_entry:
 - validation
@@ -58,4 +60,4 @@ validation:
 - exact_whitespace_mixin
 
 validator_entry:
-  - validation
+- validation
