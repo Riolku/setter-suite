@@ -46,7 +46,7 @@ template <typename T> class List : public vector<T> {
         return *this;
     }
 
-    template <typename F> auto map_new(F f) const {
+    template <typename F> auto map_new(F f) const -> List<result_of<F(T)>> {
         List<result_of<F(T)>> ret;
         ret.reserve(this->size());
         ::transform(all(*this), back_inserter(ret), f);
@@ -54,7 +54,7 @@ template <typename T> class List : public vector<T> {
     }
 };
 
-template <typename F> auto generate(int N, F f) {
+template <typename F> auto generate(int N, F f) -> List<result_of<F()>> {
     List<result_of<F()>> ret;
     ret.reserve(N);
     ::generate_n(back_inserter(ret), N, move(f));
