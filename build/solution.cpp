@@ -427,4 +427,3 @@ template <typename T = ll> class Range {
 
 ValidatingReader in_r(stdin);
 
-int main() { print(make_tuple(), 10); }
