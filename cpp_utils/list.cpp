@@ -15,8 +15,8 @@ template <typename T> class List : public vector<T> {
 
     template <typename F> void for_each(F f) const { ::for_each(all(*this), f); }
     template <typename F> void for_each_pair(F f) const {
-        ::for_each(all(*this), [&f](const T &p) {
-            auto [a, b] = p;
+        ::for_each(all(*this), [&f](const T &p) -> void {
+            auto a = get<0>(p), b = get<1>(p);
             f(a, b);
         });
     }
@@ -47,7 +47,7 @@ template <typename T> class List : public vector<T> {
     }
 
     template <typename F> auto map_new(F f) const {
-        List<decltype(declval<F>()(declval<T>()))> ret;
+        List<result_of<F(T)>> ret;
         ret.reserve(this->size());
         ::transform(all(*this), back_inserter(ret), f);
         return ret;
@@ -55,7 +55,7 @@ template <typename T> class List : public vector<T> {
 };
 
 template <typename F> auto generate(int N, F f) {
-    List<decltype(declval<F>()())> ret;
+    List<result_of<F()>> ret;
     ret.reserve(N);
     ::generate_n(back_inserter(ret), N, move(f));
     return ret;
