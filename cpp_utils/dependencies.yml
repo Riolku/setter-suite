@@ -5,6 +5,7 @@ exact_whitespace_mixin: []
 
 gen_entry:
 - output
+- random_arrays
 
 graphs:
 - sys_deps
@@ -36,6 +37,11 @@ random:
 - sys_deps
 - utils
 
+random_arrays:
+- list
+- integer_range
+- random
+
 reader:
 - sys_deps
 - utils
@@ -43,6 +49,8 @@ reader:
 sol_entry:
 - output
 - validation
+- list
+- integer_range
 
 standard_checker_entry:
 - validation

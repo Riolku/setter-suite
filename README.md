@@ -31,6 +31,10 @@ All the scripts should be invoked by first running `main.py`. Do not expect the 
 - `judge`: Judge a file. This will run the program on _all_ test cases. Helpful for knowing which cases break a solution.
 - `validate`: Validate the test data set against the validator.
 
+## C++ Quickstart
+
+For convenience, pre-built code is kept in `build/`. Some common configurations are kept there. Otherwise, read below for a more detailed description of the files.
+
 ## C++ Utilities
 
 All the utilities are in `cpp_utils`. Dependency lists can be seen in `dependencies.yml`.
@@ -60,3 +64,4 @@ All the utilities are in `cpp_utils`. Dependency lists can be seen in `dependenc
 - `g++`
 - `python3`
   - `cached_property`
+  - `pyyaml`
