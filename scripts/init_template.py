@@ -1,4 +1,7 @@
-import yaml, os, sys
+import datetime
+import os
+import sys
+import yaml
 
 SETTER_DIR = os.getenv("SETTER_DIR")
 
@@ -15,6 +18,9 @@ def main(args):
             print(f"{x} is not a valid file name", file=sys.stderr)
             return -1
 
+    argstring = " ".join(args)
+    date = datetime.date.today().isoformat()
+    print(f"// Built with `init-template {argstring}` on {date}")
     write_template(args)
 
 

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+function setter-utils() {
+  SETTER_DIR="."
+  SETTER_DIR="." python3 main.py $@
+}
+
+setter-utils init-template standard_checker_entry > build/standard_checker.cpp
+setter-utils init-template identical_checker_entry > build/identical_checker.cpp
+setter-utils init-template validator_entry > build/validator.cpp
+setter-utils init-template gen_entry > build/generator.cpp
+setter-utils init-template sol_entry > build/solution.cpp

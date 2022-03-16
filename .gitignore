@@ -1,5 +1,3 @@
-build/
-data/
 *.pyc
 __pycache__/
 .venv
