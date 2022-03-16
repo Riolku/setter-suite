@@ -1,4 +1,4 @@
-// Built files `identical_checker_entry` on 2022-03-15
+// Built with `init-template identical_checker_entry` on 2022-03-15
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -26,11 +26,6 @@ typedef unsigned long long ull;
 typedef long double ld;
 
 #define all(x) (x).begin(), (x).end()
-
-template <typename P> auto to_pair(P p) {
-    auto [a, b] = p;
-    return make_pair(move(a), move(b));
-}
 
 // modified from a template by wleung_bvg
 

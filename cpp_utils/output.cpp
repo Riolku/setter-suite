@@ -16,15 +16,21 @@ template <typename A, typename B> void print_impl(const pair<A, B> &p) {
     print_impl(p.second);
 }
 
-template <typename T, size_t... I> void print_tuple(const T &t, index_sequence<I...>) {
-    (..., (print_impl(I == 0 ? "" : " "), print_impl(get<I>(t))));
+template <size_t index, typename T> typename enable_if<index == 0, void>::type print_tuple(const T &t) {}
+
+template <size_t index, typename T> typename enable_if<index == 1, void>::type print_tuple(const T &t) {
+    print_impl(get<tuple_size<T>() - index>(t));
 }
 
-template <typename... Ts> void print_impl(const tuple<Ts...> &a) {
-    print_tuple(a, std::make_index_sequence<sizeof...(Ts)>());
+template <size_t index, typename T> typename enable_if<(index > 1), void>::type print_tuple(const T &t) {
+    print_impl(get<tuple_size<T>() - index>(t));
+    print_impl(' ');
+    print_tuple<index - 1>(t);
 }
 
-template <typename R> void print_impl(const R &arr) {
+template <typename... Ts> void print_impl(const tuple<Ts...> &t) { print_tuple<sizeof...(Ts)>(t); }
+
+template <typename T> void print_impl(const T &arr) {
     bool first = true;
 
     for (auto x : arr) {
@@ -41,7 +47,7 @@ void print_many() {}
 
 template <typename T> void print_many(const T &arg) { print_impl(arg); }
 
-template <typename T, typename... Ts> void print_many(const T &arg, Ts &&... args) {
+template <typename T, typename... Ts> void print_many(const T &arg, Ts &&...args) {
     print_impl(arg);
     print_impl(' ');
     print_many(forward<Ts>(args)...);
@@ -49,7 +55,7 @@ template <typename T, typename... Ts> void print_many(const T &arg, Ts &&... arg
 
 void print() { fprintf(stream, "\n"); }
 
-template <typename... Ts> void print(Ts &&... args) {
+template <typename... Ts> void print(Ts &&...args) {
     print_many(forward<Ts>(args)...);
 
     print();
