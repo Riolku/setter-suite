@@ -55,7 +55,7 @@ def add_checker(ret):
             ),
         )
 
-    elif checker.endsith("py"):
+    elif checker.endswith("py"):
         assert not env.get("checker_bridged", True), "Why is your checker in Python?"
         ret["checker"] = checker
 
@@ -70,7 +70,7 @@ def add_checker(ret):
 def add_cases(
     ret,
 ):
-    init_type = env["init_type"]
+    init_type = env.get("init_type", "generator")
 
     assert len(env["case_counts"]) == len(
         env["case_points"]
