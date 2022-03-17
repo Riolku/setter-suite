@@ -46,15 +46,15 @@ template <typename T> class List : public vector<T> {
         return *this;
     }
 
-    template <typename F> auto map_new(F f) const -> List<result_of<F(T)>> {
-        List<result_of<F(T)>> ret;
+    template <typename F> auto map_new(F f) const -> List<decltype(f(declval<T>()))> {
+        List<decltype(f(declval<T>()))> ret;
         ret.reserve(this->size());
         ::transform(all(*this), back_inserter(ret), f);
         return ret;
     }
 };
 
-template <typename F> auto generate(int N, F f) -> List<result_of<F()>> {
+template <typename F> auto generate(int N, F f) -> List<decltype(f())> {
     List<result_of<F()>> ret;
     ret.reserve(N);
     ::generate_n(back_inserter(ret), N, move(f));
