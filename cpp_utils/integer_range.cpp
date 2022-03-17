@@ -25,6 +25,7 @@ template <typename T = ll> class Range {
 
         bool operator<(const iterator &other) const { return cur < other.cur; }
         bool operator!=(const iterator &other) const { return cur != other.cur; }
+        bool operator==(const iterator &other) const { return cur == other.cur; }
     };
 
   public:
@@ -36,14 +37,14 @@ template <typename T = ll> class Range {
 
     template <typename F> void for_each(F f) const { ::for_each(all(*this), f); }
 
-    template <typename F> auto map_new(F f) const -> List<result_of<F(T)>> {
-        List<result_of<F(T)>> ret;
+    template <typename F> auto map_new(F f) const -> List<decltype(f(declval<T>()))> {
+        List<decltype(f(declval<T>()))> ret;
         ret.reserve(this->size());
         ::transform(all(*this), back_inserter(ret), f);
         return ret;
     }
 
     decltype(declval<T>() - declval<T>()) size() const { return r - l; }
-    T begin() const { return iterator(l); }
-    T end() const { return iterator(r); }
+    iterator begin() const { return iterator(l); }
+    iterator end() const { return iterator(r); }
 };

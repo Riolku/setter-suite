@@ -1,4 +1,4 @@
-// Built with `init-template standard_checker_entry` on 2022-03-15
+// Built with `init-template standard_checker_entry` on 2022-03-17
 #include <algorithm>
 #include <cmath>
 #include <random>
