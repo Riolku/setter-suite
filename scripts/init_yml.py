@@ -70,7 +70,7 @@ def add_checker(ret):
 def add_cases(
     ret,
 ):
-    init_type = env.get("init_type", "generator")
+    init_type = env.init_type
 
     assert len(env["case_counts"]) == len(
         env["case_points"]
@@ -81,7 +81,7 @@ def add_cases(
             env.get("generator_type", "single") == "single"
         ), "Cannot use 'double' generator config with 'generator' init_type"
 
-        ret["generator"] = env["generator"]
+        ret["generator"] = env.generator
 
         test_cases = []
 

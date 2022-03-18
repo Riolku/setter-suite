@@ -44,7 +44,7 @@ def main(args):
 
 class Generator:
     def __init__(self):
-        self.generator_executor = Executor(env["generator"])
+        self.generator_executor = Executor(env.get("generator", "gen.cpp"))
 
         if env.get("generator_type") == "double":
             self.generate = self.generate_double

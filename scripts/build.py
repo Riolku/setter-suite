@@ -31,12 +31,12 @@ def link_init():
 
 
 def link_data():
-    init_type = env["init_type"]
+    init_type = env.init_type
 
     if init_type == "zip":
         os.symlink("../data/data.zip", "build/data.zip")
 
-    os.symlink(f"../{env['generator']}", f"build/{env['generator']}")
+    os.symlink(f"../{env.generator}", f"build/{env.generator}")
 
 
 def link_checker():
