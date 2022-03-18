@@ -63,6 +63,14 @@ class Env:
         return Validator(self.env.get("validator"))
 
     @property
+    def init_type(self):
+        return self.env.get("init_type", "generator")
+
+    @property
+    def generator(self):
+        return self.env.get("generator", "gen.cpp")
+
+    @property
     def timeout(self):
         if "timelimit" in self.env:
             return int(self.env["timelimit"])
