@@ -55,7 +55,7 @@ template <typename T> class List : public vector<T> {
 };
 
 template <typename F> auto generate(int N, F f) -> List<decltype(f())> {
-    List<result_of<F()>> ret;
+    List<decltype(f())> ret;
     ret.reserve(N);
     ::generate_n(back_inserter(ret), N, move(f));
     return ret;
