@@ -11,9 +11,10 @@ vector<ll> with_gaps(int N, ll lo, ll hi, ll gap) {
     vector<ll> ret = random_array(N, lo, hi - gap * N);
     sort(all(ret));
     int i = -1;
-    transform(all(ret), ret.begin(), [&i](int x) {
+    transform(all(ret), ret.begin(), [&i](ll x) {
         ++i;
         return x + i;
     });
+    shuffle(ret);
     return ret;
 }
