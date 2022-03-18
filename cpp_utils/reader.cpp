@@ -113,6 +113,13 @@ class BaseReader {
     }
 
     template <typename T = ll>
+    T readIntSingleton(ll lo = numeric_limits<ll>::min(), ll hi = numeric_limits<ll>::max()) {
+        T x = readInt(lo, hi);
+        readNewLine();
+        return x;
+    }
+
+    template <typename T = ll>
     vector<T> readIntArray(size_t N, ll lo = numeric_limits<ll>::min(), ll hi = numeric_limits<ll>::max()) {
         vector<T> v;
         v.resize(N);
