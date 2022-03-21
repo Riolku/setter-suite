@@ -2,6 +2,9 @@ import subprocess, os, time
 from subprocess import PIPE
 from sys import exit
 
+from ctypes import cdll
+import signal
+
 CPP_EXT = ".cpp"
 PY_EXT = ".py"
 
@@ -76,9 +79,5 @@ class Executor:
 
 
 def do_prctl_deathsig():
-    from ctypes import cdll
-    import signal
-
     PR_SET_PDEATHSIG = 1
-
     cdll["libc.so.6"].prctl(PR_SET_PDEATHSIG, signal.SIGKILL)
