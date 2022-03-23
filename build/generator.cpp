@@ -111,11 +111,8 @@ template <typename T, int offset = 0> class List : public vector<T> {
 public:
   using vector<T>::vector;
   List(vector<T> v) : vector<T>::vector(move(v)) {}
-
-  List<T, offset> &one_indexed() {
-    offset = 1;
-    return *this;
-  }
+  template <int other_offset>
+  List(List<T, other_offset> other) : vector<T>::vector(move(other)) {}
 
   T &operator[](size_t x) { return this->at(x - offset); }
   const T &operator[](size_t x) const { return this->at(x - offset); }
@@ -257,17 +254,19 @@ ll randint(ll a, ll b) {
   return uniform_int_distribution<ll>(a, b)(get_engine());
 }
 
-vector<ll> random_array(int N, ll lo, ll hi) {
-  vector<ll> ret;
+template <typename T> vector<T> random_array(int N, T lo, T hi) {
+  vector<T> ret;
   ret.reserve(N);
-  generate_n(back_inserter(ret), N, [=]() { return randint(lo, hi); });
+  generate_n(back_inserter(ret), N, [lo, hi]() { return randint(lo, hi); });
   return ret;
 }
 
-void shuffle(vector<ll> &arr) { shuffle(all(arr), get_engine()); }
+template <typename T> void shuffle(vector<T> &arr) {
+  shuffle(all(arr), get_engine());
+}
 
-vector<ll> with_gaps(int N, ll lo, ll hi, ll gap) {
-  vector<ll> ret = random_array(N, lo, hi - gap * (N - 1));
+template <typename T> vector<T> with_gaps(int N, T lo, T hi, T gap) {
+  vector<T> ret = random_array(N, lo, hi - gap * (N - 1));
   sort(all(ret));
   int i = 0;
   transform(ret.begin() + 1, ret.end(), ret.begin(), [&i, gap](ll x) {
@@ -298,8 +297,10 @@ public:
 };
 
 // clang-format off
-List<List<unique_ptr<Test>, 1>, 1> cases = {
-
+List<List<shared_ptr<Test>, 1>, 1> cases = {
+  {
+    
+  }
 };
 // clang-format on
 
