@@ -3,11 +3,6 @@ public:
   using vector<T>::vector;
   List(vector<T> v) : vector<T>::vector(move(v)) {}
 
-  List<T, offset> &one_indexed() {
-    offset = 1;
-    return *this;
-  }
-
   T &operator[](size_t x) { return this->at(x - offset); }
   const T &operator[](size_t x) const { return this->at(x - offset); }
 
