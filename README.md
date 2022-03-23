@@ -64,5 +64,4 @@ All the utilities are in `cpp_utils`. Dependency lists can be seen in `dependenc
 ## Dependencies
 - `g++`
 - `python3`
-  - `cached_property`
-  - `pyyaml`
+  - See `requirements.txt`.
