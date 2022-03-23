@@ -2,6 +2,8 @@ template <typename T, int offset = 0> class List : public vector<T> {
 public:
   using vector<T>::vector;
   List(vector<T> v) : vector<T>::vector(move(v)) {}
+  template <int other_offset>
+  List(List<T, other_offset> other) : vector<T>::vector(move(other)) {}
 
   T &operator[](size_t x) { return this->at(x - offset); }
   const T &operator[](size_t x) const { return this->at(x - offset); }
