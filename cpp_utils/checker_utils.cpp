@@ -7,34 +7,34 @@ int PARTIAL = 7;
 } // namespace CheckerCodes
 
 void assertOrCode(bool cond, int code) {
-    if (!cond)
-        exit(code);
+  if (!cond)
+    exit(code);
 }
 void assertWA(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
 void assertPE(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
 
 class CheckerReader : public BaseReader {
-  protected:
-    virtual void preError() {}
-    void externalRangeError() override {
-        preError();
-        exit(CheckerCodes::WA);
-    }
-    void internalRangeError() override {
-        preError();
-        exit(CheckerCodes::WA);
-    }
-    void wrongWhitespaceError() override {
-        preError();
-        printf("Check your Whitespace");
-        exit(CheckerCodes::PE);
-    }
-    void invalidIntegerError() override {
-        preError();
-        printf("Check your Integers");
-        exit(CheckerCodes::PE);
-    }
+protected:
+  virtual void preError() {}
+  void externalRangeError() override {
+    preError();
+    exit(CheckerCodes::WA);
+  }
+  void internalRangeError() override {
+    preError();
+    exit(CheckerCodes::WA);
+  }
+  void wrongWhitespaceError() override {
+    preError();
+    printf("Check your Whitespace");
+    exit(CheckerCodes::PE);
+  }
+  void invalidIntegerError() override {
+    preError();
+    printf("Check your Integers");
+    exit(CheckerCodes::PE);
+  }
 
-  public:
-    using BaseReader::BaseReader;
+public:
+  using BaseReader::BaseReader;
 };
