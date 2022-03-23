@@ -11,60 +11,66 @@ void print_impl(const string &x) { print_impl(x.c_str()); }
 void print_impl(char x) { fprintf(stream, "%c", x); }
 
 template <typename A, typename B> void print_impl(const pair<A, B> &p) {
-    print_impl(p.first);
-    print_impl(' ');
-    print_impl(p.second);
+  print_impl(p.first);
+  print_impl(' ');
+  print_impl(p.second);
 }
 
-template <size_t index, typename T> typename enable_if<index == 0, void>::type print_tuple(const T &t) {}
+template <size_t index, typename T>
+typename enable_if<index == 0, void>::type print_tuple(const T &t) {}
 
-template <size_t index, typename T> typename enable_if<index == 1, void>::type print_tuple(const T &t) {
-    print_impl(get<tuple_size<T>() - index>(t));
+template <size_t index, typename T>
+typename enable_if<index == 1, void>::type print_tuple(const T &t) {
+  print_impl(get<tuple_size<T>() - index>(t));
 }
 
-template <size_t index, typename T> typename enable_if<(index > 1), void>::type print_tuple(const T &t) {
-    print_impl(get<tuple_size<T>() - index>(t));
-    print_impl(' ');
-    print_tuple<index - 1>(t);
+template <size_t index, typename T>
+typename enable_if<(index > 1), void>::type print_tuple(const T &t) {
+  print_impl(get<tuple_size<T>() - index>(t));
+  print_impl(' ');
+  print_tuple<index - 1>(t);
 }
 
-template <typename... Ts> void print_impl(const tuple<Ts...> &t) { print_tuple<sizeof...(Ts)>(t); }
+template <typename... Ts> void print_impl(const tuple<Ts...> &t) {
+  print_tuple<sizeof...(Ts)>(t);
+}
 
 template <typename T> void print_impl(const T &arr) {
-    bool first = true;
+  bool first = true;
 
-    for (auto x : arr) {
-        if (!first) {
-            print_impl(" ");
-        }
-        first = false;
-
-        print_impl(x);
+  for (auto x : arr) {
+    if (!first) {
+      print_impl(" ");
     }
+    first = false;
+
+    print_impl(x);
+  }
 }
 
 void print_many() {}
 
 template <typename T> void print_many(const T &arg) { print_impl(arg); }
 
-template <typename T, typename... Ts> void print_many(const T &arg, Ts &&...args) {
-    print_impl(arg);
-    print_impl(' ');
-    print_many(forward<Ts>(args)...);
+template <typename T, typename... Ts>
+void print_many(const T &arg, Ts &&...args) {
+  print_impl(arg);
+  print_impl(' ');
+  print_many(forward<Ts>(args)...);
 }
 
 void print() { fprintf(stream, "\n"); }
 
 template <typename... Ts> void print(Ts &&...args) {
-    print_many(forward<Ts>(args)...);
+  print_many(forward<Ts>(args)...);
 
-    print();
+  print();
 }
 
 template <typename R> void print_items(const R &r) {
-    for (auto x : r) {
-        print(x);
-    }
+  for (auto x : r) {
+    print(x);
+  }
 }
 }; // namespace Printer
 

@@ -56,6 +56,7 @@ All the utilities are in `cpp_utils`. Dependency lists can be seen in `dependenc
 - `standard_checker_entry.cpp`: An entry point for custom standard checkers.
 - `standard_checker.cpp`: An implementation of a reader for standard-checker behaviour.
 - `sys_deps.cpp`: System file dependencies.
+- `test_generation.cpp`: Base classes for test generation.
 - `utils.cpp`: Some basic aliases and utilities, used everywhere.
 - `validation.cpp`: Some utilities for validation.
 - `validator_entry.cpp`: An entry point for validators.

@@ -6,6 +6,7 @@ exact_whitespace_mixin: []
 gen_entry:
 - output
 - random_arrays
+- test_generation
 
 graphs:
 - sys_deps
@@ -60,6 +61,10 @@ standard_checker:
 - checker_utils
 
 sys_deps: []
+
+test_generation:
+- sys_deps
+- utils
 
 utils: []
 
