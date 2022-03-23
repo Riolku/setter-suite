@@ -1,6 +1,8 @@
 // clang-format off
-List<List<unique_ptr<Test>, 1>, 1> cases = {
-
+List<List<shared_ptr<Test>, 1>, 1> cases = {
+  {
+    
+  }
 };
 // clang-format on
 
