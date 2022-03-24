@@ -17,8 +17,8 @@ vector<T> random_sorted_array_with_gaps(int N, T lo, T hi, T gap) {
   vector<T> ret = random_array(N, lo, hi - gap * (N - 1));
   sort(all(ret));
   if (gap != 0) {
-    int i = 0;
-    transform(ret.begin() + 1, ret.end(), ret.begin(), [&i, gap](ll x) {
+    T i = 0;
+    transform(ret.begin() + 1, ret.end(), ret.begin() + 1, [&i, gap](T x) {
       i += gap;
       return x + i;
     });
@@ -33,7 +33,7 @@ template <typename T> vector<T> with_gaps(int N, T lo, T hi, T gap) {
 }
 
 template <typename T> vector<T> distinct_array(int N, T lo, T hi) {
-  return with_gaps(N, lo, hi, 1);
+  return with_gaps<T>(N, lo, hi, 1);
 }
 
 template <typename T> vector<T> array_with_sum(int N, T sum, T lo) {
