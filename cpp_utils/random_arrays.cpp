@@ -11,6 +11,9 @@ template <typename T> void shuffle(vector<T> &arr) {
 
 template <typename T>
 vector<T> random_sorted_array_with_gaps(int N, T lo, T hi, T gap) {
+  if (N == 0)
+    return vector<T>();
+
   vector<T> ret = random_array(N, lo, hi - gap * (N - 1));
   sort(all(ret));
   if (gap != 0) {
