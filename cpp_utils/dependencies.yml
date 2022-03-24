@@ -6,6 +6,7 @@ exact_whitespace_mixin: []
 gen_entry:
 - output
 - random_arrays
+- pairs
 - test_generation
 
 graphs:
