@@ -269,11 +269,13 @@ template <typename T>
 vector<T> random_sorted_array_with_gaps(int N, T lo, T hi, T gap) {
   vector<T> ret = random_array(N, lo, hi - gap * (N - 1));
   sort(all(ret));
-  int i = 0;
-  transform(ret.begin() + 1, ret.end(), ret.begin(), [&i, gap](ll x) {
-    i += gap;
-    return x + i;
-  });
+  if (gap != 0) {
+    int i = 0;
+    transform(ret.begin() + 1, ret.end(), ret.begin(), [&i, gap](ll x) {
+      i += gap;
+      return x + i;
+    });
+  }
   return ret;
 }
 
