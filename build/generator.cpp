@@ -1,4 +1,4 @@
-// Built with `init-template gen_entry` on 2022-03-23
+// Built with `init-template gen_entry` on 2022-03-24
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -265,7 +265,8 @@ template <typename T> void shuffle(vector<T> &arr) {
   shuffle(all(arr), get_engine());
 }
 
-template <typename T> vector<T> with_gaps(int N, T lo, T hi, T gap) {
+template <typename T>
+vector<T> random_sorted_array_with_gaps(int N, T lo, T hi, T gap) {
   vector<T> ret = random_array(N, lo, hi - gap * (N - 1));
   sort(all(ret));
   int i = 0;
@@ -273,7 +274,25 @@ template <typename T> vector<T> with_gaps(int N, T lo, T hi, T gap) {
     i += gap;
     return x + i;
   });
+  return ret;
+}
+
+template <typename T> vector<T> with_gaps(int N, T lo, T hi, T gap) {
+  vector<T> ret = random_sorted_array_with_gaps(N, lo, hi, gap);
   shuffle(ret);
+  return ret;
+}
+
+template <typename T> vector<T> distinct_array(int N, T lo, T hi) {
+  return with_gaps(N, lo, hi, 1);
+}
+
+template <typename T> vector<T> array_with_sum(int N, T sum, T lo) {
+  vector<T> ret = random_sorted_array_with_gaps(N - 1, 0, sum, lo);
+  ret.insert(ret.begin(), 0);
+  ret.push_back(sum);
+  adjacent_difference(all(ret), ret.begin());
+  ret.erase(ret.begin());
   return ret;
 }
 
@@ -303,9 +322,10 @@ List<List<shared_ptr<Test>, 1>, 1> cases = {
   }
 };
 // clang-format on
+vector<string> case_count_flags = {"case-counts", "cc", "case_counts"};
 
 int main(int argc, char **argv) {
-  if (argv[1] == string("case-counts")) {
+  if (find(all(case_count_flags), argv[1]) != case_count_flags.end()) {
     print(cases.map_new(
         [](const List<shared_ptr<Test>, 1> &suite) { return suite.size(); }));
     return 0;
