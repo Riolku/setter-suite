@@ -4,7 +4,6 @@ from .env import env
 
 
 def main(args):
-
     if os.path.exists("old-build"):
         os.system("rm -r old-build")
 
@@ -20,6 +19,9 @@ def main(args):
     link_data()
     link_checker()
     link_interactor()
+
+    print("---Generated build folder---")
+    return 0
 
 
 def link_config():

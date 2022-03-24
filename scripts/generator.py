@@ -2,11 +2,13 @@ import os
 
 from .env import env
 from .executors import Executor
+from .init_yml import main as init_yml_main
 
 import zipfile
 
 
 def main(args):
+    print("---Generating Data---")
     gen = Generator()
 
     if os.path.exists("old-data"):
@@ -39,7 +41,10 @@ def main(args):
                     with zf.open(f"{suite}.{case_num}.out", "w") as zip_f:
                         zip_f.write(data_f.read())
 
-    print("---Done---")
+    print("---Done Data Generation---")
+
+    init_yml_main([])
+    return 0
 
 
 class Generator:
