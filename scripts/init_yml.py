@@ -1,5 +1,6 @@
 import yaml
 
+from .build import main as build_main
 from .env import env
 
 case_regex = "(?P<batch>\d+)\.(?P<case>\d+).in"
@@ -15,6 +16,9 @@ def main(main):
 
     with open("init.yml", "w") as f:
         f.write(yaml.dump(ret))
+
+    print("---Generated init.yml---")
+    build_main([])
 
     return 0
 

@@ -5,7 +5,6 @@ from .generator import main as generator_main
 from .init_template import main as init_template_main
 from .init_yml import main as init_yml_main
 from .build import main as build_main
-from .full_build import main as full_build_main
 from .judge import main as judge_main
 from .invoke import main as invoke_main
 from .validate import main as validate_main
@@ -32,9 +31,6 @@ def main(args):
 
     elif newargs[0] == "build":
         return build_main(newargs[1:])
-
-    elif newargs[0] == "full-build":
-        return full_build_main(newargs[1:])
 
     elif newargs[0] == "judge":
         return judge_main(newargs[1:])
