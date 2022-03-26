@@ -29,11 +29,11 @@ template <typename T = ll> class Range {
     difference_type operator-(const iterator &other) const {
       return cur - other.cur;
     }
-    iterator &operator-=(const T &offset) const {
+    iterator &operator-=(const T &offset) {
       cur -= offset;
       return *this;
     }
-    iterator &operator+=(const T &offset) const {
+    iterator &operator+=(const T &offset) {
       cur += offset;
       return *this;
     }
