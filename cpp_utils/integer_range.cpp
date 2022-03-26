@@ -4,14 +4,14 @@ template <typename T = ll> class Range {
   class iterator {
     T cur;
 
+    iterator(T cur) : cur(move(cur)) {}
+
   public:
-    using difference_type = void;
+    using difference_type = decltype(declval<T>() - declval<T>());
     using value_type = T;
     using pointer = void;
     using reference = void;
-    using iterator_category = bidirectional_iterator_tag;
-
-    iterator(T cur) : cur(move(cur)) {}
+    using iterator_category = random_access_iterator_tag;
 
     iterator &operator++() {
       ++cur;
@@ -21,11 +21,31 @@ template <typename T = ll> class Range {
       --cur;
       return *this;
     }
-    T operator*() { return cur; }
+    value_type operator*() { return cur; }
+    value_type operator[](const T &offset) { return cur + offset; }
 
+    iterator operator+(const T &offset) const { return iterator(cur + offset); }
+    iterator operator-(const T &offset) const { return iterator(cur - offset); }
+    difference_type operator-(const iterator &other) const {
+      return cur - other.cur;
+    }
+    iterator &operator-=(const T &offset) const {
+      cur -= offset;
+      return *this;
+    }
+    iterator &operator+=(const T &offset) const {
+      cur += offset;
+      return *this;
+    }
+
+    bool operator>=(const iterator &other) const { return cur >= other.cur; }
+    bool operator<=(const iterator &other) const { return cur <= other.cur; }
+    bool operator>(const iterator &other) const { return cur > other.cur; }
     bool operator<(const iterator &other) const { return cur < other.cur; }
     bool operator!=(const iterator &other) const { return cur != other.cur; }
     bool operator==(const iterator &other) const { return cur == other.cur; }
+
+    friend class Range;
   };
 
 public:
