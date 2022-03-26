@@ -412,7 +412,7 @@ template <typename T = ll> class Range {
     using value_type = T;
     using pointer = void;
     using reference = void;
-    using iterator_category = bidirectional_iterator_tag;
+    using iterator_category = random_access_iterator_tag;
 
     iterator &operator++() {
       ++cur;
@@ -430,11 +430,11 @@ template <typename T = ll> class Range {
     difference_type operator-(const iterator &other) const {
       return cur - other.cur;
     }
-    iterator &operator-=(const T &offset) const {
+    iterator &operator-=(const T &offset) {
       cur -= offset;
       return *this;
     }
-    iterator &operator+=(const T &offset) const {
+    iterator &operator+=(const T &offset) {
       cur += offset;
       return *this;
     }
