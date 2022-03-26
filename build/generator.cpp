@@ -1,4 +1,4 @@
-// Built with `init-template gen_entry` on 2022-03-24
+// Built with `init-template gen_entry` on 2022-03-26
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -185,14 +185,14 @@ template <typename T = ll> class Range {
   class iterator {
     T cur;
 
+    iterator(T cur) : cur(move(cur)) {}
+
   public:
-    using difference_type = void;
+    using difference_type = decltype(declval<T>() - declval<T>());
     using value_type = T;
     using pointer = void;
     using reference = void;
     using iterator_category = bidirectional_iterator_tag;
-
-    iterator(T cur) : cur(move(cur)) {}
 
     iterator &operator++() {
       ++cur;
@@ -202,11 +202,31 @@ template <typename T = ll> class Range {
       --cur;
       return *this;
     }
-    T operator*() { return cur; }
+    value_type operator*() { return cur; }
+    value_type operator[](const T &offset) { return cur + offset; }
 
+    iterator operator+(const T &offset) const { return iterator(cur + offset); }
+    iterator operator-(const T &offset) const { return iterator(cur - offset); }
+    difference_type operator-(const iterator &other) const {
+      return cur - other.cur;
+    }
+    iterator &operator-=(const T &offset) const {
+      cur -= offset;
+      return *this;
+    }
+    iterator &operator+=(const T &offset) const {
+      cur += offset;
+      return *this;
+    }
+
+    bool operator>=(const iterator &other) const { return cur >= other.cur; }
+    bool operator<=(const iterator &other) const { return cur <= other.cur; }
+    bool operator>(const iterator &other) const { return cur > other.cur; }
     bool operator<(const iterator &other) const { return cur < other.cur; }
     bool operator!=(const iterator &other) const { return cur != other.cur; }
     bool operator==(const iterator &other) const { return cur == other.cur; }
+
+    friend class Range;
   };
 
 public:
@@ -267,11 +287,14 @@ template <typename T> void shuffle(vector<T> &arr) {
 
 template <typename T>
 vector<T> random_sorted_array_with_gaps(int N, T lo, T hi, T gap) {
+  if (N == 0)
+    return vector<T>();
+
   vector<T> ret = random_array(N, lo, hi - gap * (N - 1));
   sort(all(ret));
   if (gap != 0) {
-    int i = 0;
-    transform(ret.begin() + 1, ret.end(), ret.begin(), [&i, gap](ll x) {
+    T i = 0;
+    transform(ret.begin() + 1, ret.end(), ret.begin() + 1, [&i, gap](T x) {
       i += gap;
       return x + i;
     });
@@ -286,7 +309,7 @@ template <typename T> vector<T> with_gaps(int N, T lo, T hi, T gap) {
 }
 
 template <typename T> vector<T> distinct_array(int N, T lo, T hi) {
-  return with_gaps(N, lo, hi, 1);
+  return with_gaps<T>(N, lo, hi, 1);
 }
 
 template <typename T> vector<T> array_with_sum(int N, T sum, T lo) {
