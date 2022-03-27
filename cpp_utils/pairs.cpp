@@ -22,6 +22,7 @@ struct OrderedPairBijection {
   explicit OrderedPairBijection(int N) : N(N) {}
 
   pair<int, int> to_pair(ll v) {
+    assert(0 <= v && v <= 1LL * N * (N - 1));
     int x = v % N; // [0, N)
     int y = v / N; // [0, N - 1)
     if (y >= x)
@@ -31,6 +32,7 @@ struct OrderedPairBijection {
   }
 
   ll to_num(int x, int y) {
+    assert(0 < x && x < N && 0 < y && y < N && x != y);
     if (y > x)
       --y;
     return y * N + x;
