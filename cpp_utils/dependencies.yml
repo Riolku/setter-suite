@@ -1,16 +1,21 @@
 checker_utils:
 - reader
 
+dsu:
+- list
+- integer_range
+
 exact_whitespace_mixin: []
 
 gen_entry:
 - output
 - random_arrays
-- pairs
+- random_graphs
 - test_generation
 
 graphs:
 - sys_deps
+- dsu
 
 identical_checker_entry:
 - validation
@@ -43,6 +48,11 @@ random_arrays:
 - list
 - integer_range
 - random
+
+random_graphs:
+- graphs
+- random_arrays
+- pairs
 
 reader:
 - sys_deps

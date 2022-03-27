@@ -113,16 +113,33 @@ public:
   List(vector<T> v) : vector<T>::vector(move(v)) {}
   template <int other_offset>
   List(List<T, other_offset> other) : vector<T>::vector(move(other)) {}
+  template <typename Container>
+  explicit List(const Container &other)
+      : vector<T>::vector(other.begin(), other.end()) {}
 
   T &operator[](size_t x) { return this->at(x - offset); }
   const T &operator[](size_t x) const { return this->at(x - offset); }
 
+  template <typename F> void for_each(F f) { ::for_each(all(*this), f); }
   template <typename F> void for_each(F f) const { ::for_each(all(*this), f); }
+  template <typename F> void for_each_pair(F f) {
+    ::for_each(all(*this), [&f](const T &p) -> void {
+      auto a = get<0>(p), b = get<1>(p);
+      f(a, b);
+    });
+  }
   template <typename F> void for_each_pair(F f) const {
     ::for_each(all(*this), [&f](const T &p) -> void {
       auto a = get<0>(p), b = get<1>(p);
       f(a, b);
     });
+  }
+  template <typename F> void for_each_enumerate(F f) {
+    size_t i = offset;
+    for (auto it = this->begin(); it != this->end(); ++it) {
+      f(*it, i);
+      ++i;
+    }
   }
   template <typename F> void for_each_enumerate(F f) const {
     size_t i = offset;
@@ -132,11 +149,72 @@ public:
     }
   }
 
+  List<T, offset> &operator+=(const List<T, offset> &other) {
+    this->reserve(this->size() + other.size());
+    for (const T &elem : other)
+      this->push_back(elem);
+    return *this;
+  }
+  List<T, offset> &operator+=(List<T, offset> &&other) {
+    this->reserve(this->size() + other.size());
+    for (auto &&elem : other)
+      this->push_back(move(elem));
+    return *this;
+  }
+  List<T, offset> operator+(const List<T, offset> &other) const & {
+    List<T, offset> ret(this->begin(), this->end());
+    return ret += other;
+  }
+  List<T, offset> operator+(List<T, offset> &&other) const & {
+    List<T, offset> ret(this->begin(), this->end());
+    return ret += move(other);
+  }
+  List<T, offset> operator+(const List<T, offset> &other) && {
+    return *this += other;
+  }
+  List<T, offset> operator+(List<T, offset> &&other) && {
+    return *this += move(other);
+  }
+
   template <typename F> bool any_of(F f) const {
     return ::any_of(all(*this), f);
   }
   template <typename F> bool all_of(F f) const {
     return ::any_of(all(*this), f);
+  }
+
+  T max() const {
+    assert(this->size() > 0);
+    return *::max_element(this->begin(), this->end());
+  }
+  T max(const T &init) const {
+    if (this->size() == 0)
+      return init;
+    return max();
+  }
+  T max(T &&init) const {
+    if (this->size() == 0)
+      return move(init);
+    return max();
+  }
+
+  T min() const {
+    assert(this->size() > 0);
+    return *::min_element(this->begin(), this->end());
+  }
+  T min(const T &init) const {
+    if (this->size() == 0)
+      return init;
+    return min();
+  }
+  T min(T &&init) const {
+    if (this->size() == 0)
+      return move(init);
+    return min();
+  }
+
+  T sum(T start = T()) const {
+    return ::accumulate(this->begin(), this->end(), move(start));
   }
 
   List<T, offset> &sort() {
@@ -274,8 +352,8 @@ ll randint(ll a, ll b) {
   return uniform_int_distribution<ll>(a, b)(get_engine());
 }
 
-template <typename T> vector<T> random_array(int N, T lo, T hi) {
-  vector<T> ret;
+template <typename T = ll> List<T> random_array(int N, T lo, T hi) {
+  List<T> ret;
   ret.reserve(N);
   generate_n(back_inserter(ret), N, [lo, hi]() { return randint(lo, hi); });
   return ret;
@@ -285,12 +363,18 @@ template <typename T> void shuffle(vector<T> &arr) {
   shuffle(all(arr), get_engine());
 }
 
-template <typename T>
-vector<T> random_sorted_array_with_gaps(int N, T lo, T hi, T gap) {
-  if (N == 0)
-    return vector<T>();
+List<int, 1> permutation(int N) {
+  List<int, 1> ret(Range<int>(1, N + 1));
+  shuffle(ret);
+  return ret;
+}
 
-  vector<T> ret = random_array(N, lo, hi - gap * (N - 1));
+template <typename T>
+List<T> random_sorted_array_with_gaps(int N, T lo, T hi, T gap) {
+  if (N == 0)
+    return List<T>();
+
+  List<T> ret = random_array(N, lo, hi - gap * (N - 1));
   sort(all(ret));
   if (gap != 0) {
     T i = 0;
@@ -302,24 +386,100 @@ vector<T> random_sorted_array_with_gaps(int N, T lo, T hi, T gap) {
   return ret;
 }
 
-template <typename T> vector<T> with_gaps(int N, T lo, T hi, T gap) {
-  vector<T> ret = random_sorted_array_with_gaps(N, lo, hi, gap);
+template <typename T> List<T> with_gaps(int N, T lo, T hi, T gap) {
+  List<T> ret = random_sorted_array_with_gaps(N, lo, hi, gap);
   shuffle(ret);
   return ret;
 }
 
-template <typename T> vector<T> distinct_array(int N, T lo, T hi) {
+template <typename T> List<T> distinct_array(int N, T lo, T hi) {
   return with_gaps<T>(N, lo, hi, 1);
 }
 
-template <typename T> vector<T> array_with_sum(int N, T sum, T lo) {
-  vector<T> ret = random_sorted_array_with_gaps(N - 1, 0, sum, lo);
+template <typename T> List<T> array_with_sum(int N, T sum, T lo) {
+  List<T> ret = random_sorted_array_with_gaps(N - 1, 0, sum, lo);
+  ret.reserve(N + 1);
   ret.insert(ret.begin(), 0);
   ret.push_back(sum);
   adjacent_difference(all(ret), ret.begin());
   ret.erase(ret.begin());
   return ret;
 }
+
+class DSU {
+  int N;
+  List<int, 1> parent;
+  List<int, 1> rank;
+  int component_count;
+
+public:
+  explicit DSU(int N)
+      : N(N), parent(Range<int>(1, N + 1)), rank(N, 0), component_count(N) {}
+
+  int getparent(int u) {
+    if (parent[u] != u)
+      parent[u] = getparent(parent[u]);
+    return parent[u];
+  }
+
+  void merge(int u, int v) {
+    int uroot = getparent(u);
+    int vroot = getparent(v);
+
+    if (uroot != vroot) {
+      if (rank[uroot] < rank[vroot]) {
+        parent[uroot] = vroot;
+      } else if (rank[vroot] < rank[uroot]) {
+        parent[vroot] = uroot;
+      } else {
+        parent[uroot] = vroot;
+        ++rank[vroot];
+      }
+      --component_count;
+    }
+  }
+
+  bool same_component(int u, int v) { return getparent(u) == getparent(v); }
+  int components() const { return component_count; }
+};
+
+using Edge = pair<int, int>;
+
+struct Graph {
+  int N, M;
+  List<Edge> edges;
+  explicit Graph(int N) : N(N), M(0), edges() {}
+  Graph(int N, List<Edge> edges) : N(N), edges(move(edges)) {}
+
+  void add_edge(int u, int v) {
+    edges.emplace_back(u, v);
+    ++M;
+  }
+
+  void add_graph(const Graph &other, const List<Edge> &connectors) {
+    edges.reserve(M + other.M + connectors.size());
+    other.edges.for_each_pair([this](int u, int v) -> void { add_edge(u, v); });
+    connectors.for_each_pair(
+        [this](int u, int v) -> void { add_edge(u, v + N); });
+    N += other.N;
+  }
+
+  bool is_connected() const {
+    DSU dsu(N);
+    edges.for_each_pair([&dsu](int u, int v) -> void { dsu.merge(u, v); });
+    return dsu.components() == 1;
+  }
+  bool is_tree() const { return M == N - 1 && is_connected(); }
+};
+
+namespace Printer {
+
+void print(const Graph &g) {
+  print(g.N, g.M);
+  print_items(g.edges);
+}
+
+}; // namespace Printer
 
 namespace UnorderedPair {
 // starts counting from zero
@@ -361,6 +521,70 @@ struct OrderedPairBijection {
     return y * N + x;
   }
 };
+
+namespace DirectedGraph {
+List<Edge> random_edges(int N, int M) {
+  OrderedPairBijection mapper(N);
+  return distinct_array<ll>(M, 0, 1LL * N * (N - 1) - 1)
+      .map_new([&mapper](ll v) -> Edge {
+        auto e = mapper.to_pair(v);
+        return {e.first + 1, e.second + 1};
+      });
+}
+
+Graph random_graph(int N, int M) { return Graph(N, random_edges(N, M)); }
+
+List<Edge> random_dag_edges(int N, int M) {
+  return distinct_array<ll>(M, 0, 1LL * N * (N - 1) / 2 - 1)
+      .map_new([](ll v) -> Edge {
+        auto e = UnorderedPair::to_pair(v);
+        return {e.first + 1, e.second + 1};
+      });
+}
+
+Graph random_maybe_disconnected_dag(int N, int M) {
+  return Graph(N, random_dag_edges(N, M));
+}
+
+Graph random_connected_dag(int N, int M) {
+  List<Edge> edges;
+  edges.reserve(M);
+  for (int i = 1; i < N; ++i) {
+    edges.emplace_back(i, i + 1);
+  }
+  random_dag_edges(N - 1, M - (N - 1)).for_each_pair([&edges](int u, int v) {
+    // u, v are in [1, N - 1]
+    edges.emplace_back(u, v + 1);
+  });
+  return Graph(N, move(edges));
+}
+
+Graph random_scc(int N, int M) {
+  assert(N >= 2);
+  assert(M >= N);
+  List<Edge> edges;
+  edges.reserve(M);
+  for (int i = 1; i < N; ++i) {
+    edges.emplace_back(i, i + 1);
+  }
+  edges.emplace_back(N, 1);
+
+  distinct_array<ll>(M - N, 0, 1LL * N * (N - 2) - 1)
+      .for_each([&edges, N](ll x) {
+        int u = x % N + 1; // [1, N]
+        int v = x / N + 1; // [1, N - 2]
+        if (u == N)
+          ++v; // can't have v = 1 if u = N
+        else if (v >= u)
+          v += 2; // otherwise, can't let v = u or v = u + 1
+
+        edges.emplace_back(u, v);
+      });
+
+  return Graph(N, edges);
+}
+
+}; // namespace DirectedGraph
 
 struct Test {
   virtual void generate() = 0;
