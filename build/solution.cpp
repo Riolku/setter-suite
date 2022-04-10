@@ -1,4 +1,4 @@
-// Built with `init-template sol_entry` on 2022-03-26
+// Built with `init-template sol_entry` on 2022-04-10
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -114,14 +114,12 @@ class BaseReader {
 
 private:
   FILE *stream;
-  bool streamOpen;
 
   bool hasLast;
   char lastChar;
 
 public:
-  BaseReader(FILE *f)
-      : stream(f), streamOpen(true), hasLast(false), lastChar(0) {}
+  BaseReader(FILE *f) : stream(f), hasLast(false), lastChar(0) {}
 
   BaseReader(char *path) : BaseReader(fopen(path, "r")) {}
 
@@ -197,11 +195,12 @@ public:
   }
 
 private:
-  template <typename Arr> void _fill_arr(Arr &a, size_t N, ll lo, ll hi) {
+  template <typename Iter> void _fill_arr(Iter it, size_t N, ll lo, ll hi) {
     for (size_t i = 0; i < N; i++) {
       if (i)
         readSpace();
-      a[i] = readInt(lo, hi);
+      *it = readInt(lo, hi);
+      ++it;
     }
     readNewLine();
   }
@@ -211,7 +210,7 @@ public:
   array<T, length> readIntTuple(ll lo = numeric_limits<ll>::min(),
                                 ll hi = numeric_limits<ll>::max()) {
     array<T, length> res;
-    _fill_arr(res, length, lo, hi);
+    _fill_arr(res.begin(), length, lo, hi);
     return res;
   }
 
@@ -226,8 +225,8 @@ public:
   }
 
   template <typename T = ll>
-  T readIntSingleton(ll lo = numeric_limits<ll>::min(),
-                     ll hi = numeric_limits<ll>::max()) {
+  T readSingleInt(ll lo = numeric_limits<ll>::min(),
+                  ll hi = numeric_limits<ll>::max()) {
     T x = readInt(lo, hi);
     readNewLine();
     return x;
@@ -237,9 +236,30 @@ public:
   vector<T> readIntArray(size_t N, ll lo = numeric_limits<ll>::min(),
                          ll hi = numeric_limits<ll>::max()) {
     vector<T> v;
-    v.resize(N);
-    _fill_arr(v, N, lo, hi);
+    v.reserve(N);
+    _fill_arr(back_inserter(v), N, lo, hi);
     return v;
+  }
+
+  template <typename T = ll>
+  pair<vector<T>, int>
+  readIntArrayOrFlag(size_t N, ll lo = numeric_limits<ll>::min(),
+                     ll hi = numeric_limits<ll>::max(), T flag = -1) {
+    T first = readInt();
+    if (first == flag) {
+      return {vector<int>(), -1};
+    }
+
+    if (lo > first || first > hi) {
+      internalRangeError();
+      throw runtime_error("We should never get here");
+    } else {
+      vector<T> v;
+      v.push_back(first);
+      v.reserve(N);
+      _fill_arr(back_inserter(v), N - 1, lo, hi);
+      return {v, N};
+    }
   }
 
   template <typename T, typename... Ts> void readInts(T &arg, Ts &&...args) {
@@ -253,14 +273,7 @@ public:
     readNewLine();
   }
 
-  void closeStream() {
-    if (streamOpen) {
-      fclose(stream);
-      streamOpen = false;
-    }
-  }
-
-  virtual ~BaseReader() { closeStream(); }
+  virtual ~BaseReader() { fclose(stream); }
 
 protected:
   virtual void internalRangeError() = 0;
@@ -281,15 +294,18 @@ public:
       Parent::wrongWhitespaceError();
   }
 
-  void readEOF() override {
+  void readEOFImpl() {
     if (!Parent::eof())
       Parent::wrongWhitespaceError();
   }
+  void readEOF() override { readEOFImpl(); }
 
   void readSpace() override {
     if (Parent::readChar() != ' ')
       Parent::wrongWhitespaceError();
   }
+
+  ~ExactWhitespaceMixin() { readEOFImpl(); }
 
   using Parent::Parent;
 };

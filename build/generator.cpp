@@ -1,4 +1,4 @@
-// Built with `init-template gen_entry` on 2022-03-26
+// Built with `init-template gen_entry` on 2022-04-10
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -407,14 +407,14 @@ template <typename T> List<T> array_with_sum(int N, T sum, T lo) {
 }
 
 class DSU {
+protected:
   int N;
   List<int, 1> parent;
-  List<int, 1> rank;
   int component_count;
 
 public:
   explicit DSU(int N)
-      : N(N), parent(Range<int>(1, N + 1)), rank(N, 0), component_count(N) {}
+      : N(N), parent(Range<int>(1, N + 1)), component_count(N) {}
 
   int getparent(int u) {
     if (parent[u] != u)
@@ -422,7 +422,35 @@ public:
     return parent[u];
   }
 
-  void merge(int u, int v) {
+  bool same_component(int u, int v) { return getparent(u) == getparent(v); }
+  int components() const { return component_count; }
+
+  virtual ~DSU() {}
+};
+
+class DSUWithoutRank : public DSU {
+public:
+  using DSU::DSU;
+
+  // guarantee that u -> v
+  void merge_into(int u, int v) {
+    int uroot = getparent(u);
+    int vroot = getparent(v);
+
+    if (uroot != vroot) {
+      parent[uroot] = vroot;
+      --component_count;
+    }
+  }
+};
+
+class DSUWithRank : public DSU {
+  List<int, 1> rank;
+
+public:
+  explicit DSUWithRank(int N) : DSU(N), rank(N, 0) {}
+
+  void merge_together(int u, int v) {
     int uroot = getparent(u);
     int vroot = getparent(v);
 
@@ -438,9 +466,6 @@ public:
       --component_count;
     }
   }
-
-  bool same_component(int u, int v) { return getparent(u) == getparent(v); }
-  int components() const { return component_count; }
 };
 
 using Edge = pair<int, int>;
@@ -465,8 +490,9 @@ struct Graph {
   }
 
   bool is_connected() const {
-    DSU dsu(N);
-    edges.for_each_pair([&dsu](int u, int v) -> void { dsu.merge(u, v); });
+    DSUWithRank dsu(N);
+    edges.for_each_pair(
+        [&dsu](int u, int v) -> void { dsu.merge_together(u, v); });
     return dsu.components() == 1;
   }
   bool is_tree() const { return M == N - 1 && is_connected(); }
@@ -553,7 +579,8 @@ Graph random_connected_dag(int N, int M) {
     edges.emplace_back(i, i + 1);
   }
   random_dag_edges(N - 1, M - (N - 1)).for_each_pair([&edges](int u, int v) {
-    // u, v are in [1, N - 1]
+    // u, v are in [1, N - 1], u < v.
+    // make sure we don't add [u, u + 1].
     edges.emplace_back(u, v + 1);
   });
   return Graph(N, move(edges));

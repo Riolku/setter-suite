@@ -20,8 +20,9 @@ struct Graph {
   }
 
   bool is_connected() const {
-    DSU dsu(N);
-    edges.for_each_pair([&dsu](int u, int v) -> void { dsu.merge(u, v); });
+    DSUWithRank dsu(N);
+    edges.for_each_pair(
+        [&dsu](int u, int v) -> void { dsu.merge_together(u, v); });
     return dsu.components() == 1;
   }
   bool is_tree() const { return M == N - 1 && is_connected(); }
