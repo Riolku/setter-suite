@@ -35,11 +35,12 @@ public:
       wrongWhitespaceError();
   }
 
-  void readEOF() override {
+  void readEOFImpl() {
     skipAllWhitespace();
     if (!eof())
       wrongWhitespaceError(); // wanted EOF but found more token
   }
+  void readEOF() override { readEOFImpl(); }
 
   // PE could be confusing under standard checker
   void wrongWhitespaceError() override {
@@ -51,4 +52,6 @@ public:
     preError();
     exit(CheckerCodes::WA);
   }
+
+  ~StandardCheckerReader() { readEOFImpl(); }
 };

@@ -11,7 +11,13 @@ void assertOrCode(bool cond, int code) {
     exit(code);
 }
 void assertWA(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
-void assertPE(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
+void assertPE(bool cond) { assertOrCode(cond, CheckerCodes::PE); }
+
+int partial(int points, int denom) {
+  fprintf(stderr, "partial %d/%d\n", points, denom);
+  printf("%d/%d points", points, denom);
+  return CheckerCodes::PARTIAL;
+}
 
 class CheckerReader : public BaseReader {
 protected:
