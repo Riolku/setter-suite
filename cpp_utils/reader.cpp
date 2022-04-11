@@ -138,6 +138,7 @@ public:
                      ll hi = numeric_limits<ll>::max(), T flag = -1) {
     T first = readInt();
     if (first == flag) {
+      readNewLine();
       return {vector<int>(), -1};
     }
 
