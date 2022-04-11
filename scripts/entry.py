@@ -1,5 +1,6 @@
 from .env import env
 
+from .compile import main as compile_main
 from .countercase import main as countercase_main
 from .generator import main as generator_main
 from .init_template import main as init_template_main
@@ -17,7 +18,10 @@ def main(args):
         print("An operation is required.")
         return -1
 
-    if newargs[0] == "countercase":
+    if newargs[0] == "compile":
+        return compile_main(newargs[1:])
+
+    elif newargs[0] == "countercase":
         return countercase_main(newargs[1:])
 
     elif newargs[0] == "generate":

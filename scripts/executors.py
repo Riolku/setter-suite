@@ -44,7 +44,7 @@ class Executor:
     def force_compile(self, file, file_root):
         assert (
             subprocess.run(
-                ["g++", "-O2", "-Wall", "-std=c++20", "-o", file_root, file]
+                ["g++", "-O2", "-Wall", "-std=c++17", "-g", "-o", file_root, file]
             ).returncode
             == 0
         )
