@@ -146,9 +146,12 @@ public:
       throw runtime_error("We should never get here");
     } else {
       vector<T> v;
-      v.push_back(first);
       v.reserve(N);
-      _fill_arr(back_inserter(v), N - 1, lo, hi);
+      v.push_back(first);
+      if (N > 1) {
+        readSpace();
+        _fill_arr(back_inserter(v), N - 1, lo, hi);
+      }
       return {v, N};
     }
   }
