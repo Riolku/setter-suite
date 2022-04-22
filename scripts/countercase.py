@@ -11,7 +11,7 @@ def main(args):
 
     blocksize = int(env.get("b", env.get("blocksize", DEFAULT_BLOCKSIZE)))
 
-    generator = Executor(env["random_gen"])
+    generator = Executor(env.get("random_gen", "random_gen.py"))
 
     invoker = Invoker(args[0])
 
@@ -63,7 +63,16 @@ class CounterCaser:
             checker_res = result["checker_result"]
 
             if checker_res != codes["AC"]:
-                return f"===CASE===\n{case}==={self.invoker.program.file}===\n{result['process_result'].stdout}===Reference===\n{result['reference_result'].stdout}===CHECKER===\n{display_code(checker_res)}\n=========\n"
+                inp_rep = repr(case).replace("'", '"')
+                out_rep = repr(result["reference_result"].stdout).replace("'", '"')
+
+                return (
+                    f"===CASE===\n{case}==={self.invoker.program.file}===\n{result['process_result'].stdout}"
+                    + f"===Reference===\n{result['reference_result'].stdout}===CHECKER===\n{display_code(checker_res)}"
+                    + "\n===LiteralTest Config===\n"
+                    + f"make_shared<LiteralTest>({inp_rep}, {out_rep}),\n"
+                    + "=========\n"
+                )
 
             return None
         except RuntimeError as e:
