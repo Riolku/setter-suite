@@ -52,7 +52,7 @@ class Env:
 
     @cached_property
     def reference_sol(self):
-        return Executor(self.env["solutions"][0])
+        return Executor(self.env["reference_sol"])
 
     @cached_property
     def checker(self):
@@ -80,6 +80,9 @@ class Env:
 
     @property
     def case_counts(self):
+        if "case_counts" not in self.env:
+            gen = Executor(self.generator)
+            return list(map(int, gen.run(["cc"]).stdout.split()))
         return self.env["case_counts"]
 
     @property
