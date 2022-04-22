@@ -35,14 +35,25 @@ def write_template(files):
 def get_deps(files):
     final_deps = []
 
+    def isdummy(file_name):
+        return "DUMMY" in dependencies[file_name]
+
     def resolve(file_name):
         for sub_dep in dependencies[file_name]:
-            resolve(sub_dep)
-
-        if file_name not in final_deps:
-            final_deps.append(file_name)
+            if sub_dep != "DUMMY":
+                resolve(sub_dep)
+                if not isdummy(sub_dep) and sub_dep not in final_deps:
+                    final_deps.append(sub_dep)
 
     for f in files:
         resolve(f)
+
+    # Ensure order of the files given on the command line
+    # Helpful when we want to have more control on the output ordering
+    for f in files:
+        if not isdummy(f):
+            if f in final_deps:
+                final_deps.remove(f)
+            final_deps.append(f)
 
     return final_deps
