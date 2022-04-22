@@ -64,7 +64,13 @@ class Generator:
             with open(f"data/{suite}.{case}.out", "w") as out_f:
                 try:
                     self.generator_executor.run(
-                        [str(suite), str(case)], stdout=in_f, stderr=out_f
+                        # Bigger timeout: generators frequently TLE locally and do just fine on DMOJ
+                        # Potentially... because of so many instances running at once
+                        # and other processes want to hop on the cores
+                        [str(suite), str(case)],
+                        stdout=in_f,
+                        stderr=out_f,
+                        timeout=20,
                     )
                 except:
                     raise RuntimeError(f"Failed generating case {suite}.{case}")
@@ -75,7 +81,9 @@ class Generator:
         suite, case = arg
         with open(f"data/{suite}.{case}.in", "w") as in_f:
             try:
-                self.generator_executor.run([str(suite), str(case)], stdout=in_f)
+                self.generator_executor.run(
+                    [str(suite), str(case)], stdout=in_f, timeout=20
+                )
             except:
                 raise RuntimeError(f"Failed generating case {suite}.{case}")
 
