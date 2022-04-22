@@ -6,8 +6,8 @@ A collection of tools for problem-setting, especially for use with [DMOJ](https:
 
 `config.yml` is the file that this utility will check for many things. It is intended as a configuration for the problem. Keys include:
 
-- `solutions`: an array of solutions. The first will be used as the reference solution whenever applicable.
-- `checker`: The checker, either a builtin name (only `identical` is supported as of now), or a C++ file.
+- `reference_sol`: The reference solution.
+- `checker`: The checker, either a builtin name (only `identical` is supported as of now), a C++ file, or a python file, which will be treated as a raw checker, NOT a bridged one.
 - `generator`: The generator, a file name.
 - `generator_type`: The generator type, either `single` (the default), or `double`. See the `generate` script for an explanation of the differences.
 - `case_counts`: an array of the number of cases in each suite.
