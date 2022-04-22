@@ -24,7 +24,7 @@ def main(main):
 
 
 def add_base(ret):
-    ret["output_limit_length"] = env.get("output_limit_length", 10 ** 6)
+    ret["output_limit_length"] = env.get("output_limit_length", 10**6)
     ret["output_prefix_length"] = env.get("output_prefix_length", 0)
 
 
@@ -76,9 +76,9 @@ def add_cases(
 ):
     init_type = env.init_type
 
-    assert len(env["case_counts"]) == len(
+    assert len(env.case_counts) == len(
         env["case_points"]
-    ), "must have the same number of cases in case_counts and case_points"
+    ), "must have the same number of suites in case_counts and case_points"
 
     if init_type == "generator" or ("dependencies" in env and init_type == "zip"):
         assert (
@@ -89,10 +89,10 @@ def add_cases(
 
         test_cases = []
 
-        for suite_num in range(len(env["case_counts"])):
+        for suite_num in range(len(env.case_counts)):
             test_cases.append(dict(batched=[]))
 
-            for case_num in range(env["case_counts"][suite_num]):
+            for case_num in range(env.case_counts[suite_num]):
                 if init_type == "zip":
                     base = f"{suite_num + 1}.{case_num + 1}."
                     case = {"in": base + "in", "out": base + "out"}
