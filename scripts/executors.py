@@ -10,13 +10,13 @@ PY_EXT = ".py"
 
 
 class Executor:
-    def __init__(self, file):
+    def __init__(self, file, *, debug=False, force_compile=False):
         self.file = file
 
         if file.endswith(CPP_EXT):
             file_root = file[: -len(CPP_EXT)]
 
-            self.compile(file, file_root)
+            self.compile(file, file_root, debug=debug, force_compile=force_compile)
 
             self.exec = ["./" + file_root]
 
@@ -29,25 +29,24 @@ class Executor:
 
             self.exec = [env.python_exec, file]
 
-    def compile(self, file, file_root):
+    def compile(self, file, file_root, *, debug, force_compile):
         try:
             compiled_stat_info = os.stat(file_root)
             source_stat_info = os.stat(file)
 
             # compile only if the source file is more recent than the executable
-            if source_stat_info.st_mtime > compiled_stat_info.st_mtime:
-                self.force_compile(file, file_root)
+            if force_compile or source_stat_info.st_mtime > compiled_stat_info.st_mtime:
+                self.force_compile(file, file_root, debug=debug)
 
         except FileNotFoundError:
-            self.force_compile(file, file_root)
+            self.force_compile(file, file_root, debug=debug)
 
-    def force_compile(self, file, file_root):
-        assert (
-            subprocess.run(
-                ["g++", "-O2", "-Wall", "-std=c++17", "-g", "-o", file_root, file]
-            ).returncode
-            == 0
-        )
+    def force_compile(self, file, file_root, *, debug):
+        cmd = ["g++", "-O2", "-Wall", "-std=c++17", "-g", "-o", file_root, file]
+        if debug:
+            cmd = ["g++", "-Wall", "-std=c++17", "-g", "-o", file_root, file]
+
+        assert subprocess.run(cmd).returncode == 0
 
     def run(self, args=[], **kwargs):
         kwargs.setdefault("text", True)
