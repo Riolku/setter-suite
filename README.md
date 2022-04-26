@@ -51,7 +51,9 @@ All the utilities are in `cpp_utils`. Dependency lists can be seen in `dependenc
 - `pairs.cpp`: Convert pairs to integers and back. Useful for generating random pairs.
 - `random_arrays.cpp`: Generate some types of random arrays.
 - `random.cpp`: Basic randomness.
+- `random_set`: Utilities for sets of random numbers.
 - `reader.cpp`: A base reader class, good for validating whitespace and implementing safe checkers.
+- `set_with_bit.cpp`: Utilities for sets implemented as a BIT.
 - `sol_entry.cpp`: An entry point for solutions.
 - `standard_checker_entry.cpp`: An entry point for custom standard checkers.
 - `standard_checker.cpp`: An implementation of a reader for standard-checker behaviour.
