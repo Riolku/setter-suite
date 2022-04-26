@@ -1,4 +1,4 @@
-// Built with `init-template sol_entry` on 2022-04-11
+// Built with `init-template sol_entry` on 2022-04-26
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -13,8 +13,11 @@
 
 #include <array>
 #include <initializer_list>
+#include <map>
 #include <memory>
 #include <queue>
+#include <set>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -32,6 +35,7 @@ FILE *stream = stdout;
 
 void set_stream(FILE *st) { stream = st; }
 
+void print_impl(bool x) { fprintf(stream, "%d", x); }
 void print_impl(int x) { fprintf(stream, "%d", x); }
 void print_impl(ll x) { fprintf(stream, "%lld", x); }
 void print_impl(size_t x) { fprintf(stream, "%lu", x); }
@@ -114,12 +118,14 @@ class BaseReader {
 
 private:
   FILE *stream;
+  bool streamOpen;
 
   bool hasLast;
   char lastChar;
 
 public:
-  BaseReader(FILE *f) : stream(f), hasLast(false), lastChar(0) {}
+  BaseReader(FILE *f)
+      : stream(f), streamOpen(true), hasLast(false), lastChar(0) {}
 
   BaseReader(char *path) : BaseReader(fopen(path, "r")) {}
 
@@ -247,7 +253,8 @@ public:
                      ll hi = numeric_limits<ll>::max(), T flag = -1) {
     T first = readInt();
     if (first == flag) {
-      return {vector<int>(), -1};
+      readNewLine();
+      return {vector<T>(), -1};
     }
 
     if (lo > first || first > hi) {
@@ -259,8 +266,8 @@ public:
       v.push_back(first);
       if (N > 1) {
         readSpace();
-        _fill_arr(back_inserter(v), N - 1, lo, hi);
       }
+      _fill_arr(back_inserter(v), N - 1, lo, hi);
       return {v, N};
     }
   }
@@ -276,7 +283,14 @@ public:
     readNewLine();
   }
 
-  virtual ~BaseReader() { fclose(stream); }
+  void closeStream() {
+    if (streamOpen) {
+      fclose(stream);
+      streamOpen = false;
+      stream = nullptr;
+    }
+  }
+  virtual ~BaseReader() { closeStream(); }
 
 protected:
   virtual void internalRangeError() = 0;
