@@ -12,8 +12,11 @@
 
 #include <array>
 #include <initializer_list>
+#include <map>
 #include <memory>
 #include <queue>
+#include <set>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
