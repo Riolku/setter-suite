@@ -7,11 +7,14 @@ dsu:
 
 exact_whitespace_mixin: []
 
-gen_entry:
+gen_dependencies:
+- DUMMY
 - output
 - random_arrays
-- random_graphs
 - test_generation
+
+gen_entry:
+- gen_dependencies
 
 graphs:
 - sys_deps
@@ -40,10 +43,6 @@ pairs:
 - sys_deps
 - utils
 
-random:
-- sys_deps
-- utils
-
 random_arrays:
 - list
 - integer_range
@@ -54,15 +53,30 @@ random_graphs:
 - random_arrays
 - pairs
 
+random_set:
+- random
+- set_with_bit
+
+random:
+- sys_deps
+- utils
+
 reader:
 - sys_deps
 - utils
 
-sol_entry:
+set_with_bit:
+- list
+
+sol_dependencies:
+- DUMMY
 - output
 - validation
 - list
 - integer_range
+
+sol_entry:
+- sol_dependencies
 
 standard_checker_entry:
 - validation
