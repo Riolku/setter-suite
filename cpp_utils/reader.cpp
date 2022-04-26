@@ -5,12 +5,14 @@ class BaseReader {
 
 private:
   FILE *stream;
+  bool streamOpen;
 
   bool hasLast;
   char lastChar;
 
 public:
-  BaseReader(FILE *f) : stream(f), hasLast(false), lastChar(0) {}
+  BaseReader(FILE *f)
+      : stream(f), streamOpen(true), hasLast(false), lastChar(0) {}
 
   BaseReader(char *path) : BaseReader(fopen(path, "r")) {}
 
@@ -139,7 +141,7 @@ public:
     T first = readInt();
     if (first == flag) {
       readNewLine();
-      return {vector<int>(), -1};
+      return {vector<T>(), -1};
     }
 
     if (lo > first || first > hi) {
@@ -151,8 +153,8 @@ public:
       v.push_back(first);
       if (N > 1) {
         readSpace();
-        _fill_arr(back_inserter(v), N - 1, lo, hi);
       }
+      _fill_arr(back_inserter(v), N - 1, lo, hi);
       return {v, N};
     }
   }
@@ -168,7 +170,14 @@ public:
     readNewLine();
   }
 
-  virtual ~BaseReader() { fclose(stream); }
+  void closeStream() {
+    if (streamOpen) {
+      fclose(stream);
+      streamOpen = false;
+      stream = nullptr;
+    }
+  }
+  virtual ~BaseReader() { closeStream(); }
 
 protected:
   virtual void internalRangeError() = 0;
