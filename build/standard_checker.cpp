@@ -105,17 +105,10 @@ private:
 
 public:
   string readToken() {
+    preReadToken();
     string token;
     while (!isspace(peekChar()) && !eof() && token.size() <= MAX_TOKEN_SIZE)
       token.push_back(readChar());
-    return token;
-  }
-
-  string readString(size_t N) {
-    string token;
-    while (!eof() && token.size() < N) {
-      token.push_back(readChar());
-    }
     return token;
   }
 
@@ -202,16 +195,10 @@ public:
     readNewLine();
   }
 
-  void closeStream() {
-    if (streamOpen) {
-      fclose(stream);
-      streamOpen = false;
-      stream = nullptr;
-    }
-  }
-  virtual ~BaseReader() { closeStream(); }
+  virtual ~BaseReader() {}
 
 protected:
+  virtual void preReadToken() {}
   virtual void internalRangeError() = 0;
   virtual void externalRangeError() = 0;
   virtual void invalidIntegerError() = 0;
@@ -327,6 +314,7 @@ public:
 };
 
 class StandardCheckerReader : public CheckerReader {
+  int whitespace_flag;
 
   bool isLine(char c) { return c == '\n' || c == '\r'; }
   bool isNonLineWhitespace(char c) {
@@ -342,25 +330,29 @@ class StandardCheckerReader : public CheckerReader {
   }
 
 public:
-  StandardCheckerReader(FILE *f) : CheckerReader(f) { skipAllWhitespace(); }
-  StandardCheckerReader(char *path) : CheckerReader(path) {
-    skipAllWhitespace();
-  }
+  StandardCheckerReader(FILE *f) : CheckerReader(f), whitespace_flag(2) {}
+  StandardCheckerReader(char *path) : CheckerReader(path), whitespace_flag(2) {}
 
-  void readSpace() override {
-    if (!isNonLineWhitespace(readChar()))
-      wrongWhitespaceError();
+  void readSpace() override { whitespace_flag = 1; }
+  void readNewLine() override { whitespace_flag = 2; }
 
-    while (isNonLineWhitespace(peekChar()))
-      readChar();
-  }
-  void readNewLine() override {
-    // If we read all the whitespace and don't find a line, we should fail.
-    // However, if we are at EOF, then we shouldn't.
-    // If we are indeed at EOF, but the checker needs to read more things, those
-    // methods will fail.
-    if (!skipAllWhitespace() && !eof())
-      wrongWhitespaceError();
+  void preReadToken() override {
+    if (whitespace_flag == 1) {
+      if (!isNonLineWhitespace(readChar())) {
+        wrongWhitespaceError();
+      }
+
+      while (isNonLineWhitespace(peekChar())) {
+        readChar();
+      }
+    } else if (whitespace_flag == 2) {
+      if (!skipAllWhitespace()) {
+        wrongWhitespaceError();
+      }
+    } else {
+      assert(whitespace_flag == 0);
+    }
+    whitespace_flag = 0;
   }
 
   void readEOFImpl() {

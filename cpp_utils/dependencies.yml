@@ -21,6 +21,7 @@ graphs:
 - dsu
 
 identical_checker_entry:
+- output
 - validation
 - identical_checker
 
@@ -28,8 +29,21 @@ identical_checker:
 - checker_utils
 - exact_whitespace_mixin
 
+identical_interactor_entry:
+- output
+- validation
+- identical_interactor
+
+identical_interactor:
+- identical_checker
+- interaction
+
 integer_range:
 - list
+
+interaction:
+- sys_deps
+- utils
 
 list:
 - sys_deps
@@ -79,11 +93,21 @@ sol_entry:
 - sol_dependencies
 
 standard_checker_entry:
+- output
 - validation
 - standard_checker
 
 standard_checker:
 - checker_utils
+
+standard_interactor_entry:
+- output
+- validation
+- standard_interactor
+
+standard_interactor:
+- standard_checker
+- interaction
 
 sys_deps: []
 
@@ -98,4 +122,5 @@ validation:
 - exact_whitespace_mixin
 
 validator_entry:
+- output
 - validation
