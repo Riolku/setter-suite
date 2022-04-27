@@ -1,0 +1,1 @@
+using IdenticalInteractorReader = InteractorReader<IdenticalCheckerReader>;

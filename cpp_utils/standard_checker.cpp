@@ -1,4 +1,9 @@
 class StandardCheckerReader : public CheckerReader {
+  // 0 - don't skip space
+  // 1 - skip non-lines
+  // 2 - skip all space
+  // 3 - same as 2, but don't error if there is no space
+  int whitespace_flag;
 
   bool isLine(char c) { return c == '\n' || c == '\r'; }
   bool isNonLineWhitespace(char c) {
@@ -14,25 +19,30 @@ class StandardCheckerReader : public CheckerReader {
   }
 
 public:
-  StandardCheckerReader(FILE *f) : CheckerReader(f) { skipAllWhitespace(); }
-  StandardCheckerReader(char *path) : CheckerReader(path) {
-    skipAllWhitespace();
-  }
+  StandardCheckerReader(FILE *f) : CheckerReader(f), whitespace_flag(3) {}
+  StandardCheckerReader(const char *path)
+      : CheckerReader(path), whitespace_flag(3) {}
 
-  void readSpace() override {
-    if (!isNonLineWhitespace(readChar()))
-      wrongWhitespaceError();
+  void readSpace() override { whitespace_flag = 1; }
+  void readNewLine() override { whitespace_flag = 2; }
 
-    while (isNonLineWhitespace(peekChar()))
-      readChar();
-  }
-  void readNewLine() override {
-    // If we read all the whitespace and don't find a line, we should fail.
-    // However, if we are at EOF, then we shouldn't.
-    // If we are indeed at EOF, but the checker needs to read more things, those
-    // methods will fail.
-    if (!skipAllWhitespace() && !eof())
-      wrongWhitespaceError();
+  void preReadToken() override {
+    if (whitespace_flag == 1) {
+      if (!isNonLineWhitespace(readChar())) {
+        wrongWhitespaceError();
+      }
+
+      while (isNonLineWhitespace(peekChar())) {
+        readChar();
+      }
+    } else if (whitespace_flag == 2 || whitespace_flag == 3) {
+      if (!skipAllWhitespace() && whitespace_flag != 3) {
+        wrongWhitespaceError();
+      }
+    } else {
+      assert(whitespace_flag == 0);
+    }
+    whitespace_flag = 0;
   }
 
   void readEOFImpl() {

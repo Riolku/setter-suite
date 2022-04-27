@@ -105,17 +105,10 @@ private:
 
 public:
   string readToken() {
+    preReadToken();
     string token;
     while (!isspace(peekChar()) && !eof() && token.size() <= MAX_TOKEN_SIZE)
       token.push_back(readChar());
-    return token;
-  }
-
-  string readString(size_t N) {
-    string token;
-    while (!eof() && token.size() < N) {
-      token.push_back(readChar());
-    }
     return token;
   }
 
@@ -202,16 +195,10 @@ public:
     readNewLine();
   }
 
-  void closeStream() {
-    if (streamOpen) {
-      fclose(stream);
-      streamOpen = false;
-      stream = nullptr;
-    }
-  }
-  virtual ~BaseReader() { closeStream(); }
+  virtual ~BaseReader() {}
 
 protected:
+  virtual void preReadToken() {}
   virtual void internalRangeError() = 0;
   virtual void externalRangeError() = 0;
   virtual void invalidIntegerError() = 0;
