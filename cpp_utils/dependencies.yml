@@ -17,7 +17,6 @@ gen_entry:
 - gen_dependencies
 
 graphs:
-- sys_deps
 - dsu
 
 identical_checker_entry:
