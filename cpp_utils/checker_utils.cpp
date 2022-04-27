@@ -6,9 +6,13 @@ int IE = 3;
 int PARTIAL = 7;
 } // namespace CheckerCodes
 
+void preErrorHook();
+
 void assertOrCode(bool cond, int code) {
-  if (!cond)
+  if (!cond) {
+    preErrorHook();
     exit(code);
+  }
 }
 void assertWA(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
 void assertPE(bool cond) { assertOrCode(cond, CheckerCodes::PE); }
@@ -21,7 +25,7 @@ int partial(int points, int denom) {
 
 class CheckerReader : public BaseReader {
 protected:
-  virtual void preError() {}
+  virtual void preError() { preErrorHook(); }
   void externalRangeError() override {
     preError();
     exit(CheckerCodes::WA);
@@ -32,12 +36,10 @@ protected:
   }
   void wrongWhitespaceError() override {
     preError();
-    printf("Check your Whitespace");
     exit(CheckerCodes::PE);
   }
   void invalidIntegerError() override {
     preError();
-    printf("Check your Integers");
     exit(CheckerCodes::PE);
   }
 

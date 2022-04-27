@@ -1,6 +1,5 @@
-void preInteractorError() {
-  // Before exiting on errors, what does your interactor output?
-}
+// Hook for all library functions to call before exiting on error.
+void preErrorHook() {}
 
 int main(int argc, char **argv) {
   assert(argc >= 3);
