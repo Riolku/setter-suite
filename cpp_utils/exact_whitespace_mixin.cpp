@@ -1,7 +1,7 @@
 template <typename Parent> class ExactWhitespaceMixin : public Parent {
 public:
   void readNewLine() override {
-    if (Parent::readChar() != '\n')
+    if (Parent::rawReadChar() != '\n')
       Parent::wrongWhitespaceError();
   }
 
@@ -12,7 +12,7 @@ public:
   void readEOF() override { readEOFImpl(); }
 
   void readSpace() override {
-    if (Parent::readChar() != ' ')
+    if (Parent::rawReadChar() != ' ')
       Parent::wrongWhitespaceError();
   }
 
