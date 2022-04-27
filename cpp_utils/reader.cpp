@@ -1,7 +1,7 @@
 // modified from a template by wleung_bvg
 
 class BaseReader {
-  const static size_t MAX_TOKEN_SIZE = 1e6;
+  const static size_t MAX_TOKEN_SIZE = 1e7;
 
 private:
   FILE *stream;
@@ -16,7 +16,8 @@ public:
 
   BaseReader(const char *path) : BaseReader(fopen(path, "r")) {}
 
-  char peekChar() {
+protected:
+  char rawPeekChar() {
     if (!hasLast) {
       lastChar = getc(stream);
       hasLast = true;
@@ -24,14 +25,15 @@ public:
     return lastChar;
   }
 
-  char readChar() {
-    char ret = peekChar();
+  char rawReadChar() {
+    char ret = rawPeekChar();
     hasLast = false;
     return ret;
   }
 
-  bool eof() { return peekChar() == char_traits<char>::eof(); }
+  bool eof() { return rawPeekChar() == char_traits<char>::eof(); }
 
+public:
   ll readInt(ll lo = numeric_limits<ll>::min(),
              ll hi = numeric_limits<ll>::max()) {
     try {
@@ -75,9 +77,32 @@ public:
   string readToken() {
     preReadToken();
     string token;
-    while (!isspace(peekChar()) && !eof() && token.size() <= MAX_TOKEN_SIZE)
-      token.push_back(readChar());
+    while (!isspace(rawPeekChar()) && !eof() && token.size() <= MAX_TOKEN_SIZE)
+      token.push_back(rawReadChar());
     return token;
+  }
+
+  char peekChar() {
+    preReadChar();
+    return rawPeekChar();
+  }
+
+  char readChar(char min_char = 0, char max_char = 127) {
+    preReadChar();
+    char c = rawReadChar();
+    if (c > max_char || c < min_char) {
+      internalRangeError();
+    }
+    return c;
+  }
+
+  string readString(int N, char min_char = 0, char max_char = 127) {
+    preReadString();
+    string ret;
+    ret.reserve(N);
+    while (ret.size() < N)
+      ret.push_back(readChar(min_char, max_char));
+    return ret;
   }
 
 private:
@@ -167,6 +192,8 @@ public:
 
 protected:
   virtual void preReadToken() {}
+  virtual void preReadString() { preReadToken(); }
+  virtual void preReadChar() { preReadToken(); }
   virtual void internalRangeError() = 0;
   virtual void externalRangeError() = 0;
   virtual void invalidIntegerError() = 0;

@@ -13,8 +13,8 @@ class StandardCheckerReader : public CheckerReader {
 
   bool skipAllWhitespace() {
     bool any_line = false;
-    while (isWhite(peekChar()) && !eof())
-      any_line |= isLine(readChar());
+    while (isWhite(rawPeekChar()) && !eof())
+      any_line |= isLine(rawReadChar());
     return any_line;
   }
 
@@ -28,12 +28,12 @@ public:
 
   void preReadToken() override {
     if (whitespace_flag == 1) {
-      if (!isNonLineWhitespace(readChar())) {
+      if (!isNonLineWhitespace(rawReadChar())) {
         wrongWhitespaceError();
       }
 
-      while (isNonLineWhitespace(peekChar())) {
-        readChar();
+      while (isNonLineWhitespace(rawPeekChar())) {
+        rawReadChar();
       }
     } else if (whitespace_flag == 2 || whitespace_flag == 3) {
       if (!skipAllWhitespace() && whitespace_flag != 3) {

@@ -1,4 +1,4 @@
-// Built with `init-template standard_interactor_entry` on 2022-04-26
+// Built with `init-template standard_interactor_entry` on 2022-04-27
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -114,7 +114,7 @@ using Printer::set_stream;
 // modified from a template by wleung_bvg
 
 class BaseReader {
-  const static size_t MAX_TOKEN_SIZE = 1e6;
+  const static size_t MAX_TOKEN_SIZE = 1e7;
 
 private:
   FILE *stream;
@@ -129,7 +129,8 @@ public:
 
   BaseReader(const char *path) : BaseReader(fopen(path, "r")) {}
 
-  char peekChar() {
+protected:
+  char rawPeekChar() {
     if (!hasLast) {
       lastChar = getc(stream);
       hasLast = true;
@@ -137,14 +138,15 @@ public:
     return lastChar;
   }
 
-  char readChar() {
-    char ret = peekChar();
+  char rawReadChar() {
+    char ret = rawPeekChar();
     hasLast = false;
     return ret;
   }
 
-  bool eof() { return peekChar() == char_traits<char>::eof(); }
+  bool eof() { return rawPeekChar() == char_traits<char>::eof(); }
 
+public:
   ll readInt(ll lo = numeric_limits<ll>::min(),
              ll hi = numeric_limits<ll>::max()) {
     try {
@@ -188,9 +190,32 @@ public:
   string readToken() {
     preReadToken();
     string token;
-    while (!isspace(peekChar()) && !eof() && token.size() <= MAX_TOKEN_SIZE)
-      token.push_back(readChar());
+    while (!isspace(rawPeekChar()) && !eof() && token.size() <= MAX_TOKEN_SIZE)
+      token.push_back(rawReadChar());
     return token;
+  }
+
+  char peekChar() {
+    preReadChar();
+    return rawPeekChar();
+  }
+
+  char readChar(char min_char = 0, char max_char = 127) {
+    preReadChar();
+    char c = rawReadChar();
+    if (c > max_char || c < min_char) {
+      internalRangeError();
+    }
+    return c;
+  }
+
+  string readString(int N, char min_char = 0, char max_char = 127) {
+    preReadString();
+    string ret;
+    ret.reserve(N);
+    while (ret.size() < N)
+      ret.push_back(readChar(min_char, max_char));
+    return ret;
   }
 
 private:
@@ -280,6 +305,8 @@ public:
 
 protected:
   virtual void preReadToken() {}
+  virtual void preReadString() { preReadToken(); }
+  virtual void preReadChar() { preReadToken(); }
   virtual void internalRangeError() = 0;
   virtual void externalRangeError() = 0;
   virtual void invalidIntegerError() = 0;
@@ -294,7 +321,7 @@ public:
 template <typename Parent> class ExactWhitespaceMixin : public Parent {
 public:
   void readNewLine() override {
-    if (Parent::readChar() != '\n')
+    if (Parent::rawReadChar() != '\n')
       Parent::wrongWhitespaceError();
   }
 
@@ -305,7 +332,7 @@ public:
   void readEOF() override { readEOFImpl(); }
 
   void readSpace() override {
-    if (Parent::readChar() != ' ')
+    if (Parent::rawReadChar() != ' ')
       Parent::wrongWhitespaceError();
   }
 
@@ -411,8 +438,8 @@ class StandardCheckerReader : public CheckerReader {
 
   bool skipAllWhitespace() {
     bool any_line = false;
-    while (isWhite(peekChar()) && !eof())
-      any_line |= isLine(readChar());
+    while (isWhite(rawPeekChar()) && !eof())
+      any_line |= isLine(rawReadChar());
     return any_line;
   }
 
@@ -426,12 +453,12 @@ public:
 
   void preReadToken() override {
     if (whitespace_flag == 1) {
-      if (!isNonLineWhitespace(readChar())) {
+      if (!isNonLineWhitespace(rawReadChar())) {
         wrongWhitespaceError();
       }
 
-      while (isNonLineWhitespace(peekChar())) {
-        readChar();
+      while (isNonLineWhitespace(rawPeekChar())) {
+        rawReadChar();
       }
     } else if (whitespace_flag == 2 || whitespace_flag == 3) {
       if (!skipAllWhitespace() && whitespace_flag != 3) {
