@@ -74,19 +74,6 @@ private:
   }
 
 public:
-  string readToken() {
-    preReadToken();
-    string token;
-    while (!isspace(rawPeekChar()) && !eof() && token.size() <= MAX_TOKEN_SIZE)
-      token.push_back(rawReadChar());
-    return token;
-  }
-
-  char peekChar() {
-    preReadChar();
-    return rawPeekChar();
-  }
-
   char readChar(char min_char = 0, char max_char = 127) {
     preReadChar();
     char c = rawReadChar();
@@ -96,12 +83,28 @@ public:
     return c;
   }
 
+  string readToken(char min_char = 0, char max_char = 127) {
+    preReadToken();
+    string token;
+    while (!isspace(rawPeekChar()) && !eof() &&
+           token.size() <= MAX_TOKEN_SIZE) {
+      token.push_back(readChar(min_char, max_char));
+    }
+    return token;
+  }
+
+  char peekChar() {
+    preReadChar();
+    return rawPeekChar();
+  }
+
   string readString(int N, char min_char = 0, char max_char = 127) {
     preReadString();
     string ret;
     ret.reserve(N);
-    while (ret.size() < N)
+    for (int i = 0; i < N; ++i) {
       ret.push_back(readChar(min_char, max_char));
+    }
     return ret;
   }
 

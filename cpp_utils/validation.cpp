@@ -14,7 +14,7 @@ struct IntegerValidation {
   }
 };
 
-class ValidatingReaderBase : public BaseReader {
+class ValidatingReader : public ExactWhitespaceMixin<BaseReader> {
 protected:
   void externalRangeError() override { throw runtime_error("EXTERNAL_RANGE"); }
   void internalRangeError() override { throw runtime_error("INTERNAL_RANGE"); }
@@ -26,7 +26,5 @@ protected:
   }
 
 public:
-  using BaseReader::BaseReader;
+  using ExactWhitespaceMixin<BaseReader>::ExactWhitespaceMixin;
 };
-
-using ValidatingReader = ExactWhitespaceMixin<ValidatingReaderBase>;
