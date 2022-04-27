@@ -1,8 +1,6 @@
-void preInteractorError();
-
 template <typename Parent> class InteractorReader : public Parent {
 protected:
-  void preError() override { preInteractorError(); }
+  void preError() override { preErrorHook(); }
 
 public:
   using Parent::Parent;

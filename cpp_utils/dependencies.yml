@@ -42,8 +42,7 @@ integer_range:
 - list
 
 interaction:
-- sys_deps
-- utils
+- checker_utils
 
 list:
 - sys_deps

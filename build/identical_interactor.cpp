@@ -355,9 +355,13 @@ int IE = 3;
 int PARTIAL = 7;
 } // namespace CheckerCodes
 
+void preErrorHook();
+
 void assertOrCode(bool cond, int code) {
-  if (!cond)
+  if (!cond) {
+    preErrorHook();
     exit(code);
+  }
 }
 void assertWA(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
 void assertPE(bool cond) { assertOrCode(cond, CheckerCodes::PE); }
@@ -370,7 +374,7 @@ int partial(int points, int denom) {
 
 class CheckerReader : public BaseReader {
 protected:
-  virtual void preError() {}
+  virtual void preError() { preErrorHook(); }
   void externalRangeError() override {
     preError();
     exit(CheckerCodes::WA);
@@ -381,12 +385,10 @@ protected:
   }
   void wrongWhitespaceError() override {
     preError();
-    printf("Check your Whitespace");
     exit(CheckerCodes::PE);
   }
   void invalidIntegerError() override {
     preError();
-    printf("Check your Integers");
     exit(CheckerCodes::PE);
   }
 
@@ -394,13 +396,27 @@ public:
   using BaseReader::BaseReader;
 };
 
-using IdenticalCheckerReader = ExactWhitespaceMixin<CheckerReader>;
+class IdenticalCheckerReader : public ExactWhitespaceMixin<CheckerReader> {
+protected:
+  virtual FILE *getHelperStream() { return stdout; }
+  void wrongWhitespaceError() override {
+    preError();
+    fprintf(getHelperStream(), "Check your Whitespace");
+    exit(CheckerCodes::PE);
+  }
+  void invalidIntegerError() override {
+    preError();
+    fprintf(getHelperStream(), "Check your Integers");
+    exit(CheckerCodes::PE);
+  }
 
-void preInteractorError();
+public:
+  using ExactWhitespaceMixin<CheckerReader>::ExactWhitespaceMixin;
+};
 
 template <typename Parent> class InteractorReader : public Parent {
 protected:
-  void preError() override { preInteractorError(); }
+  void preError() override { preErrorHook(); }
 
 public:
   using Parent::Parent;
@@ -409,11 +425,18 @@ public:
   ~InteractorReader() { fclose(stdout); }
 };
 
-using IdenticalInteractorReader = InteractorReader<IdenticalCheckerReader>;
+class IdenticalInteractorReader
+    : public InteractorReader<IdenticalCheckerReader> {
 
-void preInteractorError() {
-  // Before exiting on errors, what does your interactor output?
-}
+protected:
+  FILE *getHelperStream() override { return stderr; }
+
+public:
+  using InteractorReader<IdenticalCheckerReader>::InteractorReader;
+};
+
+// Hook for all library functions to call before exiting on error.
+void preErrorHook() {}
 
 int main(int argc, char **argv) {
   assert(argc >= 3);
