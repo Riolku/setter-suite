@@ -1,4 +1,4 @@
-// Built with `init-template sol_entry` on 2022-04-26
+// Built with `init-template standard_interactor_entry` on 2022-04-26
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -347,231 +347,143 @@ public:
 
 using ValidatingReader = ExactWhitespaceMixin<ValidatingReaderBase>;
 
-template <typename T, int offset = 0> class List : public vector<T> {
-public:
-  using vector<T>::vector;
-  List(vector<T> v) : vector<T>::vector(move(v)) {}
-  template <int other_offset>
-  List(List<T, other_offset> other) : vector<T>::vector(move(other)) {}
-  template <typename Container>
-  explicit List(const Container &other)
-      : vector<T>::vector(other.begin(), other.end()) {}
+namespace CheckerCodes {
+int AC = 0;
+int WA = 1;
+int PE = 2;
+int IE = 3;
+int PARTIAL = 7;
+} // namespace CheckerCodes
 
-  T &operator[](size_t x) { return this->at(x - offset); }
-  const T &operator[](size_t x) const { return this->at(x - offset); }
+void assertOrCode(bool cond, int code) {
+  if (!cond)
+    exit(code);
+}
+void assertWA(bool cond) { assertOrCode(cond, CheckerCodes::WA); }
+void assertPE(bool cond) { assertOrCode(cond, CheckerCodes::PE); }
 
-  template <typename F> void for_each(F f) { ::for_each(all(*this), f); }
-  template <typename F> void for_each(F f) const { ::for_each(all(*this), f); }
-  template <typename F> void for_each_pair(F f) {
-    ::for_each(all(*this), [&f](const T &p) -> void {
-      auto a = get<0>(p), b = get<1>(p);
-      f(a, b);
-    });
-  }
-  template <typename F> void for_each_pair(F f) const {
-    ::for_each(all(*this), [&f](const T &p) -> void {
-      auto a = get<0>(p), b = get<1>(p);
-      f(a, b);
-    });
-  }
-  template <typename F> void for_each_enumerate(F f) {
-    size_t i = offset;
-    for (auto it = this->begin(); it != this->end(); ++it) {
-      f(*it, i);
-      ++i;
-    }
-  }
-  template <typename F> void for_each_enumerate(F f) const {
-    size_t i = offset;
-    for (auto it = this->begin(); it != this->end(); ++it) {
-      f(*it, i);
-      ++i;
-    }
-  }
-
-  List<T, offset> &operator+=(const List<T, offset> &other) {
-    this->reserve(this->size() + other.size());
-    for (const T &elem : other)
-      this->push_back(elem);
-    return *this;
-  }
-  List<T, offset> &operator+=(List<T, offset> &&other) {
-    this->reserve(this->size() + other.size());
-    for (auto &&elem : other)
-      this->push_back(move(elem));
-    return *this;
-  }
-  List<T, offset> operator+(const List<T, offset> &other) const & {
-    List<T, offset> ret(this->begin(), this->end());
-    return ret += other;
-  }
-  List<T, offset> operator+(List<T, offset> &&other) const & {
-    List<T, offset> ret(this->begin(), this->end());
-    return ret += move(other);
-  }
-  List<T, offset> operator+(const List<T, offset> &other) && {
-    return *this += other;
-  }
-  List<T, offset> operator+(List<T, offset> &&other) && {
-    return *this += move(other);
-  }
-
-  template <typename F> bool any_of(F f) const {
-    return ::any_of(all(*this), f);
-  }
-  template <typename F> bool all_of(F f) const {
-    return ::any_of(all(*this), f);
-  }
-
-  T max() const {
-    assert(this->size() > 0);
-    return *::max_element(this->begin(), this->end());
-  }
-  T max(const T &init) const {
-    if (this->size() == 0)
-      return init;
-    return max();
-  }
-  T max(T &&init) const {
-    if (this->size() == 0)
-      return move(init);
-    return max();
-  }
-
-  T min() const {
-    assert(this->size() > 0);
-    return *::min_element(this->begin(), this->end());
-  }
-  T min(const T &init) const {
-    if (this->size() == 0)
-      return init;
-    return min();
-  }
-  T min(T &&init) const {
-    if (this->size() == 0)
-      return move(init);
-    return min();
-  }
-
-  T sum(T start = T()) const {
-    return ::accumulate(this->begin(), this->end(), move(start));
-  }
-
-  List<T, offset> &sort() {
-    ::sort(all(*this));
-    return *this;
-  }
-
-  List<T, offset> &reverse() {
-    ::reverse(all(*this));
-    return *this;
-  }
-
-  template <typename F> List<T, offset> &map(F f) {
-    ::transform(all(*this), this->begin(), f);
-    return *this;
-  }
-
-  template <typename F>
-  auto map_new(F f) const -> List<decltype(f(declval<T>())), offset> {
-    List<decltype(f(declval<T>())), offset> ret;
-    ret.reserve(this->size());
-    ::transform(all(*this), back_inserter(ret), f);
-    return ret;
-  }
-};
-
-template <int offset = 0, typename F>
-auto generate(int N, F f) -> List<decltype(f()), offset> {
-  List<decltype(f()), offset> ret;
-  ret.reserve(N);
-  ::generate_n(back_inserter(ret), N, move(f));
-  return ret;
+int partial(int points, int denom) {
+  fprintf(stderr, "partial %d/%d\n", points, denom);
+  printf("%d/%d points", points, denom);
+  return CheckerCodes::PARTIAL;
 }
 
-template <typename T, typename F> void exhaust_queue(queue<T> &q, F f) {
-  while (!q.empty()) {
-    int x = q.front();
-    q.pop();
-    f(x);
+class CheckerReader : public BaseReader {
+protected:
+  virtual void preError() {}
+  void externalRangeError() override {
+    preError();
+    exit(CheckerCodes::WA);
   }
-}
-
-template <typename T = ll> class Range {
-  T l, r;
-
-  class iterator {
-    T cur;
-
-    iterator(T cur) : cur(move(cur)) {}
-
-  public:
-    using difference_type = decltype(declval<T>() - declval<T>());
-    using value_type = T;
-    using pointer = void;
-    using reference = void;
-    using iterator_category = random_access_iterator_tag;
-
-    iterator &operator++() {
-      ++cur;
-      return *this;
-    }
-    iterator &operator--() {
-      --cur;
-      return *this;
-    }
-    value_type operator*() { return cur; }
-    value_type operator[](const T &offset) { return cur + offset; }
-
-    iterator operator+(const T &offset) const { return iterator(cur + offset); }
-    iterator operator-(const T &offset) const { return iterator(cur - offset); }
-    difference_type operator-(const iterator &other) const {
-      return cur - other.cur;
-    }
-    iterator &operator-=(const T &offset) {
-      cur -= offset;
-      return *this;
-    }
-    iterator &operator+=(const T &offset) {
-      cur += offset;
-      return *this;
-    }
-
-    bool operator>=(const iterator &other) const { return cur >= other.cur; }
-    bool operator<=(const iterator &other) const { return cur <= other.cur; }
-    bool operator>(const iterator &other) const { return cur > other.cur; }
-    bool operator<(const iterator &other) const { return cur < other.cur; }
-    bool operator!=(const iterator &other) const { return cur != other.cur; }
-    bool operator==(const iterator &other) const { return cur == other.cur; }
-
-    friend class Range;
-  };
+  void internalRangeError() override {
+    preError();
+    exit(CheckerCodes::WA);
+  }
+  void wrongWhitespaceError() override {
+    preError();
+    printf("Check your Whitespace");
+    exit(CheckerCodes::PE);
+  }
+  void invalidIntegerError() override {
+    preError();
+    printf("Check your Integers");
+    exit(CheckerCodes::PE);
+  }
 
 public:
-  Range(T l, T r) : l(move(l)), r(move(r)) {}
-  Range(T r) : l(T()), r(move(r)) {}
-
-  template <typename F> bool any_of(F f) const {
-    return ::any_of(all(*this), f);
-  }
-  template <typename F> bool all_of(F f) const {
-    return ::any_of(all(*this), f);
-  }
-
-  template <typename F> void for_each(F f) const { ::for_each(all(*this), f); }
-
-  template <typename F>
-  auto map_new(F f) const -> List<decltype(f(declval<T>()))> {
-    List<decltype(f(declval<T>()))> ret;
-    ret.reserve(this->size());
-    ::transform(all(*this), back_inserter(ret), f);
-    return ret;
-  }
-
-  decltype(declval<T>() - declval<T>()) size() const { return r - l; }
-  iterator begin() const { return iterator(l); }
-  iterator end() const { return iterator(r); }
+  using BaseReader::BaseReader;
 };
 
-ValidatingReader in_r(stdin);
+class StandardCheckerReader : public CheckerReader {
+  // 0 - don't skip space
+  // 1 - skip non-lines
+  // 2 - skip all space
+  // 3 - same as 2, but don't error if there is no space
+  int whitespace_flag;
+
+  bool isLine(char c) { return c == '\n' || c == '\r'; }
+  bool isNonLineWhitespace(char c) {
+    return c == '\v' || c == '\f' || c == '\t' || c == ' ';
+  }
+  bool isWhite(char c) { return isLine(c) || isNonLineWhitespace(c); }
+
+  bool skipAllWhitespace() {
+    bool any_line = false;
+    while (isWhite(peekChar()) && !eof())
+      any_line |= isLine(readChar());
+    return any_line;
+  }
+
+public:
+  StandardCheckerReader(FILE *f) : CheckerReader(f), whitespace_flag(3) {}
+  StandardCheckerReader(const char *path)
+      : CheckerReader(path), whitespace_flag(3) {}
+
+  void readSpace() override { whitespace_flag = 1; }
+  void readNewLine() override { whitespace_flag = 2; }
+
+  void preReadToken() override {
+    if (whitespace_flag == 1) {
+      if (!isNonLineWhitespace(readChar())) {
+        wrongWhitespaceError();
+      }
+
+      while (isNonLineWhitespace(peekChar())) {
+        readChar();
+      }
+    } else if (whitespace_flag == 2 || whitespace_flag == 3) {
+      if (!skipAllWhitespace() && whitespace_flag != 3) {
+        wrongWhitespaceError();
+      }
+    } else {
+      assert(whitespace_flag == 0);
+    }
+    whitespace_flag = 0;
+  }
+
+  void readEOFImpl() {
+    skipAllWhitespace();
+    if (!eof())
+      wrongWhitespaceError(); // wanted EOF but found more token
+  }
+  void readEOF() override { readEOFImpl(); }
+
+  // PE could be confusing under standard checker
+  void wrongWhitespaceError() override {
+    preError();
+    exit(CheckerCodes::WA);
+  }
+
+  void invalidIntegerError() override {
+    preError();
+    exit(CheckerCodes::WA);
+  }
+
+  ~StandardCheckerReader() { readEOFImpl(); }
+};
+
+void preInteractorError();
+
+template <typename Parent> class InteractorReader : public Parent {
+protected:
+  void preError() override { preInteractorError(); }
+
+public:
+  using Parent::Parent;
+
+  // close stdout before reading EOF.
+  ~InteractorReader() { fclose(stdout); }
+};
+
+using StandardInteractorReader = InteractorReader<StandardCheckerReader>;
+
+void preInteractorError() {
+  // Before exiting on errors, what does your interactor output?
+}
+
+int main(int argc, char **argv) {
+  assert(argc >= 3);
+  StandardInteractorReader user_r(stdin);
+  ValidatingReader in_r(argv[1]), ref_r(argv[2]);
+}
 

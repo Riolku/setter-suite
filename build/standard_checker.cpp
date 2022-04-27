@@ -30,6 +30,87 @@ typedef long double ld;
 
 #define all(x) (x).begin(), (x).end()
 
+namespace Printer {
+FILE *stream = stdout;
+
+void set_stream(FILE *st) { stream = st; }
+
+void print_impl(bool x) { fprintf(stream, "%d", x); }
+void print_impl(int x) { fprintf(stream, "%d", x); }
+void print_impl(ll x) { fprintf(stream, "%lld", x); }
+void print_impl(size_t x) { fprintf(stream, "%lu", x); }
+void print_impl(const char *x) { fprintf(stream, "%s", x); }
+void print_impl(const string &x) { print_impl(x.c_str()); }
+void print_impl(char x) { fprintf(stream, "%c", x); }
+
+template <typename A, typename B> void print_impl(const pair<A, B> &p) {
+  print_impl(p.first);
+  print_impl(' ');
+  print_impl(p.second);
+}
+
+template <size_t index, typename T>
+typename enable_if<index == 0, void>::type print_tuple(const T &t) {}
+
+template <size_t index, typename T>
+typename enable_if<index == 1, void>::type print_tuple(const T &t) {
+  print_impl(get<tuple_size<T>() - index>(t));
+}
+
+template <size_t index, typename T>
+typename enable_if<(index > 1), void>::type print_tuple(const T &t) {
+  print_impl(get<tuple_size<T>() - index>(t));
+  print_impl(' ');
+  print_tuple<index - 1>(t);
+}
+
+template <typename... Ts> void print_impl(const tuple<Ts...> &t) {
+  print_tuple<sizeof...(Ts)>(t);
+}
+
+template <typename T> void print_impl(const T &arr) {
+  bool first = true;
+
+  for (auto x : arr) {
+    if (!first) {
+      print_impl(" ");
+    }
+    first = false;
+
+    print_impl(x);
+  }
+}
+
+void print_many() {}
+
+template <typename T> void print_many(const T &arg) { print_impl(arg); }
+
+template <typename T, typename... Ts>
+void print_many(const T &arg, Ts &&...args) {
+  print_impl(arg);
+  print_impl(' ');
+  print_many(forward<Ts>(args)...);
+}
+
+void print() { fprintf(stream, "\n"); }
+
+template <typename... Ts> void print(Ts &&...args) {
+  print_many(forward<Ts>(args)...);
+
+  print();
+}
+
+template <typename R> void print_items(const R &r) {
+  for (auto x : r) {
+    print(x);
+  }
+}
+}; // namespace Printer
+
+using Printer::print;
+using Printer::print_items;
+using Printer::set_stream;
+
 // modified from a template by wleung_bvg
 
 class BaseReader {
@@ -46,7 +127,7 @@ public:
   BaseReader(FILE *f)
       : stream(f), streamOpen(true), hasLast(false), lastChar(0) {}
 
-  BaseReader(char *path) : BaseReader(fopen(path, "r")) {}
+  BaseReader(const char *path) : BaseReader(fopen(path, "r")) {}
 
   char peekChar() {
     if (!hasLast) {
@@ -314,6 +395,10 @@ public:
 };
 
 class StandardCheckerReader : public CheckerReader {
+  // 0 - don't skip space
+  // 1 - skip non-lines
+  // 2 - skip all space
+  // 3 - same as 2, but don't error if there is no space
   int whitespace_flag;
 
   bool isLine(char c) { return c == '\n' || c == '\r'; }
@@ -330,8 +415,9 @@ class StandardCheckerReader : public CheckerReader {
   }
 
 public:
-  StandardCheckerReader(FILE *f) : CheckerReader(f), whitespace_flag(2) {}
-  StandardCheckerReader(char *path) : CheckerReader(path), whitespace_flag(2) {}
+  StandardCheckerReader(FILE *f) : CheckerReader(f), whitespace_flag(3) {}
+  StandardCheckerReader(const char *path)
+      : CheckerReader(path), whitespace_flag(3) {}
 
   void readSpace() override { whitespace_flag = 1; }
   void readNewLine() override { whitespace_flag = 2; }
@@ -345,8 +431,8 @@ public:
       while (isNonLineWhitespace(peekChar())) {
         readChar();
       }
-    } else if (whitespace_flag == 2) {
-      if (!skipAllWhitespace()) {
+    } else if (whitespace_flag == 2 || whitespace_flag == 3) {
+      if (!skipAllWhitespace() && whitespace_flag != 3) {
         wrongWhitespaceError();
       }
     } else {
@@ -377,6 +463,7 @@ public:
 };
 
 int main(int argc, char **argv) {
+  assert(argc >= 4);
   StandardCheckerReader user_r(argv[2]);
   ValidatingReader in_r(argv[1]), ref_r(argv[3]);
 }
