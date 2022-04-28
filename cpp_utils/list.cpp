@@ -4,10 +4,6 @@ public:
   List(vector<T> v) : vector<T>::vector(move(v)) {}
   template <int other_offset>
   List(List<T, other_offset> other) : vector<T>::vector(move(other)) {}
-  template <typename Container>
-  explicit List(const Container &other)
-      : vector<T>::vector(other.begin(), other.end()) {}
-
   T &operator[](size_t x) { return this->at(x - offset); }
   const T &operator[](size_t x) const { return this->at(x - offset); }
 
