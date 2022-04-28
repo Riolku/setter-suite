@@ -1,4 +1,4 @@
-// Built with `init-template identical_checker_entry` on 2022-04-27
+// Built with `init-template identical_checker_entry` on 2022-04-28
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -360,7 +360,7 @@ struct IntegerValidation {
   }
 };
 
-class ValidatingReader : public ExactWhitespaceMixin<BaseReader> {
+class ValidatingReaderBase : public BaseReader {
 protected:
   void externalRangeError() override { throw runtime_error("EXTERNAL_RANGE"); }
   void internalRangeError() override { throw runtime_error("INTERNAL_RANGE"); }
@@ -372,8 +372,10 @@ protected:
   }
 
 public:
-  using ExactWhitespaceMixin<BaseReader>::ExactWhitespaceMixin;
+  using BaseReader::BaseReader;
 };
+
+using ValidatingReader = ExactWhitespaceMixin<ValidatingReaderBase>;
 
 namespace CheckerCodes {
 int AC = 0;

@@ -10,7 +10,8 @@ template <typename T> void shuffle(vector<T> &arr) {
 }
 
 List<int, 1> permutation(int N) {
-  List<int, 1> ret(Range<int>(1, N + 1));
+  Range<int> r(1, N + 1);
+  List<int, 1> ret(r.begin(), r.end());
   shuffle(ret);
   return ret;
 }

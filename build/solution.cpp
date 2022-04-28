@@ -1,4 +1,4 @@
-// Built with `init-template sol_entry` on 2022-04-27
+// Built with `init-template sol_entry` on 2022-04-28
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -360,7 +360,7 @@ struct IntegerValidation {
   }
 };
 
-class ValidatingReader : public ExactWhitespaceMixin<BaseReader> {
+class ValidatingReaderBase : public BaseReader {
 protected:
   void externalRangeError() override { throw runtime_error("EXTERNAL_RANGE"); }
   void internalRangeError() override { throw runtime_error("INTERNAL_RANGE"); }
@@ -372,8 +372,10 @@ protected:
   }
 
 public:
-  using ExactWhitespaceMixin<BaseReader>::ExactWhitespaceMixin;
+  using BaseReader::BaseReader;
 };
+
+using ValidatingReader = ExactWhitespaceMixin<ValidatingReaderBase>;
 
 template <typename T, int offset = 0> class List : public vector<T> {
 public:
@@ -381,10 +383,6 @@ public:
   List(vector<T> v) : vector<T>::vector(move(v)) {}
   template <int other_offset>
   List(List<T, other_offset> other) : vector<T>::vector(move(other)) {}
-  template <typename Container>
-  explicit List(const Container &other)
-      : vector<T>::vector(other.begin(), other.end()) {}
-
   T &operator[](size_t x) { return this->at(x - offset); }
   const T &operator[](size_t x) const { return this->at(x - offset); }
 

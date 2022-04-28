@@ -1,4 +1,4 @@
-// Built with `init-template gen_entry` on 2022-04-27
+// Built with `init-template gen_entry` on 2022-04-28
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -117,10 +117,6 @@ public:
   List(vector<T> v) : vector<T>::vector(move(v)) {}
   template <int other_offset>
   List(List<T, other_offset> other) : vector<T>::vector(move(other)) {}
-  template <typename Container>
-  explicit List(const Container &other)
-      : vector<T>::vector(other.begin(), other.end()) {}
-
   T &operator[](size_t x) { return this->at(x - offset); }
   const T &operator[](size_t x) const { return this->at(x - offset); }
 
@@ -368,7 +364,8 @@ template <typename T> void shuffle(vector<T> &arr) {
 }
 
 List<int, 1> permutation(int N) {
-  List<int, 1> ret(Range<int>(1, N + 1));
+  Range<int> r(1, N + 1);
+  List<int, 1> ret(r.begin(), r.end());
   shuffle(ret);
   return ret;
 }
