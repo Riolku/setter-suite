@@ -1,3 +1,5 @@
+import sys
+
 from .env import env
 
 from .compile import main as compile_main
@@ -15,7 +17,7 @@ def main(args):
     newargs = env.setup_env(args)
 
     if len(newargs) < 1:
-        print("An operation is required.")
+        print("An operation is required.", file=sys.stderr)
         return -1
 
     if newargs[0] == "compile":
@@ -45,5 +47,5 @@ def main(args):
     elif newargs[0] == "validate":
         return validate_main(newargs[1:])
 
-    print(f"Invalid operation '{newargs[0]}'!")
+    print(f"Invalid operation '{newargs[0]}'!", file=sys.stderr)
     return -1

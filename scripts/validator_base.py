@@ -1,10 +1,12 @@
+import sys
+
 from .executors import Executor
 
 
 class Validator:
     def __init__(self, file):
         if not file:
-            print("Warning! No validator. Proceeding anyway.")
+            print("Warning! No validator. Proceeding anyway.", file=sys.stderr)
 
             self.validator = None
 
