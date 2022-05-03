@@ -20,7 +20,7 @@ rcodes = {b: a for a, b in codes.items()}
 
 
 def display_code(code):
-    name = rcodes.get(code, code)
+    name = rcodes.get(code, "IE")
     return colored(name, colors.get(name))
 
 
