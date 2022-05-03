@@ -9,10 +9,10 @@ codes = dict(AC=0, WA=1, PE=2, IE=3, PARTIAL=7, TLE=1000, RTE=2000)
 colors = dict(
     AC="green",
     WA="red",
-    PE="blue",
+    PE="cyan",
     IE="magenta",
     PARTIAL="green",
-    TLE="grey",
+    TLE="blue",
     RTE="yellow",
 )
 
