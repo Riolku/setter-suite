@@ -48,6 +48,9 @@ class BuiltinChecker:
 
 
 class IdenticalChecker(BuiltinChecker):
+    def __init__(self):
+        pass
+
     def check(self, inp, out, expected_out):
         if out == expected_out:
             return codes["AC"]
@@ -63,7 +66,10 @@ def iswhite(c: str) -> bool:
     return c in " \t\v\f\n\r"
 
 
-class StandardChecker:
+class StandardChecker(BuiltinChecker):
+    def __init__(self):
+        pass
+
     def _skip_spaces(self, s: str, pos: int) -> Tuple[int, int]:
         saw_line = saw_space = 0
         while pos < len(s):
