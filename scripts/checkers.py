@@ -35,7 +35,7 @@ class Checker:
 
 class BuiltinChecker:
     def __init__(self):
-        return NotImplementedError
+        raise NotImplementedError
 
     def get(id):
         if id == "identical":
