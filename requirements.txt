@@ -1,2 +1,3 @@
 pyyaml
 cached_property
+termcolor
