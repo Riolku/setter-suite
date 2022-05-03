@@ -1,16 +1,27 @@
 import multiprocessing, os
 
+from termcolor import colored
 from typing import Tuple
 
 from .executors import Executor
 
 codes = dict(AC=0, WA=1, PE=2, IE=3, PARTIAL=7, TLE=1000, RTE=2000)
+colors = dict(
+    AC="green",
+    WA="red",
+    PE="blue",
+    IE="magenta",
+    PARTIAL="green",
+    TLE="grey",
+    RTE="yellow",
+)
 
 rcodes = {b: a for a, b in codes.items()}
 
 
 def display_code(code):
-    return rcodes.get(code, code)
+    name = rcodes.get(code, code)
+    return colored(name, colors.get(name))
 
 
 class Checker:
