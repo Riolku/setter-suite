@@ -69,7 +69,9 @@ class CounterCaser:
                 return (
                     f"===CASE===\n{case}==={self.invoker.program.file}===\n{result['process_result'].stdout}"
                     + f"===Reference===\n{result['reference_result'].stdout}===CHECKER===\n{display_code(checker_res)}"
-                    + "\n===LiteralTest Config===\n"
+                    + "\n===Gen Stderr===\n"
+                    + f"{generator_res.stderr}"
+                    + "===LiteralTest Config===\n"
                     + f"make_shared<LiteralTest>({inp_rep}, {out_rep}),\n"
                     + "=========\n"
                 )
