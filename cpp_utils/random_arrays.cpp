@@ -66,11 +66,15 @@ public:
   List<T> build() {
     List<T> ret;
     int list_size = 0;
-    for (auto [c, l, r] : instructions) {
+    for (auto tp : instructions) {
+      int c, l, r;
+      tie(c, l, r) = tp;
       list_size += c;
     }
     ret.reserve(list_size);
-    for (auto [c, l, r] : instructions) {
+    for (auto tp : instructions) {
+      int c, l, r;
+      tie(c, l, r) = tp;
       for (int i = 0; i < c; ++i) {
         ret.push_back(randint(l, r));
       }
