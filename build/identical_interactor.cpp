@@ -1,4 +1,4 @@
-// Built with `init-template identical_interactor_entry` on 2022-04-28
+// Built with `init-template identical_interactor_entry` on 2022-05-17
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -12,11 +12,14 @@
 #include <stdexcept>
 
 #include <array>
+#include <deque>
 #include <initializer_list>
+#include <list>
 #include <map>
 #include <memory>
 #include <queue>
 #include <set>
+#include <stack>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -24,9 +27,10 @@
 
 using namespace std;
 
-typedef long long ll;
-typedef unsigned long long ull;
-typedef long double ld;
+using ll = long long;
+using ull = unsigned long long;
+using ld = long double;
+using pii = pair<int, int>;
 
 #define all(x) (x).begin(), (x).end()
 
@@ -118,14 +122,12 @@ class BaseReader {
 
 private:
   FILE *stream;
-  bool streamOpen;
 
   bool hasLast;
   char lastChar;
 
 public:
-  BaseReader(FILE *f)
-      : stream(f), streamOpen(true), hasLast(false), lastChar(0) {}
+  BaseReader(FILE *f) : stream(f), hasLast(false), lastChar(0) {}
 
   BaseReader(const char *path) : BaseReader(fopen(path, "r")) {}
 

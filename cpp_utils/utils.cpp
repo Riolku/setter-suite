@@ -1,5 +1,6 @@
-typedef long long ll;
-typedef unsigned long long ull;
-typedef long double ld;
+using ll = long long;
+using ull = unsigned long long;
+using ld = long double;
+using pii = pair<int, int>;
 
 #define all(x) (x).begin(), (x).end()

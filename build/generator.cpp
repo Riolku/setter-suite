@@ -1,4 +1,4 @@
-// Built with `init-template gen_entry` on 2022-04-28
+// Built with `init-template gen_entry` on 2022-05-17
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -12,11 +12,14 @@
 #include <stdexcept>
 
 #include <array>
+#include <deque>
 #include <initializer_list>
+#include <list>
 #include <map>
 #include <memory>
 #include <queue>
 #include <set>
+#include <stack>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -24,9 +27,10 @@
 
 using namespace std;
 
-typedef long long ll;
-typedef unsigned long long ull;
-typedef long double ld;
+using ll = long long;
+using ull = unsigned long long;
+using ld = long double;
+using pii = pair<int, int>;
 
 #define all(x) (x).begin(), (x).end()
 
@@ -148,6 +152,28 @@ public:
       ++i;
     }
   }
+  template <typename F> void for_each_adjacent(F f) const {
+    if (this->size() == 0)
+      return;
+    auto it1 = this->begin();
+    auto it2 = next(it1);
+    while (it2 != this->end()) {
+      f(*it1, *it2);
+      ++it1;
+      ++it2;
+    }
+  }
+  template <typename F> void for_each_adjacent(F f) {
+    if (this->size() == 0)
+      return;
+    auto it1 = this->begin();
+    auto it2 = next(it1);
+    while (it2 != this->end()) {
+      F(*it1, *it2);
+      ++it1;
+      ++it2;
+    }
+  }
 
   List<T, offset> &operator+=(const List<T, offset> &other) {
     this->reserve(this->size() + other.size());
@@ -239,6 +265,23 @@ public:
     ::transform(all(*this), back_inserter(ret), f);
     return ret;
   }
+
+  template <typename F>
+  auto map_adjacent_new(F f) const
+      -> List<decltype(f(declval<T>(), declval<T>())), offset> {
+    List<decltype(f(declval<T>(), declval<T>())), offset> ret;
+    if (this->size() == 0)
+      return ret;
+    ret.reserve(this->size() - 1);
+    auto it1 = this->begin();
+    auto it2 = next(it1);
+    while (it2 != this->end()) {
+      ret.push_back(f(*it1, *it2));
+      ++it1;
+      ++it2;
+    }
+    return ret;
+  }
 };
 
 template <int offset = 0, typename F>
@@ -246,6 +289,31 @@ auto generate(int N, F f) -> List<decltype(f()), offset> {
   List<decltype(f()), offset> ret;
   ret.reserve(N);
   ::generate_n(back_inserter(ret), N, move(f));
+  return ret;
+}
+
+template <typename T, int offset>
+List<T, offset> interleave(List<T, offset> A, List<T, offset> B) {
+  assert(A.size() == B.size() || A.size() == B.size() + 1);
+  List<T, offset> ret;
+  ret.reserve(A.size() + B.size());
+
+  auto ait = A.begin();
+  auto bit = B.begin();
+
+  while (ait != A.end() && bit != B.end()) {
+    ret.push_back(*ait);
+    ret.push_back(*bit);
+    ++ait;
+    ++bit;
+  }
+
+  if (ait != A.end()) {
+    ret.push_back(*ait);
+    ++ait;
+  }
+  assert(ait == A.end());
+  assert(bit == B.end());
   return ret;
 }
 
@@ -399,13 +467,43 @@ template <typename T> List<T> distinct_array(int N, T lo, T hi) {
 
 template <typename T> List<T> array_with_sum(int N, T sum, T lo) {
   List<T> ret = random_sorted_array_with_gaps(N - 1, 0, sum, lo);
-  ret.reserve(N + 1);
-  ret.insert(ret.begin(), 0);
+  ret.reserve(N);
   ret.push_back(sum);
   adjacent_difference(all(ret), ret.begin());
-  ret.erase(ret.begin());
   return ret;
 }
+
+template <typename T> class ArrayBuilder {
+public:
+  using BuilderInstruction = tuple<int, T, T>;
+  using BuilderInstructionList = List<BuilderInstruction>;
+
+protected:
+  BuilderInstructionList instructions;
+
+public:
+  ArrayBuilder(List<BuilderInstruction> instructions)
+      : instructions(move(instructions)) {}
+
+  List<T> build() {
+    List<T> ret;
+    int list_size = 0;
+    for (auto [c, l, r] : instructions) {
+      list_size += c;
+    }
+    ret.reserve(list_size);
+    for (auto [c, l, r] : instructions) {
+      for (int i = 0; i < c; ++i) {
+        ret.push_back(randint(l, r));
+      }
+    }
+    shuffle(ret);
+    return ret;
+  }
+};
+
+using IntArrayBuilder = ArrayBuilder<int>;
+using LongArrayBuilder = ArrayBuilder<ll>;
 
 struct Test {
   virtual void generate() = 0;

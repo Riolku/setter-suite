@@ -45,10 +45,40 @@ template <typename T> List<T> distinct_array(int N, T lo, T hi) {
 
 template <typename T> List<T> array_with_sum(int N, T sum, T lo) {
   List<T> ret = random_sorted_array_with_gaps(N - 1, 0, sum, lo);
-  ret.reserve(N + 1);
-  ret.insert(ret.begin(), 0);
+  ret.reserve(N);
   ret.push_back(sum);
   adjacent_difference(all(ret), ret.begin());
-  ret.erase(ret.begin());
   return ret;
 }
+
+template <typename T> class ArrayBuilder {
+public:
+  using BuilderInstruction = tuple<int, T, T>;
+  using BuilderInstructionList = List<BuilderInstruction>;
+
+protected:
+  BuilderInstructionList instructions;
+
+public:
+  ArrayBuilder(List<BuilderInstruction> instructions)
+      : instructions(move(instructions)) {}
+
+  List<T> build() {
+    List<T> ret;
+    int list_size = 0;
+    for (auto [c, l, r] : instructions) {
+      list_size += c;
+    }
+    ret.reserve(list_size);
+    for (auto [c, l, r] : instructions) {
+      for (int i = 0; i < c; ++i) {
+        ret.push_back(randint(l, r));
+      }
+    }
+    shuffle(ret);
+    return ret;
+  }
+};
+
+using IntArrayBuilder = ArrayBuilder<int>;
+using LongArrayBuilder = ArrayBuilder<ll>;

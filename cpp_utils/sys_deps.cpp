@@ -11,11 +11,14 @@
 #include <stdexcept>
 
 #include <array>
+#include <deque>
 #include <initializer_list>
+#include <list>
 #include <map>
 #include <memory>
 #include <queue>
 #include <set>
+#include <stack>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
