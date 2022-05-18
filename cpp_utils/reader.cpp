@@ -5,14 +5,12 @@ class BaseReader {
 
 private:
   FILE *stream;
-  bool streamOpen;
 
   bool hasLast;
   char lastChar;
 
 public:
-  BaseReader(FILE *f)
-      : stream(f), streamOpen(true), hasLast(false), lastChar(0) {}
+  BaseReader(FILE *f) : stream(f), hasLast(false), lastChar(0) {}
 
   BaseReader(const char *path) : BaseReader(fopen(path, "r")) {}
 

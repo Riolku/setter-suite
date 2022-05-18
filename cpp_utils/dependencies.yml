@@ -17,7 +17,9 @@ gen_entry:
 - gen_dependencies
 
 graphs:
-- dsu
+- output
+- reader
+- list
 
 identical_checker_entry:
 - output
