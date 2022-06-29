@@ -120,6 +120,7 @@ utils: []
 validation:
 - reader
 - exact_whitespace_mixin
+- list
 
 validator_entry:
 - output
