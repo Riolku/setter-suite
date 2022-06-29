@@ -1,4 +1,4 @@
-// Built with `init-template gen_entry` on 2022-05-17
+// Built with `init-template gen_entry` on 2022-06-29
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -473,6 +473,16 @@ template <typename T> List<T> array_with_sum(int N, T sum, T lo) {
   return ret;
 }
 
+List<int> binary_array_with_sum(int N, int one_count) {
+  assert(one_count <= N);
+  auto indices = distinct_array<int>(one_count, 1, N);
+  List<int, 1> ret(N, 0);
+  for (int x : indices)
+    ret[x] = 1;
+
+  return ret;
+}
+
 template <typename T> class ArrayBuilder {
 public:
   using BuilderInstruction = tuple<int, T, T>;
@@ -494,7 +504,9 @@ public:
       list_size += c;
     }
     ret.reserve(list_size);
-    for (auto [c, l, r] : instructions) {
+    for (auto tp : instructions) {
+      int c, l, r;
+      tie(c, l, r) = tp;
       for (int i = 0; i < c; ++i) {
         ret.push_back(randint(l, r));
       }

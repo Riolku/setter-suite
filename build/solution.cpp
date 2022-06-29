@@ -1,4 +1,4 @@
-// Built with `init-template sol_entry` on 2022-05-17
+// Built with `init-template sol_entry` on 2022-06-29
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -346,39 +346,6 @@ public:
   using Parent::Parent;
 };
 
-struct IntegerValidation {
-  ll lo, hi;
-
-  bool check(ll x) { return lo <= x && x <= hi; }
-  template <typename R> bool check(const R &r) {
-    for (auto x : r)
-      if (!check(x))
-        return false;
-    return true;
-  }
-
-  template <typename T, typename... Ts> bool check(const T &arg, Ts &&...args) {
-    return check(arg) && check(args...);
-  }
-};
-
-class ValidatingReaderBase : public BaseReader {
-protected:
-  void externalRangeError() override { throw runtime_error("EXTERNAL_RANGE"); }
-  void internalRangeError() override { throw runtime_error("INTERNAL_RANGE"); }
-  void wrongWhitespaceError() override {
-    throw runtime_error("WRONG_WHITESPACE");
-  }
-  void invalidIntegerError() override {
-    throw runtime_error("INVALID_INTEGER");
-  }
-
-public:
-  using BaseReader::BaseReader;
-};
-
-using ValidatingReader = ExactWhitespaceMixin<ValidatingReaderBase>;
-
 template <typename T, int offset = 0> class List : public vector<T> {
 public:
   using vector<T>::vector;
@@ -588,6 +555,28 @@ template <typename T, typename F> void exhaust_queue(queue<T> &q, F f) {
     f(x);
   }
 }
+
+void assert_permutation(const List<int, 1> &arr) {
+  List<int, 1> check(arr.size(), 0);
+  assert(arr.all_of([&check](int x) { return ++check[x] == 1; }));
+}
+
+class ValidatingReaderBase : public BaseReader {
+protected:
+  void externalRangeError() override { throw runtime_error("EXTERNAL_RANGE"); }
+  void internalRangeError() override { throw runtime_error("INTERNAL_RANGE"); }
+  void wrongWhitespaceError() override {
+    throw runtime_error("WRONG_WHITESPACE");
+  }
+  void invalidIntegerError() override {
+    throw runtime_error("INVALID_INTEGER");
+  }
+
+public:
+  using BaseReader::BaseReader;
+};
+
+using ValidatingReader = ExactWhitespaceMixin<ValidatingReaderBase>;
 
 template <typename T = ll> class Range {
   T l, r;
