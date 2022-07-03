@@ -1,4 +1,4 @@
-// Built with `init-template standard_checker_entry` on 2022-06-29
+// Built with `init-template standard_checker_entry` on 2022-07-03
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -703,4 +703,3 @@ int main(int argc, char **argv) {
   StandardCheckerReader user_r(argv[2]);
   ValidatingReader in_r(argv[1]), ref_r(argv[3]);
 }
-

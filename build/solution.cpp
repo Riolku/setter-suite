@@ -1,4 +1,4 @@
-// Built with `init-template sol_entry` on 2022-06-29
+// Built with `init-template sol_entry` on 2022-07-03
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -655,4 +655,3 @@ public:
 };
 
 ValidatingReader in_r(stdin);
-
