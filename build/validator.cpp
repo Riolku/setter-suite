@@ -1,4 +1,4 @@
-// Built with `init-template validator_entry` on 2022-06-29
+// Built with `init-template validator_entry` on 2022-07-03
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -579,4 +579,3 @@ public:
 using ValidatingReader = ExactWhitespaceMixin<ValidatingReaderBase>;
 
 ValidatingReader in_r(stdin);
-

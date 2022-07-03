@@ -1,4 +1,4 @@
-// Built with `init-template identical_interactor_entry` on 2022-06-29
+// Built with `init-template identical_interactor_entry` on 2022-07-03
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -674,4 +674,3 @@ int main(int argc, char **argv) {
   IdenticalInteractorReader user_r(stdin);
   ValidatingReader in_r(argv[1]), ref_r(argv[2]);
 }
-
