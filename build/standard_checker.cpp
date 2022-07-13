@@ -1,4 +1,4 @@
-// Built with `init-template standard_checker_entry` on 2022-07-03
+// Built with `init-template standard_checker_entry` on 2022-07-13
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -550,7 +550,7 @@ List<T, offset> interleave(List<T, offset> A, List<T, offset> B) {
 
 template <typename T, typename F> void exhaust_queue(queue<T> &q, F f) {
   while (!q.empty()) {
-    int x = q.front();
+    T x(move(q.front()));
     q.pop();
     f(x);
   }
@@ -703,3 +703,4 @@ int main(int argc, char **argv) {
   StandardCheckerReader user_r(argv[2]);
   ValidatingReader in_r(argv[1]), ref_r(argv[3]);
 }
+
