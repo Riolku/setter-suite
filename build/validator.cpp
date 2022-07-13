@@ -1,4 +1,4 @@
-// Built with `init-template validator_entry` on 2022-07-03
+// Built with `init-template validator_entry` on 2022-07-13
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -550,7 +550,7 @@ List<T, offset> interleave(List<T, offset> A, List<T, offset> B) {
 
 template <typename T, typename F> void exhaust_queue(queue<T> &q, F f) {
   while (!q.empty()) {
-    int x = q.front();
+    T x(move(q.front()));
     q.pop();
     f(x);
   }
@@ -579,3 +579,4 @@ public:
 using ValidatingReader = ExactWhitespaceMixin<ValidatingReaderBase>;
 
 ValidatingReader in_r(stdin);
+
