@@ -36,7 +36,7 @@ template <typename... Ts> void print_impl(const tuple<Ts...> &t) {
   print_tuple<sizeof...(Ts)>(t);
 }
 
-template <typename T> void print_impl(const T &arr) {
+template <typename T> void print_iterable(const T &arr) {
   bool first = true;
 
   for (auto x : arr) {
@@ -47,6 +47,16 @@ template <typename T> void print_impl(const T &arr) {
 
     print_impl(x);
   }
+}
+
+template <typename T> void print_impl(const set<T> &arr) {
+  print_iterable(arr);
+}
+template <typename T> void print_impl(const vector<T> &arr) {
+  print_iterable(arr);
+}
+template <typename T> void print_impl(const unordered_set<T> &arr) {
+  print_iterable(arr);
 }
 
 void print_many() {}

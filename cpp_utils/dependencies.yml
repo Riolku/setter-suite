@@ -68,6 +68,7 @@ random_graphs:
 - pairs
 
 random_set:
+- list
 - random
 - set_with_bit
 

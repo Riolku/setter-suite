@@ -10,14 +10,16 @@ public:
   template <typename F> void for_each(F f) { ::for_each(all(*this), f); }
   template <typename F> void for_each(F f) const { ::for_each(all(*this), f); }
   template <typename F> void for_each_pair(F f) {
-    ::for_each(all(*this), [&f](const T &p) -> void {
-      auto a = get<0>(p), b = get<1>(p);
+    ::for_each(all(*this), [&f](T &p) -> void {
+      decltype(p.first) &a = get<0>(p);
+      decltype(p.second) &b = get<1>(p);
       f(a, b);
     });
   }
   template <typename F> void for_each_pair(F f) const {
     ::for_each(all(*this), [&f](const T &p) -> void {
-      auto a = get<0>(p), b = get<1>(p);
+      const decltype(p.first) &a = get<0>(p);
+      const decltype(p.second) &b = get<1>(p);
       f(a, b);
     });
   }

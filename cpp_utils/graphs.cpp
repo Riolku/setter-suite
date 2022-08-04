@@ -6,14 +6,17 @@ struct Graph {
   explicit Graph(int N) : N(N), M(0), edges() {}
   Graph(int N, List<Edge> edges) : N(N), M(edges.size()), edges(move(edges)) {}
 
-  static Graph read_graph(int N, int M, BaseReader &reader) {
+  template <typename GraphType>
+  static GraphType read_graph(int N, int M, BaseReader &reader) {
     List<Edge> edges = generate(
         M, [N, &reader]() -> Edge { return reader.readIntPair<int>(1, N); });
 
-    return Graph(N, move(edges));
+    return GraphType(N, move(edges));
   }
 
+  virtual void normalize_edges() = 0;
   bool has_duplicate_edges() {
+    normalize_edges();
     edges.sort();
     return adjacent_find(all(edges)) != edges.end();
   }
@@ -27,13 +30,11 @@ struct Graph {
     ++M;
   }
 
+  virtual List<List<int>, 1> make_adj() const = 0;
+
   List<int, 1> bfs(int src) const {
     List<int, 1> ret(N, -1);
-    List<List<int>, 1> adj(N);
-    edges.for_each_pair([&adj](int u, int v) {
-      adj[u].push_back(v);
-      adj[v].push_back(u);
-    });
+    List<List<int>, 1> adj = make_adj();
     ret[src] = 0;
     queue<int> q;
     q.push(src);
@@ -49,7 +50,6 @@ struct Graph {
   }
 
   void add_graph(const Graph &other, const List<Edge> &connectors) {
-    edges.reserve(M + other.M + connectors.size());
     other.edges.for_each_pair([this](int u, int v) -> void { add_edge(u, v); });
     connectors.for_each_pair(
         [this](int u, int v) -> void { add_edge(u, v + N); });
@@ -65,13 +65,41 @@ struct Graph {
     return is_connected_from_dists(dists);
   }
   bool is_tree() const { return M == N - 1 && is_connected(); }
+
+  void print() const {
+    ::print(N, M);
+    print_items(edges);
+  }
 };
 
-namespace Printer {
+struct DirectedGraph : public Graph {
+  using Graph::Graph;
 
-void print(const Graph &g) {
-  print(g.N, g.M);
-  print_items(g.edges);
-}
+  void normalize_edges() override {}
+  virtual List<List<int>, 1> make_adj() const {
+    List<List<int>, 1> adj(N);
+    edges.for_each_pair([&adj](int u, int v) { adj[u].push_back(v); });
+    return adj;
+  }
+};
 
-}; // namespace Printer
+struct UndirectedGraph : public Graph {
+  using Graph::Graph;
+
+  void normalize_edges() override {
+    edges.for_each_pair([](int &u, int &v) {
+      if (u > v) {
+        swap(u, v);
+      }
+    });
+  }
+
+  virtual List<List<int>, 1> make_adj() const {
+    List<List<int>, 1> adj(N);
+    edges.for_each_pair([&adj](int u, int v) {
+      adj[u].push_back(v);
+      adj[v].push_back(u);
+    });
+    return adj;
+  }
+};
