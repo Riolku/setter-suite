@@ -206,6 +206,6 @@ template <typename T, typename F> void exhaust_queue(queue<T> &q, F f) {
   while (!q.empty()) {
     T x(move(q.front()));
     q.pop();
-    f(x);
+    f(move(x));
   }
 }
