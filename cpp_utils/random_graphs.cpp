@@ -17,13 +17,16 @@ struct RandomDirectedGraph : public RandomGraph<DirectedGraph> {
     shuffle(edges);
   }
 
+  static List<Edge> random_edges(int N, int M) {
+    return distinct_array<ll>(M, 0, OrderedPair::max_pair(N))
+        .map_new([](ll v) -> Edge {
+          auto e = OrderedPair::to_pair(v);
+          return {e.first + 1, e.second + 1};
+        })
+  }
+
   static RandomDirectedGraph random_graph(int N, int M) {
-    auto edges = distinct_array<ll>(M, 0, OrderedPair::max_pair(N))
-                     .map_new([](ll v) -> Edge {
-                       auto e = OrderedPair::to_pair(v);
-                       return {e.first + 1, e.second + 1};
-                     });
-    return RandomDirectedGraph(N, move(edges));
+    return RandomDirectedGraph(N, random_edges(N, M));
   }
 
   static List<Edge> random_dag_edges(int N, int M) {
@@ -89,5 +92,7 @@ struct RandomUndirectedGraph : public RandomGraph<UndirectedGraph> {
     shuffle(edges);
   }
 
-  static
+  static List<Edge> random_edges(int N, int M) {
+    return RandomDirectedGraph::random_dag_edges(N, M);
+  }
 };
