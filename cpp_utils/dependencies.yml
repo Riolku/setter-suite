@@ -67,6 +67,10 @@ random_graphs:
 - random_arrays
 - pairs
 
+random_pairs:
+- pairs
+- random
+
 random_set:
 - list
 - random

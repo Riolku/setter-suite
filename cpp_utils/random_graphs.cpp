@@ -2,8 +2,8 @@ template <typename Parent> struct RandomGraph : public Parent {
   using Parent::Parent;
 
   void permute_edges() {
-    auto perm = permutation(N);
-    edges.map([&perm](pii e) -> pii {
+    auto perm = permutation(this->N);
+    this->edges.map([&perm](pii e) -> pii {
       return {perm[e.first], perm[e.second]};
     });
   }
@@ -14,7 +14,7 @@ struct RandomDirectedGraph : public RandomGraph<DirectedGraph> {
 
   void shuffle() {
     permute_edges();
-    shuffle(edges);
+    ::shuffle(edges);
   }
 
   static List<Edge> random_edges(int N, int M) {
@@ -22,7 +22,7 @@ struct RandomDirectedGraph : public RandomGraph<DirectedGraph> {
         .map_new([](ll v) -> Edge {
           auto e = OrderedPair::to_pair(v);
           return {e.first + 1, e.second + 1};
-        })
+        });
   }
 
   static RandomDirectedGraph random_graph(int N, int M) {
@@ -89,7 +89,7 @@ struct RandomUndirectedGraph : public RandomGraph<UndirectedGraph> {
         return e;
       return {e.second, e.first};
     });
-    shuffle(edges);
+    ::shuffle(edges);
   }
 
   static List<Edge> random_edges(int N, int M) {
