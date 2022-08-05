@@ -77,11 +77,13 @@ struct RandomDirectedGraph : public RandomGraph<DirectedGraph> {
           edges.emplace_back(u, v);
         });
 
-    return RandomDirectedGraph(N, edges);
+    return RandomDirectedGraph(N, move(edges));
   }
 };
 
 struct RandomUndirectedGraph : public RandomGraph<UndirectedGraph> {
+  using RandomGraph<UndirectedGraph>::RandomGraph;
+
   void shuffle() {
     permute_edges();
     edges.map([](pii e) -> pii {
@@ -94,5 +96,27 @@ struct RandomUndirectedGraph : public RandomGraph<UndirectedGraph> {
 
   static List<Edge> random_edges(int N, int M) {
     return RandomDirectedGraph::random_dag_edges(N, M);
+  }
+
+  static RandomUndirectedGraph star(int N) {
+    List<Edge> edges;
+    edges.reserve(N - 1);
+    for (int i = 2; i <= N; ++i) {
+      edges.emplace_back(1, i);
+    }
+    return RandomUndirectedGraph(N, move(edges));
+  }
+
+  static List<Edge> random_tree_edges(int N) {
+    List<Edge> edges;
+    edges.reserve(N - 1);
+    for (int i = 2; i <= N; ++i) {
+      edges.emplace_back(randint(1, i - 1), i);
+    }
+    return edges;
+  }
+
+  static RandomUndirectedGraph random_tree(int N) {
+    return RandomUndirectedGraph(N, random_tree_edges(N));
   }
 };

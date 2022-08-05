@@ -50,7 +50,8 @@ struct Graph {
   }
 
   void add_graph(const Graph &other, const List<Edge> &connectors) {
-    other.edges.for_each_pair([this](int u, int v) -> void { add_edge(u, v); });
+    other.edges.for_each_pair(
+        [this](int u, int v) -> void { add_edge(u + N, v + N); });
     connectors.for_each_pair(
         [this](int u, int v) -> void { add_edge(u, v + N); });
     N += other.N;
