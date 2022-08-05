@@ -44,7 +44,7 @@ template <typename T> List<T> distinct_array(int N, T lo, T hi) {
 }
 
 template <typename T> List<T> array_with_sum(int N, T sum, T lo) {
-  List<T> ret = random_sorted_array_with_gaps(N - 1, 0, sum, lo);
+  List<T> ret = random_sorted_array_with_gaps(N - 1, lo, sum - lo, lo);
   ret.reserve(N);
   ret.push_back(sum);
   adjacent_difference(all(ret), ret.begin());
