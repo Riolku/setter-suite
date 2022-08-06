@@ -83,8 +83,16 @@ template <typename R> void print_items(const R &r) {
     print(x);
   }
 }
+
+void print_yes_no(bool x) { print(x ? "YES" : "NO"); }
+
+template <typename T> void print_yes_no(vector<T> xs) {
+  for (const T &x : xs)
+    print_yes_no(x);
+}
 }; // namespace Printer
 
 using Printer::print;
 using Printer::print_items;
+using Printer::print_yes_no;
 using Printer::set_stream;
