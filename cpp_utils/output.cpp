@@ -10,6 +10,9 @@ void print_impl(size_t x) { fprintf(stream, "%lu", x); }
 void print_impl(const char *x) { fprintf(stream, "%s", x); }
 void print_impl(const string &x) { print_impl(x.c_str()); }
 void print_impl(char x) { fprintf(stream, "%c", x); }
+template <typename T> void print_impl(const T &x) {
+  print_impl(x.get_printable());
+}
 
 template <typename A, typename B> void print_impl(const pair<A, B> &p) {
   print_impl(p.first);
