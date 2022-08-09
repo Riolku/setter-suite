@@ -3,7 +3,7 @@ FILE *stream = stdout;
 
 void set_stream(FILE *st) { stream = st; }
 
-// simple types
+// Simple Types
 void print_impl(bool x) { fprintf(stream, "%d", x); }
 void print_impl(int x) { fprintf(stream, "%d", x); }
 void print_impl(ll x) { fprintf(stream, "%lld", x); }
