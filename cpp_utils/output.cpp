@@ -16,6 +16,7 @@ void print_impl(char x) { fprintf(stream, "%c", x); }
 template <typename T> void print_impl(const T &);
 template <typename A, typename B> void print_impl(const pair<A, B> &);
 template <typename... Ts> void print_impl(const tuple<Ts...> &t);
+template <typename T> void print_impl(queue<T> arr);
 template <typename T> void print_impl(const set<T> &arr);
 template <typename T> void print_impl(const vector<T> &arr);
 template <typename T> void print_impl(const unordered_set<T> &arr);
@@ -63,6 +64,26 @@ template <typename T> void print_iterable(const T &arr) {
   }
 }
 
+template <typename T> void print_impl(queue<T> q) {
+  vector<T> dummy;
+  dummy.reserve(q.size());
+  while (!q.empty()) {
+    dummy.push_back(move(q.front()));
+    q.pop_front();
+  }
+  print_impl(dummy);
+}
+
+template <typename T> void print_impl(priority_queue<T> pq) {
+  vector<T> dummy;
+  dummy.reserve(pq.size());
+  while (!pq.empty()) {
+    dummy.push_back(move(pq.top()));
+    pq.pop();
+  }
+  print_impl(dummy);
+}
+
 template <typename T> void print_impl(const set<T> &arr) {
   print_iterable(arr);
 }
@@ -88,11 +109,24 @@ template <typename... Ts> void print(Ts &&...args) {
   print();
 }
 template <> void print() { fprintf(stream, "\n"); }
+template <typename T> void print_map(const T &mp) {
+  for (auto p : mp) {
+    print(p);
+  }
+}
 
 template <typename R> void print_items(const R &r) {
   for (auto x : r) {
     print(x);
   }
+}
+
+template <typename K, typename V>
+void print_items(const unordered_map<K, V> &mp) {
+  print_map(mp);
+}
+template <typename K, typename V> void print_items(const map<K, V> &mp) {
+  print_map(mp);
 }
 
 template <typename T> void print_yes_no(const T &xs) {

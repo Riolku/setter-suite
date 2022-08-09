@@ -68,11 +68,6 @@ struct Graph {
   bool is_tree() const { return M == N - 1 && is_connected(); }
 };
 
-template <> void Printer::print(const Graph &g) {
-  print(g.N, g.M);
-  print_items(g.edges);
-}
-
 struct DirectedGraph : public Graph {
   using Graph::Graph;
 

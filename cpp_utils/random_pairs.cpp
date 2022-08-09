@@ -23,7 +23,8 @@ List<pair<IntType, IntType>> random_ordered_pairs(int N, int M) {
 template <typename IntType, int offset>
 pair<IntType, IntType> random_unordered_pair(int M) {
   ll v = randint(0, UnorderedPair::max_pair(M));
-  auto [a, b] = UnorderedPair::to_pair(v);
+  IntType a, b;
+  tie(a, b) = UnorderedPair::to_pair(v);
   return {a + offset, b + offset};
 }
 
