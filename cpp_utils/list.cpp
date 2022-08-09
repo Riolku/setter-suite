@@ -167,6 +167,8 @@ public:
     }
     return ret;
   }
+
+  const vector<T> &get_printable() const { return *this; }
 };
 
 template <int offset = 0, typename F>
