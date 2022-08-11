@@ -16,3 +16,21 @@ public:
     fprintf(stderr, "%s", output.c_str());
   }
 };
+
+class SolutionTestBase : public Test {
+public:
+  virtual void get_input() = 0;
+  virtual void print_input() = 0;
+  virtual void solve_input() = 0;
+
+  void generate() override {
+    get_input();
+    print_input();
+    solve_input();
+  }
+};
+
+class SingleTest
+
+    // For the classic "T test cases" problems
+    class MultipleTests : public Test {};

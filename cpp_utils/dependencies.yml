@@ -45,6 +45,9 @@ integer_range:
 interaction:
 - checker_utils
 
+list_builder:
+- list
+
 list:
 - sys_deps
 - utils
