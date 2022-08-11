@@ -16,10 +16,13 @@ void print_impl(char x) { fprintf(stream, "%c", x); }
 template <typename T> void print_impl(const T &);
 template <typename A, typename B> void print_impl(const pair<A, B> &);
 template <typename... Ts> void print_impl(const tuple<Ts...> &t);
-template <typename T> void print_impl(queue<T> arr);
-template <typename T> void print_impl(const set<T> &arr);
-template <typename T> void print_impl(const vector<T> &arr);
-template <typename T> void print_impl(const unordered_set<T> &arr);
+template <typename T, typename Container> void print_impl(queue<T, Container>);
+template <typename T, typename Container, typename Compare>
+void print_impl(priority_queue<T, Container, Compare>);
+template <typename T> void print_impl(const set<T> &);
+template <typename T> void print_impl(const vector<T> &);
+template <typename T, size_t size> void print_impl(const array<T, size> &);
+template <typename T> void print_impl(const unordered_set<T> &);
 
 // Recursive type definitions
 template <typename T> void print_impl(const T &x) {
@@ -64,26 +67,6 @@ template <typename T> void print_iterable(const T &arr) {
   }
 }
 
-template <typename T> void print_impl(queue<T> q) {
-  vector<T> dummy;
-  dummy.reserve(q.size());
-  while (!q.empty()) {
-    dummy.push_back(move(q.front()));
-    q.pop_front();
-  }
-  print_impl(dummy);
-}
-
-template <typename T> void print_impl(priority_queue<T> pq) {
-  vector<T> dummy;
-  dummy.reserve(pq.size());
-  while (!pq.empty()) {
-    dummy.push_back(move(pq.top()));
-    pq.pop();
-  }
-  print_impl(dummy);
-}
-
 template <typename T> void print_impl(const set<T> &arr) {
   print_iterable(arr);
 }
@@ -93,7 +76,30 @@ template <typename T> void print_impl(const vector<T> &arr) {
 template <typename T> void print_impl(const unordered_set<T> &arr) {
   print_iterable(arr);
 }
+template <typename T, size_t size> void print_impl(const array<T, size> &arr) {
+  print_iterable(arr);
+}
+template <typename T, typename Container>
+void print_impl(queue<T, Container> q) {
+  vector<T> dummy;
+  dummy.reserve(q.size());
+  while (!q.empty()) {
+    dummy.push_back(move(q.front()));
+    q.pop_front();
+  }
+  print_impl(dummy);
+}
 
+template <typename T, typename Container, typename Compare>
+void print_impl(priority_queue<T, Container, Compare> pq) {
+  vector<T> dummy;
+  dummy.reserve(pq.size());
+  while (!pq.empty()) {
+    dummy.push_back(move(pq.top()));
+    pq.pop();
+  }
+  print_impl(dummy);
+}
 // print_many helper
 template <typename T> void print_many(const T &arg) { print_impl(arg); }
 template <typename T, typename... Ts>
