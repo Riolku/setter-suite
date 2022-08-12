@@ -124,8 +124,8 @@ standard_interactor:
 sys_deps: []
 
 test_generation:
-- sys_deps
-- utils
+- list_builder
+- output
 
 utils: []
 

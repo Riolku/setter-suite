@@ -25,12 +25,26 @@ public:
 
   void generate() override {
     get_input();
+    set_stream(stdout);
     print_input();
+    set_stream(stderr);
     solve_input();
   }
 };
 
-class SingleTest
+// For the classic "T tests" problems
+class MultipleTests : public Test {
+  ListBuilder<unique_ptr<Test>> builder;
 
-    // For the classic "T test cases" problems
-    class MultipleTests : public Test {};
+public:
+  MultipleTests(ListBuilder<unique_ptr<Test>> builder)
+      : builder(move(builder)) {}
+
+  void generate() override {
+    List<unique_ptr<Test>> tests = builder.build();
+    print(tests.size());
+    for (const auto &test : tests) {
+      test->generate();
+    }
+  }
+};
