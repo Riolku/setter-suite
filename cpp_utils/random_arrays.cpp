@@ -77,13 +77,12 @@ public:
     List<T> ret;
     int list_size = 0;
     for (auto tp : instructions) {
-      int c, l, r;
-      tie(c, l, r) = tp;
-      list_size += c;
+      list_size += get<0>(tp);
     }
     ret.reserve(list_size);
     for (auto tp : instructions) {
-      int c, l, r;
+      int c;
+      T l, r;
       tie(c, l, r) = tp;
       for (int i = 0; i < c; ++i) {
         ret.push_back(randint(l, r));
