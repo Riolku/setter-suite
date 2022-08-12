@@ -35,8 +35,7 @@ template <typename T> class SerialElements : public ListBuilder<T> {
   }
   template <typename... Ts>
   PartList to_parts(PartList cur, T elem, Ts &&...rest) {
-    cur.push_back(make_unique<SingleElement<T>>(move(elem)));
-    return to_parts(move(cur), forward<Ts>(rest)...);
+    return to_parts(move(cur), make_unique<SingleElement<T>>(move(elem)));
   }
 
   PartList parts;
@@ -62,6 +61,9 @@ template <typename T> class RepeatElement : public ListBuilder<T> {
 public:
   RepeatElement(int N, unique_ptr<ListBuilder<T>> part)
       : N(N), part(move(part)) {}
+
+  RepeatElement(int N, T elem)
+      : RepeatElement(N, make_unique<SingleElement<T>>(move(T))) {}
 
   List<T> build() {
     List<T> ret;
