@@ -34,14 +34,14 @@ public:
 
 // For the classic "T tests" problems
 class MultipleTests : public Test {
-  ListBuilder<unique_ptr<Test>> builder;
+  unique_ptr<ListBuilder<unique_ptr<Test>>> builder;
 
 public:
-  MultipleTests(ListBuilder<unique_ptr<Test>> builder)
+  MultipleTests(unique_ptr<ListBuilder<unique_ptr<Test>>> builder)
       : builder(move(builder)) {}
 
   void generate() override {
-    List<unique_ptr<Test>> tests = builder.build();
+    List<unique_ptr<Test>> tests = builder->build();
     print(tests.size());
     for (const auto &test : tests) {
       test->generate();
