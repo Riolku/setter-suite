@@ -35,7 +35,8 @@ template <typename T> class SerialElements : public ListBuilder<T> {
   }
   template <typename... Ts>
   PartList to_parts(PartList cur, T elem, Ts &&...rest) {
-    return to_parts(move(cur), make_unique<SingleElement<T>>(move(elem)));
+    return to_parts(move(cur), make_unique<SingleElement<T>>(move(elem)),
+                    forward<Ts>(rest)...);
   }
 
   PartList parts;
