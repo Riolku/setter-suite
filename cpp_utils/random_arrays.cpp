@@ -61,7 +61,7 @@ List<int> binary_array_with_sum(int N, int one_count) {
   return ret;
 }
 
-template <typename T> class ArrayBuilder {
+template <typename T> class RandomArrayBuilder {
 public:
   using BuilderInstruction = tuple<int, T, T>;
   using BuilderInstructionList = List<BuilderInstruction>;
@@ -70,7 +70,7 @@ protected:
   BuilderInstructionList instructions;
 
 public:
-  ArrayBuilder(List<BuilderInstruction> instructions)
+  RandomArrayBuilder(BuilderInstructionList instructions)
       : instructions(move(instructions)) {}
 
   List<T> build() {
@@ -94,5 +94,5 @@ public:
   }
 };
 
-using IntArrayBuilder = ArrayBuilder<int>;
-using LongArrayBuilder = ArrayBuilder<ll>;
+using IntArrayBuilder = RandomArrayBuilder<int>;
+using LongArrayBuilder = RandomArrayBuilder<ll>;
