@@ -18,11 +18,11 @@ public:
 };
 
 class SolutionTestBase : public Test {
-public:
   virtual void get_input() = 0;
   virtual void print_input() = 0;
   virtual void solve_input() = 0;
 
+public:
   void generate() override {
     get_input();
     set_stream(stdout);
@@ -41,7 +41,41 @@ public:
       : builder(move(builder)) {}
 
   void generate() override {
-    List<unique_ptr<Test>> tests = builder->build();
+    auto tests = builder->build();
+    print(tests.size());
+    for (const auto &test : tests) {
+      test->generate();
+    }
+  }
+};
+
+class MultipleTestsWithSumUnit : public SolutionTestBase {
+public:
+  virtual int get_unit_value() = 0;
+};
+
+class MultipleTestsWithSum : public Test {
+  int total;
+  unique_ptr<ListBuilder<unique_ptr<MultipleTestsWithSumUnit>>> builder;
+
+public:
+  MultipleTestsWithSum(
+      int total,
+      unique_ptr<ListBuilder<unique_ptr<MultipleTestsWithSumUnit>>> builder)
+      : total(total), builder(move(builder)) {}
+
+  void generate() override {
+    auto tests = builder->build();
+    int cur = 0;
+    for (const auto &test : tests) {
+      cur += test->get_unit_value();
+    }
+    while (cur > total) {
+      cur -= tests.back()->get_unit_value();
+      tests.pop_back();
+    }
+    assert(tests.size() > 0);
+
     print(tests.size());
     for (const auto &test : tests) {
       test->generate();
