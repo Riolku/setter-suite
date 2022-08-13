@@ -64,7 +64,7 @@ public:
       : N(N), part(move(part)) {}
 
   RepeatElement(int N, T elem)
-      : RepeatElement(N, make_unique<SingleElement<T>>(move(T))) {}
+      : RepeatElement(N, make_unique<SingleElement<T>>(move(elem))) {}
 
   List<T> build() {
     List<T> ret;
