@@ -34,10 +34,10 @@ public:
 
 // For the classic "T tests" problems
 class MultipleTests : public Test {
-  unique_ptr<ListBuilder<unique_ptr<Test>>> builder;
+  unique_ptr<ListBuilder<shared_ptr<Test>>> builder;
 
 public:
-  MultipleTests(unique_ptr<ListBuilder<unique_ptr<Test>>> builder)
+  MultipleTests(unique_ptr<ListBuilder<shared_ptr<Test>>> builder)
       : builder(move(builder)) {}
 
   void generate() override {
@@ -51,34 +51,47 @@ public:
 
 class MultipleTestsWithSumUnit : public SolutionTestBase {
 public:
-  virtual int get_unit_value() = 0;
+  // When tests are duplicated, they share the same memory, and as such doing
+  // initialization will overwrite The idea is to get the unit value which may
+  // be constant, but is likely random, (but still does not modify the object)
+  // And then store it before calling generate()
+  virtual int get_unit_value() const = 0;
+  virtual void store_unit_value(int) = 0;
 };
 
 class MultipleTestsWithSum : public Test {
-  int total;
-  unique_ptr<ListBuilder<unique_ptr<MultipleTestsWithSumUnit>>> builder;
+  int max_total;
+  unique_ptr<ListBuilder<shared_ptr<MultipleTestsWithSumUnit>>> builder;
 
 public:
   MultipleTestsWithSum(
-      int total,
-      unique_ptr<ListBuilder<unique_ptr<MultipleTestsWithSumUnit>>> builder)
+      int max_total,
+      unique_ptr<ListBuilder<shared_ptr<MultipleTestsWithSumUnit>>> builder)
       : total(total), builder(move(builder)) {}
 
   void generate() override {
-    auto tests = builder->build();
-    int cur = 0;
-    for (const auto &test : tests) {
-      cur += test->get_unit_value();
-    }
-    while (cur > total) {
-      cur -= tests.back()->get_unit_value();
-      tests.pop_back();
-    }
-    assert(tests.size() > 0);
+    List<shared_ptr<MultipleTestsWithSumUnit>, 1> tests = builder->build();
+    int cur_total = 0;
+    int test_count = 0;
+    List<int, 1> test_sizes(tests.size(), -1);
 
-    print(tests.size());
-    for (const auto &test : tests) {
-      test->generate();
+    // Basically do greedy knapsack
+    for (size_t ti = 1; ti <= tests.size(); ++ti) {
+      int v = tests[ti]->get_unit_value();
+      if (cur_total + v <= max_total) {
+        ++test_count;
+        cur_total += v;
+        test_sizes[ti] = v;
+      }
+    }
+    print(test_count);
+    for (size_t ti = 1; ti <= tests.size(); ++ti) {
+      int sz = test_sizes[ti];
+      if (sz != -1) {
+        auto &test = tests[ti];
+        test->store_unit_value(sz);
+        test->generate();
+      }
     }
   }
 };
