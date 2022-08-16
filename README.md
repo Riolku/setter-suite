@@ -70,4 +70,4 @@ All the utilities are in `cpp_utils`. Dependency lists can be seen in `dependenc
 
 ## Changelog
 
-- `readEOF` is now called automatically by the destructor of readers, and as such should never be called explicitly.
+2022-08-16: `readEOF` is now called automatically by the destructor of readers, and as such should never be called explicitly.
