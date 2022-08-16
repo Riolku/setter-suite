@@ -1,4 +1,4 @@
-// Built with `init-template identical_interactor_entry` on 2022-07-13
+// Built with `init-template identical_interactor_entry` on 2022-08-16
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -320,28 +320,26 @@ protected:
 public:
   virtual void readNewLine() = 0;
   virtual void readSpace() = 0;
-  virtual void readEOF() = 0;
 };
 
 template <typename Parent> class ExactWhitespaceMixin : public Parent {
+  void readEOF() {
+    if (!Parent::eof())
+      Parent::wrongWhitespaceError();
+  }
+
 public:
   void readNewLine() override {
     if (Parent::rawReadChar() != '\n')
       Parent::wrongWhitespaceError();
   }
 
-  void readEOFImpl() {
-    if (!Parent::eof())
-      Parent::wrongWhitespaceError();
-  }
-  void readEOF() override { readEOFImpl(); }
-
   void readSpace() override {
     if (Parent::rawReadChar() != ' ')
       Parent::wrongWhitespaceError();
   }
 
-  ~ExactWhitespaceMixin() { readEOFImpl(); }
+  ~ExactWhitespaceMixin() { readEOF(); }
 
   using Parent::Parent;
 };

@@ -203,5 +203,4 @@ protected:
 public:
   virtual void readNewLine() = 0;
   virtual void readSpace() = 0;
-  virtual void readEOF() = 0;
 };

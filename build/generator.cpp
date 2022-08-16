@@ -1,4 +1,4 @@
-// Built with `init-template gen_entry` on 2022-07-13
+// Built with `init-template gen_entry` on 2022-08-16
 #include <algorithm>
 #include <cmath>
 #include <random>

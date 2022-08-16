@@ -18,6 +18,12 @@ class StandardCheckerReader : public CheckerReader {
     return any_line;
   }
 
+  void readEOF() {
+    skipAllWhitespace();
+    if (!eof())
+      wrongWhitespaceError(); // wanted EOF but found more token
+  }
+
 public:
   StandardCheckerReader(FILE *f) : CheckerReader(f), whitespace_flag(3) {}
   StandardCheckerReader(const char *path)
@@ -45,13 +51,6 @@ public:
     whitespace_flag = 0;
   }
 
-  void readEOFImpl() {
-    skipAllWhitespace();
-    if (!eof())
-      wrongWhitespaceError(); // wanted EOF but found more token
-  }
-  void readEOF() override { readEOFImpl(); }
-
   // PE could be confusing under standard checker
   void wrongWhitespaceError() override {
     preError();
@@ -63,5 +62,5 @@ public:
     exit(CheckerCodes::WA);
   }
 
-  ~StandardCheckerReader() { readEOFImpl(); }
+  ~StandardCheckerReader() { readEOF(); }
 };
