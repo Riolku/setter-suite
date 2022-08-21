@@ -49,6 +49,17 @@ public:
   }
 };
 
+template <typename T> class RandomTestUnion : public ListBuilder<T> {
+  T first, second;
+  int num, denom;
+
+public:
+  RandomTestUnion(T first, T second, int num = 1, int denom = 2)
+      : first(move(first)), second(move(second)), num(num), denom(denom) {}
+
+  List<T> build() { return {randint(1, denom) <= num ? first : second}; }
+};
+
 class MultipleTestsWithSumUnit : public SolutionTestBase {
 public:
   // When tests are duplicated, they share the same memory, and as such doing
