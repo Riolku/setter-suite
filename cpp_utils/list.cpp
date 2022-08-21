@@ -61,13 +61,11 @@ public:
   }
 
   List<T, offset> &operator+=(const List<T, offset> &other) {
-    this->reserve(this->size() + other.size());
     for (const T &elem : other)
       this->push_back(elem);
     return *this;
   }
   List<T, offset> &operator+=(List<T, offset> &&other) {
-    this->reserve(this->size() + other.size());
     for (auto &&elem : other)
       this->push_back(move(elem));
     return *this;
