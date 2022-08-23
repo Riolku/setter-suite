@@ -56,7 +56,7 @@ class Env:
 
     @cached_property
     def checker(self):
-        return Checker.get(self.env["checker"])
+        return Checker.get(self.env.get("checker", "standard"))
 
     @cached_property
     def validator(self):
