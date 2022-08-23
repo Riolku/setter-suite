@@ -1,7 +1,7 @@
 import sys
 
 from .env import env
-from .executors import Executor
+from .executors import get_executor
 from .checkers import Checker, display_code
 
 
@@ -45,7 +45,7 @@ def main(args):
 
 class Invoker:
     def __init__(self, file):
-        self.program = Executor(file)
+        self.program = get_executor(file)
         self.reference_sol = env.reference_sol
         self.checker = env.checker
 

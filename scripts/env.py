@@ -2,7 +2,7 @@ import json, yaml, multiprocessing
 
 from cached_property import cached_property
 
-from .executors import Executor
+from .executors import get_executor
 from .checkers import Checker
 from .validator_base import Validator
 
@@ -52,7 +52,7 @@ class Env:
 
     @cached_property
     def reference_sol(self):
-        return Executor(self.env["reference_sol"])
+        return get_executor(self.env["reference_sol"])
 
     @cached_property
     def checker(self):
@@ -81,7 +81,7 @@ class Env:
     @property
     def case_counts(self):
         if "case_counts" not in self.env:
-            gen = Executor(self.generator)
+            gen = get_executor(self.generator)
             return list(map(int, gen.run(["cc"]).stdout.split()))
         return self.env["case_counts"]
 

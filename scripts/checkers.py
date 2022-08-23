@@ -3,7 +3,7 @@ import multiprocessing, os
 from termcolor import colored
 from typing import Tuple
 
-from .executors import Executor
+from .executors import get_executor
 
 codes = dict(AC=0, WA=1, PE=2, IE=3, PARTIAL=7, TLE=1000, RTE=2000)
 colors = dict(
@@ -119,7 +119,7 @@ class StandardChecker(BuiltinChecker):
 
 class CustomChecker:
     def __init__(self, filename):
-        self.executor = Executor(filename)
+        self.executor = get_executor(filename)
 
     def check(self, inp, out, expected_out):
         pid = multiprocessing.current_process().pid

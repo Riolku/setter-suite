@@ -1,7 +1,7 @@
 import os
 
 from .env import env
-from .executors import Executor
+from .executors import get_executor
 from .init_yml import main as init_yml_main
 
 import zipfile
@@ -49,7 +49,7 @@ def main(args):
 
 class Generator:
     def __init__(self):
-        self.generator_executor = Executor(env.get("generator", "gen.cpp"))
+        self.generator_executor = get_executor(env.get("generator", "gen.cpp"))
 
         if env.get("generator_type") == "double":
             self.generate = self.generate_double

@@ -7,46 +7,32 @@ import signal
 
 CPP_EXT = ".cpp"
 PY_EXT = ".py"
+RUST_EXT = ".rs"
+
+
+def get_executor(file, *, debug=False, force_compile=False):
+    if file.endswith(CPP_EXT):
+        return CppExecutor(file, debug=debug, force_compile=force_compile)
+    elif file.endswith(PY_EXT):
+        return PyExecutor(file, debug=debug, force_compile=force_compile)
+    else:
+        assert file.endswith(
+            RUST_EXT
+        ), f"Refusing to run '{file}' with unknown extension"
+        return RustExecutor(file, debug=debug, force_compile=force_compile)
 
 
 class Executor:
     def __init__(self, file, *, debug=False, force_compile=False):
         self.file = file
+        self.compile(debug=debug, force_compile=force_compile)
+        self.exec = self.get_exec()
 
-        if file.endswith(CPP_EXT):
-            file_root = file[: -len(CPP_EXT)]
+    def compile(self, *, debug, force_compile) -> None:
+        pass
 
-            self.compile(file, file_root, debug=debug, force_compile=force_compile)
-
-            self.exec = ["./" + file_root]
-
-        else:
-            assert file.endswith(
-                PY_EXT
-            ), f"Refusing to run '{file}' with unknown extension"
-
-            from .env import env
-
-            self.exec = [env.python_exec, file]
-
-    def compile(self, file, file_root, *, debug, force_compile):
-        try:
-            compiled_stat_info = os.stat(file_root)
-            source_stat_info = os.stat(file)
-
-            # compile only if the source file is more recent than the executable
-            if force_compile or source_stat_info.st_mtime > compiled_stat_info.st_mtime:
-                self.force_compile(file, file_root, debug=debug)
-
-        except FileNotFoundError:
-            self.force_compile(file, file_root, debug=debug)
-
-    def force_compile(self, file, file_root, *, debug):
-        cmd = ["g++", "-O2", "-Wall", "-std=c++17", "-g", "-o", file_root, file]
-        if debug:
-            cmd = ["g++", "-Wall", "-std=c++17", "-g", "-o", file_root, file]
-
-        assert subprocess.run(cmd).returncode == 0
+    def get_exec(self):
+        raise NotImplementedError
 
     def run(self, args=[], **kwargs):
         kwargs.setdefault("text", True)
@@ -77,6 +63,78 @@ class Executor:
             return ret
 
 
+class CompiledExecutor(Executor):
+    ext = None
+
+    def compile(self, *, debug: bool, force_compile: bool) -> None:
+        self.compiled_file = self.file[: -len(self.ext)]
+        try:
+            if force_compile or more_recent(self.file, self.compiled_file):
+                self.force_compile(debug=debug)
+
+        except FileNotFoundError:
+            self.force_compile(debug=debug)
+
+    def force_compile(self, *, debug: bool) -> None:
+        assert subprocess.run(self.get_compiler_cmd(debug=debug)).returncode == 0
+
+    def get_compiler_cmd(self):
+        raise NotImplementedError
+
+    def get_exec(self):
+        return ["./" + self.compiled_file]
+
+
+class CppExecutor(CompiledExecutor):
+    ext = CPP_EXT
+
+    def get_compiler_cmd(self, *, debug: bool):
+        if debug:
+            return [
+                "g++",
+                "-Wall",
+                "-std=c++17",
+                "-g",
+                "-o",
+                self.compiled_file,
+                self.file,
+            ]
+
+        return [
+            "g++",
+            "-O2",
+            "-Wall",
+            "-std=c++17",
+            "-g",
+            "-o",
+            self.compiled_file,
+            self.file,
+        ]
+
+
+class PyExecutor(Executor):
+    ext = PY_EXT
+
+    def get_exec(self):
+        from .env import env
+
+        return [env.python_exec, self.file]
+
+
+class RustExecutor(CompiledExecutor):
+    ext = RUST_EXT
+
+    def get_compiler_cmd(self, *, debug: bool):
+        return ["rustc", self.file]
+
+
 def do_prctl_deathsig():
     PR_SET_PDEATHSIG = 1
     cdll["libc.so.6"].prctl(PR_SET_PDEATHSIG, signal.SIGKILL)
+
+
+def more_recent(A: str, B: str) -> bool:
+    A_info = os.stat(A)
+    B_info = os.stat(B)
+
+    return A_info.st_mtime > B_info.st_mtime

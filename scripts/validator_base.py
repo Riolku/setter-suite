@@ -1,6 +1,6 @@
 import sys
 
-from .executors import Executor
+from .executors import get_executor
 
 
 class Validator:
@@ -11,7 +11,7 @@ class Validator:
             self.validator = None
 
         else:
-            self.validator = Executor(file)
+            self.validator = get_executor(file)
 
     def validate(self, input):
         if self.validator is None:

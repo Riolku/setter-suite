@@ -1,6 +1,6 @@
 from .invoke import Invoker
 from .env import env
-from .executors import Executor
+from .executors import get_executor
 from .checkers import codes, display_code
 
 DEFAULT_BLOCKSIZE = 100
@@ -11,7 +11,7 @@ def main(args):
 
     blocksize = int(env.get("b", env.get("blocksize", DEFAULT_BLOCKSIZE)))
 
-    generator = Executor(env.get("random_gen", "random_gen.py"))
+    generator = get_executor(env.get("random_gen", "random_gen.py"))
 
     invoker = Invoker(args[0])
 
