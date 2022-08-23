@@ -134,7 +134,7 @@ class RustExecutor(CompiledExecutor):
         return ["rustc", "-g", "-O", self.file]
 
     def get_default_env(self):
-        return dict(RUST_BACKTRACE=1)
+        return dict(RUST_BACKTRACE="1")
 
 
 def do_prctl_deathsig():
