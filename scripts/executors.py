@@ -44,6 +44,7 @@ class Executor:
         return_time = kwargs.pop("return_time", False)
 
         kwargs.setdefault("preexec_fn", do_prctl_deathsig)
+        kwargs.setdefault("env", self.get_default_env())
 
         start = time.time()
 
@@ -61,6 +62,9 @@ class Executor:
 
         else:
             return ret
+
+    def get_default_env(self):
+        return {}
 
 
 class CompiledExecutor(Executor):
@@ -125,7 +129,12 @@ class RustExecutor(CompiledExecutor):
     ext = RUST_EXT
 
     def get_compiler_cmd(self, *, debug: bool):
-        return ["rustc", self.file]
+        if debug:
+            return ["rustc", "-g", self.file]
+        return ["rustc", "-g", "-O", self.file]
+
+    def get_default_env(self):
+        return dict(RUST_BACKTRACE=1)
 
 
 def do_prctl_deathsig():
