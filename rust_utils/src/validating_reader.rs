@@ -1,6 +1,5 @@
-use super::identical_whitespace;
-use super::panic_error_handler;
 use super::reader::{self, AsciiStream, ErrorHandler, Reader};
+use super::{identical_whitespace, panic_error_handler};
 use std::io::BufRead;
 
 fn new(

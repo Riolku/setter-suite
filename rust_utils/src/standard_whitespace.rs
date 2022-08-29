@@ -33,13 +33,9 @@ where
     }
     fn consume_flag(&mut self) -> TokenizerResult<()> {
         match self.flag {
-            WhitespaceFlag::NoWhitespace => Err(WRONG_WHITESPACE),
+            WhitespaceFlag::NoWhitespace => {}
             WhitespaceFlag::Space => {
-                if self
-                    .src
-                    .next()
-                    .map_or(true, |c| !Self::is_non_line_whitespace(c))
-                {
+                if !self.src.next().map_or(false, Self::is_non_line_whitespace) {
                     return Err(WRONG_WHITESPACE);
                 }
 
@@ -50,11 +46,9 @@ where
                 {
                     self.src.next();
                 }
-                self.flag = WhitespaceFlag::NoWhitespace;
-                Ok(())
             }
             WhitespaceFlag::Newline => {
-                if self.src.peek().map_or(true, |c| !c.is_ascii_whitespace()) {
+                if !self.src.peek().map_or(false, char::is_ascii_whitespace) {
                     return Err(WRONG_WHITESPACE);
                 }
 
@@ -66,18 +60,17 @@ where
                 }
 
                 if !any_line {
-                    Err(WRONG_WHITESPACE)
-                } else {
-                    Ok(())
+                    return Err(WRONG_WHITESPACE);
                 }
             }
             WhitespaceFlag::All => {
                 while self.src.peek().map_or(false, char::is_ascii_whitespace) {
                     self.src.next();
                 }
-                Ok(())
             }
-        }
+        };
+        self.flag = WhitespaceFlag::NoWhitespace;
+        Ok(())
     }
     fn poke_flag(&mut self, flag: WhitespaceFlag) {
         self.flag = max(self.flag, flag);
