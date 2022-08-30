@@ -21,7 +21,9 @@ use super::reader::{self, AsciiStream, ErrorHandler as _, Reader};
 use super::standard_whitespace;
 use std::io::BufRead;
 
-fn new(src: impl BufRead) -> Reader<standard_whitespace::Handler<impl AsciiStream>, ErrorHandler> {
+pub fn new(
+    src: impl BufRead,
+) -> Reader<standard_whitespace::Handler<impl AsciiStream>, ErrorHandler> {
     reader::new(standard_whitespace::new(src), ErrorHandler::new())
 }
 
