@@ -36,30 +36,39 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "wrong whitespace")]
     fn panics_when_has_unread_data() {
         let reader = super::new(" ".as_bytes());
         drop(reader);
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "wrong whitespace")]
     fn panics_when_whitespace_is_wrong() {
         let mut reader = super::new("\n".as_bytes());
         reader.expect_space();
+
+        // necessary because otherwise reader's destructor might panic, passing the test.
+        panic!("Should have died");
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "wrong whitespace")]
     fn panics_when_extra_whitespace_before_token() {
         let mut reader = super::new(" a".as_bytes());
         reader.read_token();
+
+        // necessary because otherwise reader's destructor might panic, passing the test.
+        panic!("Should have died");
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "wrong whitespace")]
     fn panics_when_no_newline_on_readline() {
         let mut reader = super::new("abc woo".as_bytes());
         reader.read_line();
+
+        // necessary because otherwise reader's destructor might panic, passing the test.
+        panic!("Should have died");
     }
 }
