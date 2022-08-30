@@ -14,12 +14,10 @@ where
     TK: Tokenizer,
     EH: ErrorHandler,
 {
-    let mut reader = Reader {
+    Reader {
         tokenizer: tokenizer,
         handler: handler,
-    };
-    reader.init();
-    reader
+    }
 }
 
 pub trait AsciiStream: Iterator<Item = char> {
@@ -44,7 +42,6 @@ pub const WRONG_WHITESPACE: TokenizerError = TokenizerError::WhitespaceError;
 pub type TokenizerResult<T> = Result<T, TokenizerError>;
 
 pub trait Tokenizer {
-    fn init(&mut self) -> TokenizerResult<()>;
     fn expect_space(&mut self) -> TokenizerResult<()>;
     fn expect_newline(&mut self) -> TokenizerResult<()>;
     fn expect_eof(&mut self) -> TokenizerResult<()>;
@@ -53,6 +50,11 @@ pub trait Tokenizer {
 
 pub trait ExactWhitespaceTokenizer {
     fn read_line(&mut self) -> TokenizerResult<String>;
+}
+
+pub trait StandardWhitespace {
+    fn next_token_on_line(&mut self) -> Option<String>;
+    fn has_token_in_stream(&mut self) -> TokenizerResult<bool>;
 }
 
 pub trait ErrorHandler {
@@ -67,10 +69,6 @@ where
     TK: Tokenizer,
     EH: ErrorHandler,
 {
-    pub fn init(&mut self) {
-        let res = self.tokenizer.init();
-        self.from_tk_result(res)
-    }
     pub fn expect_space(&mut self) {
         let res = self.tokenizer.expect_space();
         self.from_tk_result(res)
@@ -109,6 +107,20 @@ where
 {
     pub fn read_line(&mut self) -> String {
         let res = self.tokenizer.read_line();
+        self.from_tk_result(res)
+    }
+}
+
+impl<TK, EH> Reader<TK, EH>
+where
+    TK: Tokenizer + StandardWhitespace,
+    EH: ErrorHandler,
+{
+    pub fn next_token_on_line(&mut self) -> Option<String> {
+        self.tokenizer.next_token_on_line()
+    }
+    pub fn has_token_in_stream(&mut self) -> bool {
+        let res = self.tokenizer.has_token_in_stream();
         self.from_tk_result(res)
     }
 }

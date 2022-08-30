@@ -1,8 +1,9 @@
-use super::reader::{self, AsciiStream, Tokenizer, TokenizerResult, WRONG_WHITESPACE};
-use std::cmp::max;
+use super::reader::{
+    self, AsciiStream, StandardWhitespace, Tokenizer, TokenizerResult, WRONG_WHITESPACE,
+};
 use std::io::BufRead;
 
-#[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Eq, PartialEq)]
 enum WhitespaceFlag {
     NoWhitespace,
     Space,
@@ -17,7 +18,7 @@ pub struct Handler<S: AsciiStream> {
 pub fn new(src: impl BufRead) -> Handler<impl AsciiStream> {
     Handler {
         src: reader::to_ascii_stream(src),
-        flag: WhitespaceFlag::NoWhitespace,
+        flag: WhitespaceFlag::All,
     }
 }
 
@@ -31,40 +32,82 @@ where
     fn is_line_whitespace(c: char) -> bool {
         c == '\n' || c == '\r'
     }
+    fn skip_non_line_whitespace(&mut self) {
+        while self
+            .src
+            .peek()
+            .filter(|c| Self::is_non_line_whitespace(**c))
+            .is_some()
+        {
+            self.src.next();
+        }
+    }
+    fn raw_read_token(&mut self) -> String {
+        let mut token = String::new();
+        while self
+            .src
+            .peek()
+            .filter(|c| !c.is_ascii_whitespace())
+            .is_some()
+        {
+            token.push(self.src.next().unwrap());
+        }
+        token
+    }
+    fn has_line_before_next_token(&mut self) -> bool {
+        let mut any_line = false;
+        while self
+            .src
+            .peek()
+            .filter(|c| c.is_ascii_whitespace())
+            .is_some()
+        {
+            if Self::is_line_whitespace(self.src.next().unwrap()) {
+                any_line = true;
+            }
+        }
+        any_line
+    }
+
     fn consume_flag(&mut self) -> TokenizerResult<()> {
         match self.flag {
             WhitespaceFlag::NoWhitespace => {}
             WhitespaceFlag::Space => {
-                if !self.src.next().map_or(false, Self::is_non_line_whitespace) {
-                    return Err(WRONG_WHITESPACE);
+                match self.src.next() {
+                    Some(c) if Self::is_non_line_whitespace(c) => {}
+                    Some(c) => {
+                        assert!(
+                            c.is_ascii_whitespace(),
+                            "Found non-whitespace right after token!"
+                        );
+                        return Err(WRONG_WHITESPACE);
+                    }
+                    None => return Err(WRONG_WHITESPACE),
                 }
 
-                while self
-                    .src
-                    .peek()
-                    .map_or(false, |c| Self::is_non_line_whitespace(*c))
-                {
-                    self.src.next();
-                }
+                self.skip_non_line_whitespace();
             }
             WhitespaceFlag::Newline => {
-                if !self.src.peek().map_or(false, char::is_ascii_whitespace) {
-                    return Err(WRONG_WHITESPACE);
-                }
-
-                let mut any_line = Self::is_line_whitespace(self.src.next().unwrap());
-                while self.src.peek().map_or(false, char::is_ascii_whitespace) {
-                    if Self::is_line_whitespace(self.src.next().unwrap()) {
-                        any_line = true;
+                match self.src.peek() {
+                    Some(c) if c.is_ascii_whitespace() => {}
+                    _ => {
+                        panic!("Found non-whitespace right after token!");
                     }
                 }
 
-                if !any_line {
+                if !Self::is_line_whitespace(self.src.next().unwrap())
+                    & !self.has_line_before_next_token()
+                {
                     return Err(WRONG_WHITESPACE);
                 }
             }
             WhitespaceFlag::All => {
-                while self.src.peek().map_or(false, char::is_ascii_whitespace) {
+                while self
+                    .src
+                    .peek()
+                    .filter(|c| c.is_ascii_whitespace())
+                    .is_some()
+                {
                     self.src.next();
                 }
             }
@@ -73,7 +116,12 @@ where
         Ok(())
     }
     fn poke_flag(&mut self, flag: WhitespaceFlag) {
-        self.flag = max(self.flag, flag);
+        assert!(
+            self.flag == WhitespaceFlag::NoWhitespace,
+            "Do not call two whitespace methods in a row. \
+            This error may also appear because you called a whitespace method immediately after initialization."
+        );
+        self.flag = flag;
     }
 }
 
@@ -81,10 +129,6 @@ impl<S> Tokenizer for Handler<S>
 where
     S: AsciiStream,
 {
-    fn init(&mut self) -> TokenizerResult<()> {
-        self.poke_flag(WhitespaceFlag::All);
-        self.consume_flag()
-    }
     fn expect_space(&mut self) -> TokenizerResult<()> {
         self.poke_flag(WhitespaceFlag::Space);
         Ok(())
@@ -94,7 +138,7 @@ where
         Ok(())
     }
     fn expect_eof(&mut self) -> TokenizerResult<()> {
-        self.poke_flag(WhitespaceFlag::All);
+        self.flag = WhitespaceFlag::All;
         self.consume_flag()?;
         if self.src.next().is_some() {
             Err(WRONG_WHITESPACE)
@@ -104,14 +148,52 @@ where
     }
     fn read_token(&mut self) -> TokenizerResult<String> {
         self.consume_flag()?;
-        let mut token = String::new();
-        while self.src.peek().map_or(false, |c| !c.is_ascii_whitespace()) {
-            token.push(self.src.next().unwrap());
-        }
+        let token = self.raw_read_token();
         if token.len() == 0 {
             Err(WRONG_WHITESPACE)
         } else {
             Ok(token)
+        }
+    }
+}
+
+impl<S> StandardWhitespace for Handler<S>
+where
+    S: AsciiStream,
+{
+    fn next_token_on_line(&mut self) -> Option<String> {
+        assert!(
+            self.flag == WhitespaceFlag::NoWhitespace,
+            "You must not call `next_token_on_line` after any whitespace method."
+        );
+
+        self.skip_non_line_whitespace();
+
+        let token = self.raw_read_token();
+        if token.len() == 0 {
+            None
+        } else {
+            Some(token)
+        }
+    }
+    fn has_token_in_stream(&mut self) -> TokenizerResult<bool> {
+        assert!(
+            self.flag == WhitespaceFlag::Newline,
+            "You must call `expect_newline` before `has_token_in_stream`."
+        );
+
+        let any_line = self.has_line_before_next_token();
+        match self.src.peek() {
+            Some(c) => {
+                assert!(!c.is_ascii_whitespace());
+                // Force a newline to appear if there are still tokens
+                if !any_line {
+                    Err(WRONG_WHITESPACE)
+                } else {
+                    Ok(true)
+                }
+            }
+            None => Ok(false),
         }
     }
 }

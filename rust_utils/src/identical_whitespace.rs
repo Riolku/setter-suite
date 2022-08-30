@@ -16,9 +16,6 @@ impl<S> Tokenizer for Handler<S>
 where
     S: AsciiStream,
 {
-    fn init(&mut self) -> TokenizerResult<()> {
-        Ok(())
-    }
     fn expect_space(&mut self) -> TokenizerResult<()> {
         match self.src.next() {
             Some(' ') => Ok(()),
@@ -39,7 +36,12 @@ where
     }
     fn read_token(&mut self) -> TokenizerResult<String> {
         let mut token = String::new();
-        while self.src.peek().map_or(false, |c| !c.is_ascii_whitespace()) {
+        while self
+            .src
+            .peek()
+            .filter(|c| !c.is_ascii_whitespace())
+            .is_some()
+        {
             token.push(self.src.next().unwrap());
         }
         if token.len() == 0 {
@@ -56,7 +58,7 @@ where
 {
     fn read_line(&mut self) -> TokenizerResult<String> {
         let mut line = String::new();
-        while self.src.peek().map_or(false, |c| *c != '\n') {
+        while self.src.peek().filter(|c| **c != '\n').is_some() {
             line.push(self.src.next().unwrap());
         }
         if self.src.next().is_none() {
