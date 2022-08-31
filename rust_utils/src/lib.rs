@@ -1,13 +1,13 @@
-mod checker;
-mod reader;
+pub mod checker;
+pub mod reader;
 
-mod identical_checker;
-mod identical_whitespace;
+pub mod identical_checker;
+pub mod identical_whitespace;
 
-mod standard_checker;
-mod standard_whitespace;
+pub mod standard_checker;
+pub mod standard_whitespace;
 
-mod panic_error_handler;
-mod validating_reader;
+pub mod panic_error_handler;
+pub mod validating_reader;
 
 fn pre_error() {}

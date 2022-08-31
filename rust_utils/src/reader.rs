@@ -50,6 +50,8 @@ pub trait Tokenizer {
 
 pub trait ExactWhitespaceTokenizer {
     fn read_line(&mut self) -> TokenizerResult<String>;
+    fn peek(&mut self) -> Option<&char>;
+    fn next(&mut self) -> Option<char>;
 }
 
 pub trait StandardWhitespace {
