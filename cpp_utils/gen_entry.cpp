@@ -6,7 +6,7 @@ List<List<shared_ptr<Test>, 1>, 1> cases = {
 };
 // clang-format on
 
-const int _PAGE_SZ = 1 << 12;
+const int _PAGE_SZ = 4096;
 const int _BUF_SZ = _PAGE_SZ * 16;
 char _out_buf[_BUF_SZ], _err_buf[_BUF_SZ];
 
