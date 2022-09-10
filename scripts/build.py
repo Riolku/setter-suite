@@ -42,8 +42,8 @@ def link_data():
 
 
 def link_checker():
-    if "interactor" not in env and env["checker"].endswith("cpp"):
-        os.symlink(f"../{env['checker']}", f"build/{env['checker']}")
+    if "interactor" not in env and env.checker_name.endswith("cpp"):
+        os.symlink(f"../{env.checker_name}", f"build/{env.checker_name}")
 
 
 def link_interactor():

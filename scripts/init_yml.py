@@ -29,7 +29,7 @@ def add_base(ret):
 
 
 def add_interactor(ret):
-    if "checker" in env:
+    if "interactor" not in env:
         return
 
     ret["interactive"] = dict(
@@ -45,7 +45,7 @@ def add_checker(ret):
     if "interactor" in env:
         return
 
-    checker = env["checker"]
+    checker = env.checker_name
 
     if checker.endswith("cpp"):
         ret["checker"] = dict(

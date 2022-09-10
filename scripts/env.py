@@ -52,11 +52,15 @@ class Env:
 
     @cached_property
     def reference_sol(self):
-        return get_executor(self.env["reference_sol"])
+        return get_executor(self.env.get("reference_sol", "sol.cpp"))
+
+    @cached_property
+    def checker_name(self):
+        return self.env.get("checker", "standard")
 
     @cached_property
     def checker(self):
-        return Checker.get(self.env.get("checker", "standard"))
+        return Checker.get(self.checker_name)
 
     @cached_property
     def validator(self):
@@ -72,11 +76,7 @@ class Env:
 
     @property
     def timeout(self):
-        if "timelimit" in self.env:
-            return int(self.env["timelimit"])
-
-        else:
-            return 5
+        return int(self.env.get("timelimit", "5"))
 
     @property
     def case_counts(self):
