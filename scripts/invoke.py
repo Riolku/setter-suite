@@ -66,3 +66,16 @@ class Invoker:
             process_time=process_time,
             reference_time=reference_time,
         )
+
+    def invoke_with_output(self, input, output):
+        process_result, process_time = self.program.run(
+            input=input, timeout=env.timeout, return_time=True
+        )
+
+        return dict(
+            process_result=process_result,
+            reference_result=None,
+            checker_result=self.checker.check(input, process_result.stdout, output),
+            process_time=process_time,
+            reference_time=0,
+        )

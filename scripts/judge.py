@@ -45,9 +45,11 @@ class Judge:
     def judge_one(self, arg):
         suite, case = arg
 
-        with open(f"data/{suite}.{case}.in") as in_f:
+        with open(f"data/{suite}.{case}.in") as in_f, open(
+            f"data/{suite}.{case}.out"
+        ) as out_f:
             try:
-                result = self.invoker.invoke(in_f.read())
+                result = self.invoker.invoke_with_output(in_f.read(), out_f.read())
 
                 return suite, case, result["checker_result"], result["process_time"]
 
