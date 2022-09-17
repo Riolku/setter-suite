@@ -42,6 +42,7 @@ public:
 
   void generate() override {
     auto tests = builder->build();
+    shuffle(tests);
     print(tests.size());
     for (const auto &test : tests) {
       test->generate();
