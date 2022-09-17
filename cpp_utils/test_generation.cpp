@@ -96,13 +96,19 @@ public:
       }
     }
     print(test_count);
+    List<pair<shared_ptr<MultipleTestsWithSumUnit>, int>, 1> used_tests;
+    used_tests.reserve(test_count);
     for (size_t ti = 1; ti <= tests.size(); ++ti) {
       int sz = test_sizes[ti];
       if (sz != -1) {
-        auto &test = tests[ti];
-        test->store_unit_value(sz);
-        test->generate();
+        used_tests.emplace_back(tests[ti], sz);
       }
+    }
+    shuffle(used_tests);
+
+    for (auto [test, sz] : used_tests) {
+      test->store_unit_value(sz);
+      test->generate();
     }
   }
 };
