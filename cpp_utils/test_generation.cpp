@@ -79,7 +79,7 @@ public:
   MultipleTestsWithSum(
       int max_total,
       unique_ptr<ListBuilder<shared_ptr<MultipleTestsWithSumUnit>>> builder)
-      : total(total), builder(move(builder)) {}
+      : max_total(max_total), builder(move(builder)) {}
 
   void generate() override {
     List<shared_ptr<MultipleTestsWithSumUnit>, 1> tests = builder->build();
