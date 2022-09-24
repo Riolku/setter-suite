@@ -18,6 +18,8 @@ template <typename T> class RandomStack {
 public:
   RandomStack() {}
 
+  void reserve(size_t N) { data.reserve(N); }
+
   size_t size() { return data.size(); }
 
   void push(T x) { data.push_back(move(x)); }
