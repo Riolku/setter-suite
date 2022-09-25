@@ -46,10 +46,11 @@ def main(args):
 class Invoker:
     def __init__(self, file):
         self.program = get_executor(file)
-        self.reference_sol = env.reference_sol
         self.checker = env.checker
 
     def invoke(self, input):
+        self.reference_sol = env.reference_sol
+
         process_result, process_time = self.program.run(
             input=input, timeout=env.timeout, return_time=True
         )
