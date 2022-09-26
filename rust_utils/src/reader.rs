@@ -1,5 +1,7 @@
+use std::fmt::Debug;
 use std::io::BufRead;
 use std::iter::Peekable;
+use std::str::FromStr;
 
 pub struct Reader<TK, EH>
 where
@@ -83,6 +85,13 @@ where
         let res = self.tokenizer.read_token();
         self.from_tk_result(res)
     }
+    pub fn parse_token<T>(&mut self) -> T
+    where
+        T: FromStr,
+        T::Err: Debug,
+    {
+        self.read_token().parse().unwrap()
+    }
     fn from_tk_result<T>(&self, res: TokenizerResult<T>) -> T {
         res.unwrap_or_else(|_| self.handler.wrong_whitespace())
     }
@@ -125,4 +134,25 @@ where
         let res = self.tokenizer.has_token_in_stream();
         self.from_tk_result(res)
     }
+}
+
+#[macro_export]
+macro_rules! read_sep {
+    ($rd:expr, $first:ty $(,$rest:ty)*) => {
+        {
+            let ret = (
+                {
+                    let ret: $first = $rd.parse_token();
+                    ret
+                },
+                $({
+                    $rd.expect_space();
+                    let ret: $rest = $rd.parse_token();
+                    ret
+                }),*
+            );
+            $rd.expect_newline();
+            ret
+        }
+    };
 }
