@@ -156,3 +156,6 @@ macro_rules! read_sep {
         }
     };
 }
+
+#[cfg(test)]
+mod tests;
