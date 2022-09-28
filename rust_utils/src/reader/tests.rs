@@ -1,11 +1,12 @@
-use super::*;
 use super::super::{identical_whitespace, panic_error_handler};
+use super::*;
 
 #[test]
 fn test_read_sep() {
     let mut reader = new_test_reader("a 1 2 3 4.5 bcde\n-1 -5\n6\n");
 
-    let (a, one, two, three, four_point_five, bcde) = read_sep!(reader, String, usize, u64, i32, f32, String);
+    let (a, one, two, three, four_point_five, bcde) =
+        read_sep!(reader, String, usize, u64, i32, f32, String);
     assert_eq!(a, "a");
     assert_eq!(one, 1);
     assert_eq!(two, 2);

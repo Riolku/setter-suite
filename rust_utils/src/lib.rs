@@ -9,5 +9,3 @@ pub mod standard_whitespace;
 
 pub mod panic_error_handler;
 pub mod validating_reader;
-
-fn pre_error() {}

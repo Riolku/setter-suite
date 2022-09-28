@@ -2,10 +2,13 @@ use super::reader::ErrorHandler;
 
 pub struct Handler;
 
-impl ErrorHandler for Handler {
-    fn new() -> Self {
+impl Handler {
+    pub fn new() -> Self {
         Self {}
     }
+}
+
+impl ErrorHandler for Handler {
     fn out_of_range(&self) -> ! {
         panic!("out of range")
     }

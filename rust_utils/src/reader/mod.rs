@@ -62,7 +62,6 @@ pub trait StandardWhitespace {
 }
 
 pub trait ErrorHandler {
-    fn new() -> Self;
     fn out_of_range(&self) -> !;
     fn parse_error(&self) -> !;
     fn wrong_whitespace(&self) -> !;

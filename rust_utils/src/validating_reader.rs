@@ -1,4 +1,4 @@
-use super::reader::{self, AsciiStream, ErrorHandler, Reader};
+use super::reader::{self, AsciiStream, Reader};
 use super::{identical_whitespace, panic_error_handler};
 use std::io::BufRead;
 

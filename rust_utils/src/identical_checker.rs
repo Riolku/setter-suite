@@ -1,28 +1,39 @@
-pub struct ErrorHandler;
+use super::checker::{codes, Checker};
+use super::identical_whitespace;
+use super::reader::{self, AsciiStream, Reader};
+use std::io::BufRead;
 
-use super::checker::{codes, exit};
+pub struct ErrorHandler<'a, F> {
+    checker: &'a Checker<F>,
+}
 
-impl super::reader::ErrorHandler for ErrorHandler {
-    fn new() -> Self {
-        Self {}
-    }
-    fn wrong_whitespace(&self) -> ! {
-        exit(codes::PE);
-    }
-    fn out_of_range(&self) -> ! {
-        exit(codes::WA);
-    }
-    fn parse_error(&self) -> ! {
-        exit(codes::WA);
+impl<'a, F> ErrorHandler<'a, F>
+where
+    F: FnOnce(),
+{
+    pub fn new(checker: &'a Checker<F>) -> Self {
+        Self { checker }
     }
 }
 
-use super::identical_whitespace;
-use super::reader::{self, AsciiStream, ErrorHandler as _, Reader};
-use std::io::BufRead;
+impl<'a, F> reader::ErrorHandler for ErrorHandler<'a, F>
+where
+    F: FnOnce(),
+{
+    fn wrong_whitespace(&self) -> ! {
+        self.checker.exit(codes::WA);
+    }
+    fn out_of_range(&self) -> ! {
+        self.checker.exit(codes::WA);
+    }
+    fn parse_error(&self) -> ! {
+        self.checker.exit(codes::WA);
+    }
+}
 
-pub fn new(
+pub fn new<'a, F: FnOnce()>(
     src: impl BufRead,
-) -> Reader<identical_whitespace::Handler<impl AsciiStream>, ErrorHandler> {
-    reader::new(identical_whitespace::new(src), ErrorHandler::new())
+    checker: &'a Checker<F>,
+) -> Reader<identical_whitespace::Handler<impl AsciiStream>, ErrorHandler<'a, F>> {
+    reader::new(identical_whitespace::new(src), ErrorHandler::new(checker))
 }

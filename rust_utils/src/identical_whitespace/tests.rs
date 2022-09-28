@@ -57,8 +57,8 @@ fn panics_when_no_newline_on_readline() {
     panic!("Should have died");
 }
 
+use super::super::{panic_error_handler, reader::Reader};
 use super::*;
-use super::super::{panic_error_handler, reader::ErrorHandler as _, reader::Reader};
 fn new_test_reader(
     contents: &str,
 ) -> Reader<Handler<impl AsciiStream + '_>, panic_error_handler::Handler> {

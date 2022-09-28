@@ -87,8 +87,8 @@ fn can_get_all_tokens_on_line() {
     assert_eq!(reader.next_token_on_line(), None);
 }
 
+use super::super::{panic_error_handler, reader::Reader};
 use super::*;
-use super::super::{panic_error_handler, reader::ErrorHandler as _, reader::Reader};
 fn test_reader(
     contents: &str,
 ) -> Reader<Handler<impl AsciiStream + '_>, panic_error_handler::Handler> {
