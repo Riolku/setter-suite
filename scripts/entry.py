@@ -11,6 +11,7 @@ from .build import main as build_main
 from .judge import main as judge_main
 from .invoke import main as invoke_main
 from .validate import main as validate_main
+from .rust import main as rust_main
 
 
 def main(args):
@@ -46,6 +47,9 @@ def main(args):
 
     elif newargs[0] == "validate":
         return validate_main(newargs[1:])
+
+    elif newargs[0] == "rust":
+        return rust_main(newargs[1:])
 
     print(f"Invalid operation '{newargs[0]}'!", file=sys.stderr)
     return -1
