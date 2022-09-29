@@ -3,4 +3,12 @@ name = "dmoj_rust_utils"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
+[features]
+checker = []
+identical_checker = ["checker", "identical_whitespace", "reader"]
+identical_whitespace = ["reader"]
+panic_error_handler = ["reader"]
+reader = []
+standard_checker = ["checker", "reader", "standard_whitespace"]
+standard_whitespace = ["reader"]
+validating_reader = ["reader", "identical_whitespace", "panic_error_handler"]
