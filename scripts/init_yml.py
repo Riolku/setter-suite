@@ -68,7 +68,15 @@ def add_checker(ret):
             checker.find(".") == -1
         ), "Checker must be a builtin checker if not bridged!"
 
-        ret["checker"] = checker
+        checker_args = env.checker_args
+
+        if checker_args == {}:
+            ret["checker"] = checker
+        else:
+            ret["checker"] = dict(
+                name=checker,
+                args=checker_args,
+            )
 
 
 def add_cases(

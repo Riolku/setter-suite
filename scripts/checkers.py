@@ -1,5 +1,6 @@
 import multiprocessing, os
 
+from re import split as resplit
 from termcolor import colored
 from typing import Tuple
 
@@ -25,24 +26,27 @@ def display_code(code):
 
 
 class Checker:
-    def get(id):
+    def get(id, args: dict):
         if id.endswith("cpp") or id.endswith("py"):
             return CustomChecker(id)
 
         else:
-            return BuiltinChecker.get(id)
+            return BuiltinChecker.get(id, args)
 
 
 class BuiltinChecker:
     def __init__(self):
         raise NotImplementedError
 
-    def get(id):
+    def get(id, args):
         if id == "identical":
             return IdenticalChecker()
 
         if id == "standard":
             return StandardChecker()
+
+        if id == "floats":
+            return FloatsChecker(precision=args.get("precision"))
 
         raise NotImplementedError(f"no such checker '{id}'")
 
@@ -115,6 +119,65 @@ class StandardChecker(BuiltinChecker):
             return codes["AC"]
         else:
             return codes["WA"]
+
+
+class FloatsChecker:
+    def __init__(self, *, precision=None):
+        self.precision = precision or 9
+
+    def check(self, inp: str, process: str, judge: str) -> int:
+        if self._check(inp, process, judge):
+            return codes["AC"]
+        else:
+            return codes["WA"]
+
+    def _check(self, inp: str, process: str, judge: str) -> bool:
+        # Discount empty lines
+        process_lines = list(filter(None, resplit("[\r\n]", process)))
+        judge_lines = list(filter(None, resplit("[\r\n]", judge)))
+
+        if len(process_lines) != len(judge_lines):
+            return False
+
+        epsilon = 10 ** -int(self.precision)
+
+        for process_line, judge_line in zip(process_lines, judge_lines):
+            process_tokens = process_line.split()
+            judge_tokens = judge_line.split()
+
+            if len(process_tokens) != len(judge_tokens):
+                return False
+
+            for process_token, judge_token in zip(process_tokens, judge_tokens):
+                # Allow mixed tokens, for lines like "abc 0.68 def 0.70"
+                try:
+                    judge_float = float(judge_token)
+                except ValueError:
+                    # If it's not a float the token must match exactly
+                    if process_token != judge_token:
+                        return False
+                else:
+                    try:
+                        process_float = float(process_token)
+                    except ValueError:
+                        return False
+
+                    else:
+                        if not self.verify_float(process_float, judge_float, epsilon):
+                            return False
+
+        return True
+
+    def verify_float(
+        self, process_float: float, judge_float: float, epsilon: float
+    ) -> bool:
+        # process_float can be NaN
+        # in this case, we reject NaN as a possible answer, even if judge_float is NaN
+        return (
+            abs(process_float - judge_float) <= epsilon
+            or abs(judge_float) >= epsilon
+            and abs(1.0 - process_float / judge_float) <= epsilon
+        )
 
 
 class CustomChecker:
