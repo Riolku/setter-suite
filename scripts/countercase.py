@@ -54,10 +54,13 @@ class CounterCaser:
         case = generator_res.stdout
 
         if not self.validator.validate(case):
-            return f"===CASE===\n{case}===CASE INVALID===\n"
+            return (
+                f"===CASE===\n{case}===CASE INVALID===\n"
+                + "===Gen Stderr===\n"
+                + f"{generator_res.stderr}"
+            )
 
         try:
-
             result = self.invoker.invoke(case)
 
             checker_res = result["checker_result"]
@@ -78,5 +81,5 @@ class CounterCaser:
                 )
 
             return None
-        except RuntimeError as e:
-            raise RuntimeError(f"==input===\n{case}=======\n")
+        except Exception as e:
+            raise Exception(f"==input===\n{case}=======\n")
