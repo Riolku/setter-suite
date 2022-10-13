@@ -16,6 +16,9 @@ pub mod standard_checker;
 #[cfg(feature = "standard_whitespace")]
 pub mod standard_whitespace;
 
+#[cfg(feature = "output")]
+pub mod output;
+
 #[cfg(feature = "panic_error_handler")]
 pub mod panic_error_handler;
 

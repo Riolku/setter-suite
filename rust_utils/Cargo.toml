@@ -7,6 +7,7 @@ edition = "2021"
 checker = []
 identical_checker = ["checker", "identical_whitespace", "reader"]
 identical_whitespace = ["reader"]
+output = []
 panic_error_handler = ["reader"]
 reader = []
 standard_checker = ["checker", "reader", "standard_whitespace"]
