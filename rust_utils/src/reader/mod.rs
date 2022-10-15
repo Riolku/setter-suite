@@ -139,18 +139,19 @@ where
 macro_rules! read_sep {
     ($rd:expr, $first:ty $(,$rest:ty)*) => {
         {
+            let rd_ref = &mut $rd;
             let ret = (
                 {
-                    let ret: $first = $rd.parse_token();
+                    let ret: $first = rd_ref.parse_token();
                     ret
                 },
                 $({
-                    $rd.expect_space();
-                    let ret: $rest = $rd.parse_token();
+                    rd_ref.expect_space();
+                    let ret: $rest = rd_ref.parse_token();
                     ret
                 }),*
             );
-            $rd.expect_newline();
+            rd_ref.expect_newline();
             ret
         }
     };
