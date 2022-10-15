@@ -3,5 +3,13 @@ from .executors import get_executor
 
 def main(args):
     assert len(args) > 0, "Must provide the file to compile!"
-    e = get_executor(args[0], debug="debug" in args, force_compile="force" in args)
+    debug = False
+    if "debug" in args:
+        debug = True
+        args.remove("debug")
+    force_compile = False
+    if "force_compile" in args:
+        force_compile = True
+        args.remove("force_compile")
+    e = get_executor(args[0], args[1:], debug=debug, force_compile=force_compile)
     return 0

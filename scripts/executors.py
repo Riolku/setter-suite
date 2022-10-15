@@ -3,32 +3,37 @@ from subprocess import PIPE
 from sys import exit
 
 from ctypes import cdll
+import os
 import signal
 
 CPP_EXT = ".cpp"
 PY_EXT = ".py"
 RUST_EXT = ".rs"
 
+SETTER_DIR = os.getenv("SETTER_DIR")
 
-def get_executor(file, *, debug=False, force_compile=False):
+
+def get_executor(file: str, extra_args: list, *, debug=False, force_compile=False):
     if file.endswith(CPP_EXT):
-        return CppExecutor(file, debug=debug, force_compile=force_compile)
+        return CppExecutor(file, extra_args, debug=debug, force_compile=force_compile)
     elif file.endswith(PY_EXT):
-        return PyExecutor(file, debug=debug, force_compile=force_compile)
+        return PyExecutor(file, extra_args, debug=debug, force_compile=force_compile)
     else:
         assert file.endswith(
             RUST_EXT
         ), f"Refusing to run '{file}' with unknown extension"
-        return RustExecutor(file, debug=debug, force_compile=force_compile)
+        return RustExecutor(file, extra_args, debug=debug, force_compile=force_compile)
 
 
 class Executor:
-    def __init__(self, file, *, debug=False, force_compile=False):
+    def __init__(
+        self, file: str, extra_args: list, *, debug=False, force_compile=False
+    ):
         self.file = file
-        self.compile(debug=debug, force_compile=force_compile)
+        self.compile(extra_args, debug=debug, force_compile=force_compile)
         self.exec = self.get_exec()
 
-    def compile(self, *, debug, force_compile) -> None:
+    def compile(self, args: list, *, debug: bool, force_compile: bool) -> None:
         pass
 
     def get_exec(self):
@@ -70,19 +75,19 @@ class Executor:
 class CompiledExecutor(Executor):
     ext = None
 
-    def compile(self, *, debug: bool, force_compile: bool) -> None:
+    def compile(self, args: list, *, debug: bool, force_compile: bool) -> None:
         self.compiled_file = self.file[: -len(self.ext)]
         try:
             if force_compile or more_recent(self.file, self.compiled_file):
-                self.force_compile(debug=debug)
+                self.force_compile(args, debug=debug)
 
         except FileNotFoundError:
-            self.force_compile(debug=debug)
+            self.force_compile(args, debug=debug)
 
-    def force_compile(self, *, debug: bool) -> None:
-        assert subprocess.run(self.get_compiler_cmd(debug=debug)).returncode == 0
+    def force_compile(self, args: list, *, debug: bool) -> None:
+        assert subprocess.run(self.get_compiler_cmd(args, debug=debug)).returncode == 0
 
-    def get_compiler_cmd(self):
+    def get_compiler_cmd(self, args: list, *, debug: bool):
         raise NotImplementedError
 
     def get_exec(self):
@@ -92,28 +97,21 @@ class CompiledExecutor(Executor):
 class CppExecutor(CompiledExecutor):
     ext = CPP_EXT
 
-    def get_compiler_cmd(self, *, debug: bool):
-        if debug:
-            return [
-                "g++",
-                "-Wall",
-                "-std=c++17",
-                "-g",
-                "-o",
-                self.compiled_file,
-                self.file,
-            ]
-
-        return [
+    def get_compiler_cmd(self, args: list, *, debug: bool):
+        cmd = [
             "g++",
-            "-O2",
             "-Wall",
             "-std=c++17",
             "-g",
             "-o",
             self.compiled_file,
             self.file,
-        ]
+        ] + args
+
+        if not debug:
+            cmd.append("-O2")
+
+        return cmd
 
 
 class PyExecutor(Executor):
@@ -128,10 +126,17 @@ class PyExecutor(Executor):
 class RustExecutor(CompiledExecutor):
     ext = RUST_EXT
 
-    def get_compiler_cmd(self, *, debug: bool):
-        if debug:
-            return ["rustc", "-g", self.file]
-        return ["rustc", "-g", "-O", self.file]
+    def get_compiler_cmd(self, args: list, *, debug: bool):
+        cmd = [
+            "rustc",
+            "-g",
+            "-L",
+            f"{SETTER_DIR}/rust_utils/target/debug/deps",
+            self.file,
+        ] + args
+        if not debug:
+            cmd += ["-O"]
+        return cmd
 
     def get_default_env(self):
         return dict(RUST_BACKTRACE="1")

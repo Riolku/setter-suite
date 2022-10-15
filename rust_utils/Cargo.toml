@@ -5,6 +5,7 @@ edition = "2021"
 
 [features]
 checker = []
+generator = ["output", "test_cases"]
 identical_checker = ["checker", "identical_whitespace", "reader"]
 identical_whitespace = ["reader"]
 interactive_solution = ["output", "tied_streams", "validating_reader"]
