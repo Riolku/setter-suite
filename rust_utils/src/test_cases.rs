@@ -12,7 +12,6 @@ pub struct LiteralTest {
 }
 
 impl LiteralTest {
-    // This should be `String`, but it's less convenient.
     pub fn new(input: &'static str, output: &'static str) -> Self {
         Self { input, output }
     }
@@ -28,7 +27,7 @@ impl TestCase for LiteralTest {
 }
 
 pub trait StreamWriteable {
-    fn write_to(&self, stream: impl Write);
+    fn write_to(&self, stream: &mut impl Write);
 }
 
 pub trait InputGenerator {
@@ -36,10 +35,18 @@ pub trait InputGenerator {
     fn generate(self, rng: impl Rng) -> Self::Input;
 }
 
-pub trait AbstractSolver {
-    type Input;
-    type Output;
-    fn solve(self, input: Self::Input) -> Self::Output;
+pub struct SolutionTestFactory<S> {
+    solver: S,
+}
+
+impl<S> SolutionTestFactory<S> {
+    pub const fn new(solver: S) -> Self {
+        Self { solver }
+    }
+
+    pub fn with<G>(self, generator: G) -> SolutionTest<G, S> {
+        SolutionTest::new(generator, self.solver)
+    }
 }
 
 pub struct SolutionTest<G, S> {
@@ -56,14 +63,16 @@ impl<G, S> SolutionTest<G, S> {
 impl<G, S, I, O> TestCase for SolutionTest<G, S>
 where
     G: InputGenerator<Input = I>,
-    S: AbstractSolver<Input = I, Output = O>,
+    S: FnOnce(I) -> O,
     I: StreamWriteable,
     O: StreamWriteable,
 {
-    fn generate(self, rng: impl Rng, input_stream: impl Write, output_stream: impl Write) {
+    fn generate(self, rng: impl Rng, mut input_stream: impl Write, mut output_stream: impl Write) {
         let input = self.generator.generate(rng);
-        input.write_to(input_stream);
-        let output = self.solver.solve(input);
-        output.write_to(output_stream);
+        input.write_to(&mut input_stream);
+        let output = (self.solver)(input);
+        output.write_to(&mut output_stream);
+        input_stream.flush().unwrap();
+        output_stream.flush().unwrap();
     }
 }
