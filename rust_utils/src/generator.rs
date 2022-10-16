@@ -9,8 +9,6 @@ macro_rules! count_exprs {
 macro_rules! generator_main {
     ($([$($case:expr,)*],)*) => {
         use std::process::ExitCode;
-        pub extern crate rand_xoshiro;
-        pub extern crate rand;
         fn main() -> ExitCode {
             use std::env;
             let mut args = env::args();

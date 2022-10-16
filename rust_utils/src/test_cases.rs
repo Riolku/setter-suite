@@ -1,5 +1,4 @@
-extern crate rand;
-use self::rand::Rng;
+use rand::Rng;
 use super::output::StreamWriteable;
 use std::io::Write;
 

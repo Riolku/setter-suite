@@ -34,6 +34,12 @@ class Env:
         newargs = []
 
         while i < len(args):
+            # Dashes stop processing as arguments
+            if args[i] == "-":
+                i += 1
+                newargs.extend(args[i:])
+                break
+
             if args[i].startswith("-"):
                 assert i + 1 < len(args), f"option {args[i]} requires an argument"
 

@@ -127,11 +127,17 @@ class RustExecutor(CompiledExecutor):
     ext = RUST_EXT
 
     def get_compiler_cmd(self, args: list, *, debug: bool):
+        # TODO: do we have to hardcode these paths
         cmd = [
             "rustc",
             "-g",
             "-L",
             f"{SETTER_DIR}/rust_utils/target/debug/deps",
+            "--extern",
+            f"rand={SETTER_DIR}/rust_utils/target/debug/deps/librand-d26ebf01dbcb67f8.rlib",
+            "--extern",
+            f"rand_xoshiro={SETTER_DIR}/rust_utils/target/debug/deps/librand_xoshiro-28a93eac8ba0cb71.rlib",
+            "--edition=2021",
             self.file,
         ] + args
         if not debug:
