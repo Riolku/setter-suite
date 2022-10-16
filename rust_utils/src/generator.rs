@@ -42,7 +42,6 @@ macro_rules! generator_main {
                                 );
 
                                 use std::io::{BufWriter, stdout, stderr};
-
                                 let input_stream = BufWriter::with_capacity(1048576, stdout().lock());
                                 let output_stream = BufWriter::with_capacity(1048576, stderr().lock());
 

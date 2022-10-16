@@ -127,7 +127,7 @@ class RustExecutor(CompiledExecutor):
     ext = RUST_EXT
 
     def get_compiler_cmd(self, args: list, *, debug: bool):
-        # TODO: do we have to hardcode these paths
+        # TODO: do we have to hardcode these paths?
         cmd = [
             "rustc",
             "-g",
