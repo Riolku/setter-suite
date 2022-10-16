@@ -9,8 +9,8 @@ macro_rules! count_exprs {
 macro_rules! generator_main {
     ($([$($case:expr,)*],)*) => {
         use std::process::ExitCode;
-        extern crate rand_xoshiro;
-        extern crate rand;
+        pub extern crate rand_xoshiro;
+        pub extern crate rand;
         fn main() -> ExitCode {
             use std::env;
             let mut args = env::args();
@@ -62,4 +62,10 @@ macro_rules! generator_main {
             }
         }
     };
+}
+
+pub mod prelude {
+    pub use rand::{Rng, distributions::Uniform};
+    pub use super::super::test_cases::{TestCase, InputGenerator, LiteralTest, SolutionTestFactory, StreamWriteable};
+    pub use std::io::Write;
 }
