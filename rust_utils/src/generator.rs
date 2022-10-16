@@ -65,7 +65,9 @@ macro_rules! generator_main {
 }
 
 pub mod prelude {
-    pub use rand::{Rng, distributions::Uniform};
-    pub use super::super::test_cases::{TestCase, InputGenerator, LiteralTest, SolutionTestFactory, StreamWriteable};
+    pub use super::super::test_cases::{
+        InputGenerator, LiteralTest, SolutionTestFactory, StreamWriteable, TestCase,
+    };
+    pub use rand::{distributions::Uniform, Rng};
     pub use std::io::Write;
 }
