@@ -2,4 +2,4 @@ import sys
 
 import scripts
 
-scripts.main(sys.argv[1:])
+sys.exit(scripts.main(sys.argv[1:]))
