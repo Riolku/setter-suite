@@ -22,6 +22,15 @@ fn test_read_sep() {
     assert_eq!(six, 6);
 }
 
+#[test]
+fn test_read_array() {
+    let mut reader = new_test_reader("1 2 3 4\n1\n");
+    let v = read_array!(reader, 4, usize);
+    assert_eq!(v, vec![1, 2, 3, 4])
+    let v = read_array!(reader, 1, usize);
+    assert_eq!(v, vec![1]);
+}
+
 fn new_test_reader(
     contents: &str,
 ) -> Reader<identical_whitespace::Handler<impl AsciiStream + '_>, panic_error_handler::Handler> {
