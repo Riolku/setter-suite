@@ -159,25 +159,21 @@ macro_rules! read_sep {
 
 #[macro_export]
 macro_rules! read_array {
-    ($rd:expr, $size:expr, $type:ty) => {
-        {
-            let cap = $size;
-            let mut ret = Vec::with_capacity(cap);
-            for i in 0..cap {
-                if i != 0 {
-                    $rd.expect_space();
-                }
-
-                let item: $type = $rd.parse_token();
-                ret.push(item);
+    ($rd:expr, $size:expr, $type:ty) => {{
+        let cap = $size;
+        let mut ret = Vec::with_capacity(cap);
+        for i in 0..cap {
+            if i != 0 {
+                $rd.expect_space();
             }
-            $rd.expect_newline();
-            ret
+
+            let item: $type = $rd.parse_token();
+            ret.push(item);
         }
-    };
+        $rd.expect_newline();
+        ret
+    }};
 }
-
-
 
 #[cfg(test)]
 mod tests;

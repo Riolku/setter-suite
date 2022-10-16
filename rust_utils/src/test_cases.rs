@@ -1,8 +1,30 @@
-use rand::Rng;
+extern crate rand;
+use self::rand::Rng;
 use std::io::Write;
 
 pub trait TestCase {
     fn generate(self, rng: impl Rng, input_stream: impl Write, output_stream: impl Write);
+}
+
+pub struct LiteralTest {
+    input: &'static str,
+    output: &'static str,
+}
+
+impl LiteralTest {
+    // This should be `String`, but it's less convenient.
+    pub fn new(input: &'static str, output: &'static str) -> Self {
+        Self { input, output }
+    }
+}
+
+impl TestCase for LiteralTest {
+    fn generate(self, _: impl Rng, mut input_stream: impl Write, mut output_stream: impl Write) {
+        input_stream.write_all(&self.input.as_bytes()).unwrap();
+        output_stream.write_all(&self.output.as_bytes()).unwrap();
+        input_stream.flush().unwrap();
+        output_stream.flush().unwrap();
+    }
 }
 
 pub trait StreamWriteable {
@@ -25,8 +47,7 @@ pub struct SolutionTest<G, S> {
     solver: S,
 }
 
-impl<G, S> SolutionTest<G, S>
-{
+impl<G, S> SolutionTest<G, S> {
     pub fn new(generator: G, solver: S) -> Self {
         Self { generator, solver }
     }

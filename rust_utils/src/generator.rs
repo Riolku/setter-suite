@@ -9,6 +9,8 @@ macro_rules! count_exprs {
 macro_rules! generator_main {
     ($([$($case:expr,)*],)*) => {
         use std::process::ExitCode;
+        extern crate rand_xoshiro;
+        extern crate rand;
         fn main() -> ExitCode {
             use std::env;
             let mut args = env::args();
@@ -36,7 +38,20 @@ macro_rules! generator_main {
                         $(
                             running_case += 1;
                             if running_case == case_num {
-                                $case.generate();
+                                use rand::SeedableRng;
+                                let rng = rand_xoshiro::Xoshiro256PlusPlus::from_seed({
+                                    let mut seed = [0u8; 32];
+                                    seed[0] = suite as u8;
+                                    seed[1] = case_num as u8;
+                                    seed
+                                });
+
+                                use std::io::{BufWriter, stdout, stderr};
+
+                                let input_stream = BufWriter::with_capacity(1048576, stdout().lock());
+                                let output_stream = BufWriter::with_capacity(1048576, stderr().lock());
+
+                                $case.generate(rng, input_stream, output_stream);
                                 return ExitCode::SUCCESS;
                             }
                         )*
