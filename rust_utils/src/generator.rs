@@ -64,10 +64,25 @@ macro_rules! generator_main {
     };
 }
 
-pub mod prelude {
-    pub use super::super::test_cases::{
-        InputGenerator, LiteralTest, SolutionTestFactory, StreamWriteable, TestCase,
+#[macro_export]
+macro_rules! bind_solution_test {
+    ($solve:ident, $input_type:ty, $output_type:ty) => {
+        struct SolutionTest;
+
+        use dmoj_rust_utils::test_cases::AbstractSolutionTest;
+        impl SolutionTest {
+            fn new<G>(
+                generator: G,
+            ) -> AbstractSolutionTest<G, impl FnOnce($input_type) -> $output_type> {
+                AbstractSolutionTest::new(generator, $solve)
+            }
+        }
     };
-    pub use rand::{distributions::Uniform, Rng};
+}
+
+pub mod prelude {
+    pub use super::super::output::StreamWriteable;
+    pub use super::super::test_cases::{InputGenerator, LiteralTest, TestCase};
+    pub use rand::{self, distributions::Uniform, Rng};
     pub use std::io::Write;
 }
