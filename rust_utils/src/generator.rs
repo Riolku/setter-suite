@@ -39,12 +39,9 @@ macro_rules! generator_main {
                             running_case += 1;
                             if running_case == case_num {
                                 use rand::SeedableRng;
-                                let rng = rand_xoshiro::Xoshiro256PlusPlus::from_seed({
-                                    let mut seed = [0u8; 32];
-                                    seed[0] = suite as u8;
-                                    seed[1] = case_num as u8;
-                                    seed
-                                });
+                                let rng = rand_xoshiro::Xoshiro256PlusPlus::seed_from_u64(
+                                    ((suite << 32) | case_num) as u64
+                                );
 
                                 use std::io::{BufWriter, stdout, stderr};
 
