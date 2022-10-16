@@ -26,7 +26,7 @@ fn test_read_sep() {
 fn test_read_array() {
     let mut reader = new_test_reader("1 2 3 4\n1\n");
     let v = read_array!(reader, 4, usize);
-    assert_eq!(v, vec![1, 2, 3, 4])
+    assert_eq!(v, vec![1, 2, 3, 4]);
     let v = read_array!(reader, 1, usize);
     assert_eq!(v, vec![1]);
 }
