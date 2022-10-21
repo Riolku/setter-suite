@@ -26,5 +26,7 @@ def main(args):
         return result
 
     with open(args[0], "w") as source_file:
-        write_template(args[1:], output_file=source_file)
+        ret = write_template(args[1:], output_file=source_file)
+        if ret:
+            return ret
         source_file.write(rest)

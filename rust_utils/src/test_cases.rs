@@ -1,5 +1,5 @@
-use rand::Rng;
 use super::output::StreamWriteable;
+use rand::Rng;
 use std::io::Write;
 
 pub trait TestCase {

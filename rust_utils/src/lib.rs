@@ -25,6 +25,9 @@ pub mod panic_error_handler;
 #[cfg(feature = "reader")]
 pub mod reader;
 
+#[cfg(feature = "splay")]
+pub mod splay;
+
 #[cfg(feature = "standard_checker")]
 pub mod standard_checker;
 
