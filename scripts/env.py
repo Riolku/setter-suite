@@ -1,4 +1,4 @@
-import json, yaml, multiprocessing
+import os, json, yaml, multiprocessing
 
 from cached_property import cached_property
 
@@ -58,7 +58,13 @@ class Env:
 
     @cached_property
     def reference_sol(self):
-        return get_executor(self.env.get("reference_sol", "sol.cpp"))
+        reference_file = self.env.get("reference_sol")
+        if os.path.exists("sol.cpp"):
+            reference_file = "sol.cpp"
+        if os.path.exists("sol.rs"):
+            reference_file = "sol.rs"
+
+        return get_executor(reference_file)
 
     @cached_property
     def checker_name(self):

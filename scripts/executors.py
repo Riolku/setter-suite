@@ -13,24 +13,32 @@ RUST_EXT = ".rs"
 SETTER_DIR = os.getenv("SETTER_DIR")
 
 
-def get_executor(file: str, extra_args: list, *, debug=False, force_compile=False):
+def get_executor(
+    file: str, extra_compile_args: list = [], *, debug=False, force_compile=False
+):
     if file.endswith(CPP_EXT):
-        return CppExecutor(file, extra_args, debug=debug, force_compile=force_compile)
+        return CppExecutor(
+            file, extra_compile_args, debug=debug, force_compile=force_compile
+        )
     elif file.endswith(PY_EXT):
-        return PyExecutor(file, extra_args, debug=debug, force_compile=force_compile)
+        return PyExecutor(
+            file, extra_compile_args, debug=debug, force_compile=force_compile
+        )
     else:
         assert file.endswith(
             RUST_EXT
         ), f"Refusing to run '{file}' with unknown extension"
-        return RustExecutor(file, extra_args, debug=debug, force_compile=force_compile)
+        return RustExecutor(
+            file, extra_compile_args, debug=debug, force_compile=force_compile
+        )
 
 
 class Executor:
     def __init__(
-        self, file: str, extra_args: list, *, debug=False, force_compile=False
+        self, file: str, extra_compile_args: list, *, debug=False, force_compile=False
     ):
         self.file = file
-        self.compile(extra_args, debug=debug, force_compile=force_compile)
+        self.compile(extra_compile_args, debug=debug, force_compile=force_compile)
         self.exec = self.get_exec()
 
     def compile(self, args: list, *, debug: bool, force_compile: bool) -> None:
