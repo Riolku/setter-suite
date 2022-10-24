@@ -39,9 +39,6 @@ identical_interactor:
 - identical_checker
 - interaction
 
-integer_range:
-- list
-
 interaction:
 - checker_utils
 
@@ -66,7 +63,6 @@ pairs:
 
 random_arrays:
 - list
-- integer_range
 - random
 
 random_graphs:
@@ -99,7 +95,6 @@ sol_dependencies:
 - output
 - validation
 - list
-- integer_range
 
 sol_entry:
 - sol_dependencies
