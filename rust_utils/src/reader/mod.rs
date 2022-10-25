@@ -164,7 +164,7 @@ macro_rules! read_into_iter {
         let rd_ref = &mut $rd;
         let cap = $size;
 
-        assert!(cap != 0);
+        assert!(cap != 0, "Why are you calling `read_into_iter` with a size of zero? If you really want one, use `read_array`.");
         std::iter::repeat_with(move || {
             debug_assert!(i < cap);
             if i != 0 {
@@ -196,7 +196,7 @@ macro_rules! read_array {
         }
         rd_ref.expect_newline();
         ret
-    }}
+    }};
 }
 
 #[cfg(test)]
