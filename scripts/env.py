@@ -59,10 +59,11 @@ class Env:
     @cached_property
     def reference_sol(self):
         reference_file = self.env.get("reference_sol")
-        if os.path.exists("sol.cpp"):
-            reference_file = "sol.cpp"
-        if os.path.exists("sol.rs"):
-            reference_file = "sol.rs"
+        if reference_file is None:
+            if os.path.exists("sol.cpp"):
+                reference_file = "sol.cpp"
+            if os.path.exists("sol.rs"):
+                reference_file = "sol.rs"
 
         return get_executor(reference_file)
 
