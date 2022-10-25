@@ -158,21 +158,45 @@ macro_rules! read_sep {
 }
 
 #[macro_export]
+macro_rules! read_into_iter {
+    ($rd:expr, $size:expr, $type:ty) => {{
+        let mut i = 0;
+        let rd_ref = &mut $rd;
+        let cap = $size;
+
+        assert!(cap != 0);
+        std::iter::repeat_with(move || {
+            debug_assert!(i < cap);
+            if i != 0 {
+                rd_ref.expect_space();
+            }
+            let item: $type = rd_ref.parse_token();
+            i += 1;
+            if i == cap {
+                rd_ref.expect_newline();
+            }
+
+            item
+        }).take(cap)
+    }};
+}
+
+#[macro_export]
 macro_rules! read_array {
     ($rd:expr, $size:expr, $type:ty) => {{
+        let rd_ref = &mut $rd;
         let cap = $size;
         let mut ret = Vec::with_capacity(cap);
         for i in 0..cap {
             if i != 0 {
-                $rd.expect_space();
+                rd_ref.expect_space();
             }
-
-            let item: $type = $rd.parse_token();
+            let item: $type = rd_ref.parse_token();
             ret.push(item);
         }
-        $rd.expect_newline();
+        rd_ref.expect_newline();
         ret
-    }};
+    }}
 }
 
 #[cfg(test)]

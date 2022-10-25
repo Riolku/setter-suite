@@ -23,12 +23,23 @@ fn test_read_sep() {
 }
 
 #[test]
-fn test_read_array() {
+fn test_read_into_iter() {
     let mut reader = new_test_reader("1 2 3 4\n1\n");
+    let v = read_into_iter!(reader, 4, usize);
+    assert!(v.eq(vec![1, 2, 3, 4]));
+    let v = read_into_iter!(reader, 1, usize);
+    assert!(v.eq(vec![1]));
+}
+
+#[test]
+fn test_read_array() {
+    let mut reader = new_test_reader("1 2 3 4\n1\n\n");
     let v = read_array!(reader, 4, usize);
     assert_eq!(v, vec![1, 2, 3, 4]);
     let v = read_array!(reader, 1, usize);
     assert_eq!(v, vec![1]);
+    let v = read_array!(reader, 0, usize);
+    assert_eq!(v, vec![]);
 }
 
 fn new_test_reader(
