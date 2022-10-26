@@ -35,7 +35,7 @@ class Env:
 
         while i < len(args):
             # Dashes stop processing as arguments
-            if args[i] == "-":
+            if args[i] == "--":
                 i += 1
                 newargs.extend(args[i:])
                 break
