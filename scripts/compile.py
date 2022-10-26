@@ -8,8 +8,8 @@ def main(args):
         debug = True
         args.remove("debug")
     force_compile = False
-    if "force_compile" in args:
+    if "force" in args:
         force_compile = True
-        args.remove("force_compile")
+        args.remove("force")
     e = get_executor(args[0], args[1:], debug=debug, force_compile=force_compile)
     return 0
