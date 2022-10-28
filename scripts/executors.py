@@ -6,6 +6,7 @@ from ctypes import cdll
 import os
 import signal
 
+C_EXT = ".c"
 CPP_EXT = ".cpp"
 PY_EXT = ".py"
 RUST_EXT = ".rs"
@@ -22,6 +23,10 @@ def get_executor(
         )
     elif file.endswith(PY_EXT):
         return PyExecutor(
+            file, extra_compile_args, debug=debug, force_compile=force_compile
+        )
+    elif file.endswith(C_EXT):
+        return CExecutor(
             file, extra_compile_args, debug=debug, force_compile=force_compile
         )
     else:
@@ -110,6 +115,26 @@ class CppExecutor(CompiledExecutor):
             "g++",
             "-Wall",
             "-std=c++17",
+            "-g",
+            "-o",
+            self.compiled_file,
+            self.file,
+        ] + args
+
+        if not debug:
+            cmd.append("-O2")
+
+        return cmd
+
+
+class CExecutor(CompiledExecutor):
+    ext = C_EXT
+
+    def get_compiler_cmd(self, args: list, *, debug: bool):
+        cmd = [
+            "gcc",
+            "-Wall",
+            "-std=c99",
             "-g",
             "-o",
             self.compiled_file,
