@@ -4,6 +4,9 @@ pub mod checker;
 #[cfg(feature = "generator")]
 pub mod generator;
 
+#[cfg(feature = "identical_checker")]
+pub mod identical_checker;
+
 #[cfg(feature = "identical_checker_handler")]
 pub mod identical_checker_handler;
 

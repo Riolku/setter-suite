@@ -3,25 +3,25 @@ use super::identical_whitespace;
 use super::reader::{self, AsciiStream, Reader};
 use std::io::BufRead;
 
-pub struct ErrorHandler<'a, F> {
-    checker: &'a Checker<F>,
+pub struct ErrorHandler<F> {
+    checker: Checker<F>,
 }
 
-impl<'a, F> ErrorHandler<'a, F>
+impl<F> ErrorHandler<F>
 where
     F: FnOnce(),
 {
-    pub fn new(checker: &'a Checker<F>) -> Self {
+    pub fn new(checker: Checker<F>) -> Self {
         Self { checker }
     }
 }
 
-impl<'a, F> reader::ErrorHandler for ErrorHandler<'a, F>
+impl<F> reader::ErrorHandler for ErrorHandler<F>
 where
     F: FnOnce(),
 {
     fn wrong_whitespace(&self) -> ! {
-        self.checker.exit(codes::WA);
+        self.checker.exit(codes::PE);
     }
     fn out_of_range(&self) -> ! {
         self.checker.exit(codes::WA);
@@ -31,9 +31,9 @@ where
     }
 }
 
-pub fn new<'a, F: FnOnce()>(
+pub fn new_checker<F: FnOnce()>(
     src: impl BufRead,
-    checker: &'a Checker<F>,
-) -> Reader<identical_whitespace::Handler<impl AsciiStream>, ErrorHandler<'a, F>> {
+    checker: Checker<F>,
+) -> Reader<identical_whitespace::Handler<impl AsciiStream>, ErrorHandler<F>> {
     reader::new(identical_whitespace::new(src), ErrorHandler::new(checker))
 }
