@@ -1,5 +1,5 @@
 use super::reader::{
-    self, AsciiStream, StandardWhitespace, Tokenizer, TokenizerResult, WRONG_WHITESPACE,
+    self, AsciiStream, StandardWhitespace, TokenizerResult, WRONG_WHITESPACE,
 };
 use std::io::BufRead;
 
@@ -11,18 +11,18 @@ enum WhitespaceFlag {
     All,
 }
 
-pub struct Handler<S: AsciiStream> {
+pub struct Tokenizer<S: AsciiStream> {
     src: S,
     flag: WhitespaceFlag,
 }
-pub fn new(src: impl BufRead) -> Handler<impl AsciiStream> {
-    Handler {
+pub fn new(src: impl BufRead) -> Tokenizer<impl AsciiStream> {
+    Tokenizer {
         src: reader::to_ascii_stream(src),
         flag: WhitespaceFlag::All,
     }
 }
 
-impl<S> Handler<S>
+impl<S> Tokenizer<S>
 where
     S: AsciiStream,
 {
@@ -105,7 +105,7 @@ where
     }
 }
 
-impl<S> Tokenizer for Handler<S>
+impl<S> reader::Tokenizer for Tokenizer<S>
 where
     S: AsciiStream,
 {
@@ -137,7 +137,7 @@ where
     }
 }
 
-impl<S> StandardWhitespace for Handler<S>
+impl<S> StandardWhitespace for Tokenizer<S>
 where
     S: AsciiStream,
 {

@@ -1,6 +1,6 @@
 use super::checker::{self, codes, Checker};
-use super::identical_whitespace;
-use super::reader::{self, AsciiStream, Tokenizer, Reader};
+use super::reader::{self, AsciiStream, Reader, Tokenizer};
+use super::standard_whitespace;
 use std::io::BufRead;
 
 pub struct ErrorHandler<F> {
@@ -21,7 +21,7 @@ where
     F: FnOnce(),
 {
     fn wrong_whitespace(&self) -> ! {
-        self.checker.exit(codes::PE);
+        self.checker.exit(codes::WA);
     }
     fn out_of_range(&self) -> ! {
         self.checker.exit(codes::WA);
@@ -34,8 +34,8 @@ where
 pub fn new_checker<F: FnOnce()>(
     src: impl BufRead,
     checker: Checker<F>,
-) -> Reader<identical_whitespace::Tokenizer<impl AsciiStream>, ErrorHandler<F>> {
-    reader::new(identical_whitespace::new(src), ErrorHandler::new(checker))
+) -> Reader<standard_whitespace::Tokenizer<impl AsciiStream>, ErrorHandler<F>> {
+    reader::new(standard_whitespace::new(src), ErrorHandler::new(checker))
 }
 
 pub fn entry<F: FnOnce()>(
@@ -44,7 +44,7 @@ pub fn entry<F: FnOnce()>(
     Checker<F>,
     Reader<impl Tokenizer, impl reader::ErrorHandler>,
     Reader<
-        identical_whitespace::Tokenizer<impl AsciiStream>,
+        standard_whitespace::Tokenizer<impl AsciiStream>,
         ErrorHandler<F>,
     >,
     Reader<impl Tokenizer, impl reader::ErrorHandler>,

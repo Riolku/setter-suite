@@ -1,18 +1,18 @@
 use super::reader::{
-    self, AsciiStream, ExactWhitespaceTokenizer, Tokenizer, TokenizerResult, WRONG_WHITESPACE,
+    self, AsciiStream, ExactWhitespaceTokenizer, TokenizerResult, WRONG_WHITESPACE,
 };
 use std::io::BufRead;
 
-pub struct Handler<S: AsciiStream> {
+pub struct Tokenizer<S: AsciiStream> {
     src: S,
 }
-pub fn new(src: impl BufRead) -> Handler<impl AsciiStream> {
-    Handler {
+pub fn new(src: impl BufRead) -> Tokenizer<impl AsciiStream> {
+    Tokenizer {
         src: reader::to_ascii_stream(src),
     }
 }
 
-impl<S> Tokenizer for Handler<S>
+impl<S> reader::Tokenizer for Tokenizer<S>
 where
     S: AsciiStream,
 {
@@ -47,7 +47,7 @@ where
     }
 }
 
-impl<S> ExactWhitespaceTokenizer for Handler<S>
+impl<S> ExactWhitespaceTokenizer for Tokenizer<S>
 where
     S: AsciiStream,
 {

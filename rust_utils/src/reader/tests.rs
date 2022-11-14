@@ -44,7 +44,7 @@ fn test_read_array() {
 
 fn new_test_reader(
     contents: &str,
-) -> Reader<identical_whitespace::Handler<impl AsciiStream + '_>, panic_error_handler::Handler> {
+) -> Reader<identical_whitespace::Tokenizer<impl AsciiStream + '_>, panic_error_handler::Handler> {
     new(
         identical_whitespace::new(contents.as_bytes()),
         panic_error_handler::Handler::new(),

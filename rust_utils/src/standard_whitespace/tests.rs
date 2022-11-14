@@ -91,7 +91,7 @@ use super::super::{panic_error_handler, reader::Reader};
 use super::*;
 fn test_reader(
     contents: &str,
-) -> Reader<Handler<impl AsciiStream + '_>, panic_error_handler::Handler> {
+) -> Reader<Tokenizer<impl AsciiStream + '_>, panic_error_handler::Handler> {
     reader::new(
         new(contents.as_bytes()),
         panic_error_handler::Handler::new(),
