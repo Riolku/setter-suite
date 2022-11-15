@@ -1,8 +1,8 @@
 #[macro_export]
 macro_rules! count_exprs {
     () => { 0 };
-    ($odd:expr $(, $a:expr, $b:expr)*) => { (count_exprs!($($a)*) << 1) | 1 };
-    ($($a:expr, $even:expr),*) => { count_exprs!($($a)*) << 1 };
+    ($odd:expr $(, $a:expr, $b:expr)*) => { (count_exprs!($($a),*) << 1) | 1 };
+    ($($a:expr, $even:expr),*) => { count_exprs!($($a),*) << 1 };
 }
 
 #[macro_export]
