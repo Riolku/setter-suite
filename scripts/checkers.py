@@ -27,7 +27,7 @@ def display_code(code):
 
 class Checker:
     def get(id, args: dict):
-        if id.endswith("cpp") or id.endswith("py"):
+        if id.endswith("cpp") or id.endswith("rs") or id.endswith("py"):
             return CustomChecker(id)
 
         else:
