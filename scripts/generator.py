@@ -25,23 +25,24 @@ def main(args):
         for suite, case in p.imap(gen.generate, env.case_iter):
             print("Generated    %.2d.%.2d" % (suite, case))
 
-    print("---Creating Zip---")
+    if env.init_type == "zip":
+        print("---Creating Zip---")
 
-    # I really don't think this can be parallelized effectively
-    # Nor is it slow
-    with zipfile.ZipFile("data/data.zip", "w") as zf:
-        for suite, case_num in env.case_iter:
-            print("Adding       %.2d.%.2d" % (suite, case_num))
+        # I really don't think this can be parallelized effectively
+        # Nor is it slow
+        with zipfile.ZipFile("data/data.zip", "w") as zf:
+            for suite, case_num in env.case_iter:
+                print("Adding       %.2d.%.2d" % (suite, case_num))
 
-            with open(f"data/{suite}.{case_num}.in", "rb") as data_f:
-                with zf.open(f"{suite}.{case_num}.in", "w") as zip_f:
-                    zip_f.write(data_f.read())
-
-                with open(f"data/{suite}.{case_num}.out", "rb") as data_f:
-                    with zf.open(f"{suite}.{case_num}.out", "w") as zip_f:
+                with open(f"data/{suite}.{case_num}.in", "rb") as data_f:
+                    with zf.open(f"{suite}.{case_num}.in", "w") as zip_f:
                         zip_f.write(data_f.read())
 
-    print("---Done Data Generation---")
+                    with open(f"data/{suite}.{case_num}.out", "rb") as data_f:
+                        with zf.open(f"{suite}.{case_num}.out", "w") as zip_f:
+                            zip_f.write(data_f.read())
+
+        print("---Done Data Generation---")
 
     init_yml_main([])
     return 0

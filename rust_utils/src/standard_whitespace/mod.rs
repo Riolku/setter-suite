@@ -38,7 +38,7 @@ where
         }
     }
     fn raw_read_token(&mut self) -> String {
-        let mut token = String::new();
+        let mut token = String::with_capacity(32);
         while matches!(self.src.peek(), Some(c) if !c.is_ascii_whitespace()) {
             token.push(self.src.next().unwrap());
         }

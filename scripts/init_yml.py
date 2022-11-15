@@ -24,7 +24,7 @@ def main(main):
 
 
 def add_base(ret):
-    ret["output_limit_length"] = env.get("output_limit_length", 10**6)
+    ret["output_limit_length"] = env.get("output_limit_length", 10 ** 6)
     ret["output_prefix_length"] = env.get("output_prefix_length", 0)
 
 
@@ -47,12 +47,15 @@ def add_checker(ret):
 
     checker = env.checker_name
 
-    if checker.endswith("cpp"):
+    if checker.endswith(".cpp") or checker.endswith(".rs"):
+        LANG_CODES = {".cpp": "CPP17", ".rs": "RUST"}
+        ext = checker[checker.index(".") :]
+
         ret["checker"] = dict(
             name="bridged",
             args=dict(
                 files=checker,
-                lang=env.get("checker_lang", "CPP20"),
+                lang=LANG_CODES[ext],
                 feedback=env.get("checker_feedback", True),
                 type=env.get("checker_type", "coci"),
                 cached=env.get("cached", True),

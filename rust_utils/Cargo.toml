@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-checker = []
+checker = ["reader", "validating_reader"]
 generator = ["output", "test_cases"]
 identical_checker = ["checker", "identical_checker_handler", "validating_reader"]
 identical_checker_handler = ["checker", "identical_whitespace", "reader"]
