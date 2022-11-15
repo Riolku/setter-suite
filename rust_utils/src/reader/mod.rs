@@ -89,7 +89,7 @@ where
         T: FromStr,
         T::Err: Debug,
     {
-        self.read_token().parse().unwrap()
+        self.read_token().parse().unwrap_or_else(|_| self.handler.parse_error())
     }
     fn from_tk_result<T>(&self, res: TokenizerResult<T>) -> T {
         res.unwrap_or_else(|_| self.handler.wrong_whitespace())
