@@ -43,10 +43,7 @@ pub fn entry<F: FnOnce()>(
 ) -> (
     Checker<F>,
     Reader<impl Tokenizer, impl reader::ErrorHandler>,
-    Reader<
-        standard_whitespace::Tokenizer<impl AsciiStream>,
-        ErrorHandler<F>,
-    >,
+    Reader<standard_whitespace::Tokenizer<impl AsciiStream>, ErrorHandler<F>>,
     Reader<impl Tokenizer, impl reader::ErrorHandler>,
 ) {
     checker::entry(f, new_checker)

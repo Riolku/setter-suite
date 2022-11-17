@@ -6,7 +6,7 @@ fn test_read_sep() {
     let mut reader = new_test_reader("a 1 2 3 4.5 bcde\n-1 -5\n6\n");
 
     let (a, one, two, three, four_point_five, bcde) =
-        read_sep!(reader, String, usize, u64, i32, f32, String);
+        read_sep_without_range!(reader, String, usize, u64, i32, f32, String);
     assert_eq!(a, "a");
     assert_eq!(one, 1);
     assert_eq!(two, 2);
@@ -14,31 +14,30 @@ fn test_read_sep() {
     assert!(f32::abs(four_point_five - 4.5) < 1e-9);
     assert_eq!(bcde, "bcde");
 
-    let (negative_one, negative_five) = read_sep!(reader, i8, isize);
+    let (negative_one, negative_five) = read_sep!(reader, -6..0, i8, isize);
     assert_eq!(negative_one, -1);
     assert_eq!(negative_five, -5);
 
-    let (six,) = read_sep!(reader, u32);
-    assert_eq!(six, 6);
+    let _ = read_sep!(reader, (6..=6), u32);
 }
 
 #[test]
 fn test_read_into_iter() {
     let mut reader = new_test_reader("1 2 3 4\n1\n");
-    let v = read_into_iter!(reader, 4, usize);
+    let v = read_into_iter!(reader, 4, usize, 1..=5);
     assert!(v.eq(vec![1, 2, 3, 4]));
-    let v = read_into_iter!(reader, 1, usize);
+    let v = read_into_iter!(reader, 1, usize, 1..=5);
     assert!(v.eq(vec![1]));
 }
 
 #[test]
 fn test_read_array() {
     let mut reader = new_test_reader("1 2 3 4\n1\n\n");
-    let v = read_array!(reader, 4, usize);
+    let v = read_array!(reader, 4, usize, 1..=5);
     assert_eq!(v, vec![1, 2, 3, 4]);
-    let v = read_array!(reader, 1, usize);
+    let v = read_array!(reader, 1, usize, 1..=5);
     assert_eq!(v, vec![1]);
-    let v = read_array!(reader, 0, usize);
+    let v = read_array!(reader, 0, usize, 1..=5);
     assert_eq!(v, vec![]);
 }
 

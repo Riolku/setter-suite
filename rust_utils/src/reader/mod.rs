@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 use std::io::BufRead;
 use std::iter::Peekable;
+use std::ops::RangeBounds;
 use std::str::FromStr;
 
 pub struct Reader<TK, EH>
@@ -84,12 +85,24 @@ where
         let res = self.tokenizer.read_token();
         self.from_tk_result(res)
     }
-    pub fn parse_token<T>(&mut self) -> T
+    pub fn parse_token_without_range<T>(&mut self) -> T
     where
         T: FromStr,
         T::Err: Debug,
     {
-        self.read_token().parse().unwrap_or_else(|_| self.handler.parse_error())
+        self.read_token()
+            .parse()
+            .unwrap_or_else(|_| self.handler.parse_error())
+    }
+    pub fn parse_token<T>(&mut self, range: &impl RangeBounds<T>) -> T
+    where
+        T: FromStr + PartialOrd,
+        T::Err: Debug,
+    {
+        match self.parse_token_without_range() {
+            val if range.contains(&val) => val,
+            _ => self.handler.out_of_range(),
+        }
     }
     fn from_tk_result<T>(&self, res: TokenizerResult<T>) -> T {
         res.unwrap_or_else(|_| self.handler.wrong_whitespace())
@@ -137,17 +150,17 @@ where
 
 #[macro_export]
 macro_rules! read_sep {
-    ($rd:expr, $first:ty $(,$rest:ty)*) => {
+    ($rd:expr, $range:expr, $first:ty $(,$rest:ty)*) => {
         {
             let rd_ref = &mut $rd;
             let ret = (
                 {
-                    let ret: $first = rd_ref.parse_token();
+                    let ret: $first = rd_ref.parse_token(&$range);
                     ret
                 },
                 $({
                     rd_ref.expect_space();
-                    let ret: $rest = rd_ref.parse_token();
+                    let ret: $rest = rd_ref.parse_token(&$range);
                     ret
                 }),*
             );
@@ -158,19 +171,43 @@ macro_rules! read_sep {
 }
 
 #[macro_export]
+macro_rules! read_sep_without_range {
+    ($rd:expr, $first:ty $(,$rest:ty)*) => {
+        {
+            let rd_ref = &mut $rd;
+            let ret = (
+                {
+                    let ret: $first = rd_ref.parse_token_without_range();
+                    ret
+                },
+                $({
+                    rd_ref.expect_space();
+                    let ret: $rest = rd_ref.parse_token_without_range();
+                    ret
+                }),*
+            );
+            rd_ref.expect_newline();
+            ret
+        }
+    };
+}
+
+
+#[macro_export]
 macro_rules! read_into_iter {
-    ($rd:expr, $size:expr, $type:ty) => {{
-        let mut i = 0;
+    ($rd:expr, $size:expr, $type:ty, $range:expr) => {{
         let rd_ref = &mut $rd;
         let cap = $size;
-
+        let range = $range;
         assert!(cap != 0, "Why are you calling `read_into_iter` with a size of zero? If you really want one, use `read_array`.");
+
+        let mut i = 0;
         std::iter::repeat_with(move || {
             debug_assert!(i < cap);
             if i != 0 {
                 rd_ref.expect_space();
             }
-            let item: $type = rd_ref.parse_token();
+            let item: $type = rd_ref.parse_token(&range);
             i += 1;
             if i == cap {
                 rd_ref.expect_newline();
@@ -183,15 +220,17 @@ macro_rules! read_into_iter {
 
 #[macro_export]
 macro_rules! read_array {
-    ($rd:expr, $size:expr, $type:ty) => {{
+    ($rd:expr, $size:expr, $type:ty, $range:expr) => {{
         let rd_ref = &mut $rd;
         let cap = $size;
+        let range = $range;
+
         let mut ret = Vec::with_capacity(cap);
         for i in 0..cap {
             if i != 0 {
                 rd_ref.expect_space();
             }
-            let item: $type = rd_ref.parse_token();
+            let item: $type = rd_ref.parse_token(&range);
             ret.push(item);
         }
         rd_ref.expect_newline();

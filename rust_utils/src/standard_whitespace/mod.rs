@@ -1,6 +1,4 @@
-use super::reader::{
-    self, AsciiStream, StandardWhitespace, TokenizerResult, WRONG_WHITESPACE,
-};
+use super::reader::{self, AsciiStream, StandardWhitespace, TokenizerResult, WRONG_WHITESPACE};
 use std::io::BufRead;
 
 #[derive(Eq, PartialEq)]
