@@ -18,7 +18,7 @@ fn test_read_sep() {
     assert_eq!(negative_one, -1);
     assert_eq!(negative_five, -5);
 
-    let _ = read_sep!(reader, (6..=6), u32);
+    let _ = read_sep!(reader, 6..=6, u32);
 }
 
 #[test]
