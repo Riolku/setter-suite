@@ -27,9 +27,15 @@ impl<F> Clone for Checker<F> {
     }
 }
 
+pub fn partial(num: i32, denom: i32) -> i32 {
+    eprintln!("partial {num}/{denom}\n");
+    print!("{num}/{denom} points");
+    return codes::PARTIAL;
+}
+
 impl<F> Checker<F>
 where
-    F: FnOnce(),
+    F: FnOnce() -> Option<i32>,
 {
     pub fn new(pre_error: F) -> Self {
         Self {
@@ -52,8 +58,8 @@ where
     }
 
     pub fn exit(&self, code: i32) -> ! {
-        (self.pre_error.replace(None).unwrap())();
-        std::process::exit(code);
+        let pre_error_code = (self.pre_error.take().unwrap())();
+        std::process::exit(pre_error_code.unwrap_or(code));
     }
 }
 
@@ -68,7 +74,7 @@ pub fn entry<Constructor, ErrorFunc, HandlerType, TokenizerType>(
 )
 where
     Constructor: FnOnce(BufReader<File>, Checker<ErrorFunc>) -> Reader<TokenizerType, HandlerType>,
-    ErrorFunc: FnOnce(),
+    ErrorFunc: FnOnce() -> Option<i32>,
     HandlerType: ErrorHandler,
     TokenizerType: Tokenizer,
 {
