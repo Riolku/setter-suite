@@ -80,6 +80,8 @@ macro_rules! bind_solution_test {
 pub mod prelude {
     pub use super::super::output::StreamWriteable;
     pub use super::super::test_cases::{InputGenerator, LiteralTest, TestCase};
+    pub use rand::seq::{IteratorRandom, SliceRandom};
     pub use rand::{self, distributions::Uniform, Rng};
     pub use std::io::Write;
+    pub use std::iter;
 }
