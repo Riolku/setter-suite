@@ -30,10 +30,5 @@ macro_rules! print_iter {
     };
 }
 
-use std::io::Write;
-pub trait StreamWriteable {
-    fn write_to(&self, stream: &mut impl Write);
-}
-
 #[cfg(test)]
 mod tests;
