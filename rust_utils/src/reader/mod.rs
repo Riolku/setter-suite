@@ -195,33 +195,6 @@ macro_rules! read_sep_without_range {
 }
 
 #[macro_export]
-macro_rules! read_into_iter {
-    ($rd:expr, $size:expr, $type:ty, $range:expr) => {{
-        let rd_ref = &mut $rd;
-        let cap = $size;
-        let range = $range;
-        assert!(cap != 0, "Why are you calling `read_into_iter` with a size of zero? If you really want one, use `read_array`.");
-
-        let mut i = 0;
-        std::iter::repeat_with(move || {
-            debug_assert!(i < cap);
-            if i != 0 {
-                rd_ref.expect_space();
-            }
-            let tk = rd_ref.read_token();
-            let item: $type = rd_ref.parse_token(tk);
-            rd_ref.check_range(&item, &range);
-            i += 1;
-            if i == cap {
-                rd_ref.expect_newline();
-            }
-
-            item
-        }).take(cap)
-    }};
-}
-
-#[macro_export]
 macro_rules! read_array {
     ($rd:expr, $size:expr, $type:ty, $range:expr) => {{
         let rd_ref = &mut $rd;

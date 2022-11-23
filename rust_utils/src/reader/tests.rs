@@ -22,12 +22,23 @@ fn test_read_sep() {
 }
 
 #[test]
-fn test_read_into_iter() {
-    let mut reader = new_test_reader("1 2 3 4\n1\n");
-    let v = read_into_iter!(reader, 4, usize, 1..=5);
-    assert!(v.eq(vec![1, 2, 3, 4]));
-    let v = read_into_iter!(reader, 1, usize, 1..=5);
-    assert!(v.eq(vec![1]));
+#[should_panic(expected = "parse error")]
+fn test_read_sep_parse() {
+    let mut reader = new_test_reader("1 a\n");
+    let _ = read_sep!(reader, 1..=2, usize, usize);
+
+    // necessary because otherwise reader's destructor will panic, passing the test.
+    panic!("Should have died");
+}
+
+#[test]
+#[should_panic(expected = "out of range")]
+fn test_read_sep_range() {
+    let mut reader = new_test_reader("1 2 3\n");
+    let _ = read_sep!(reader, 1..=2, usize, i32, u8);
+
+    // necessary because otherwise reader's destructor will panic, passing the test.
+    panic!("Should have died");
 }
 
 #[test]
@@ -39,6 +50,16 @@ fn test_read_array() {
     assert_eq!(v, vec![1]);
     let v = read_array!(reader, 0, usize, 1..=5);
     assert_eq!(v, vec![]);
+}
+
+#[test]
+#[should_panic(expected = "out of range")]
+fn test_read_array_range() {
+    let mut reader = new_test_reader("1 2 3\n");
+    let _ = read_array!(reader, 3, usize, 1..=2);
+
+    // necessary because otherwise reader's destructor will panic, passing the test.
+    panic!("Should have died");
 }
 
 fn new_test_reader(
