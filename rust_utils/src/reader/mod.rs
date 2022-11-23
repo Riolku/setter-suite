@@ -85,23 +85,19 @@ where
         let res = self.tokenizer.read_token();
         self.from_tk_result(res)
     }
-    pub fn parse_token_without_range<T>(&mut self) -> T
+    pub fn parse_token<T>(&self, token: String) -> T
     where
         T: FromStr,
         T::Err: Debug,
     {
-        self.read_token()
-            .parse()
-            .unwrap_or_else(|_| self.handler.parse_error())
+        token.parse().unwrap_or_else(|_| self.handler.parse_error())
     }
-    pub fn parse_token<T>(&mut self, range: &impl RangeBounds<T>) -> T
+    pub fn check_range<T>(&self, val: &T, range: &impl RangeBounds<T>)
     where
-        T: FromStr + PartialOrd,
-        T::Err: Debug,
+        T: PartialOrd,
     {
-        match self.parse_token_without_range() {
-            val if range.contains(&val) => val,
-            _ => self.handler.out_of_range(),
+        if !range.contains(&val) {
+            self.handler.out_of_range();
         }
     }
     fn from_tk_result<T>(&self, res: TokenizerResult<T>) -> T {
@@ -155,12 +151,16 @@ macro_rules! read_sep {
             let rd_ref = &mut $rd;
             let ret = (
                 {
-                    let ret: $first = rd_ref.parse_token(&$range);
+                    let tk = rd_ref.read_token();
+                    let ret: $first = rd_ref.parse_token(tk);
+                    rd_ref.check_range(&ret, &$range);
                     ret
                 },
                 $({
                     rd_ref.expect_space();
-                    let ret: $rest = rd_ref.parse_token(&$range);
+                    let tk = rd_ref.read_token();
+                    let ret: $rest = rd_ref.parse_token(tk);
+                    rd_ref.check_range(&ret, &$range);
                     ret
                 }),*
             );
@@ -177,12 +177,14 @@ macro_rules! read_sep_without_range {
             let rd_ref = &mut $rd;
             let ret = (
                 {
-                    let ret: $first = rd_ref.parse_token_without_range();
+                    let tk = rd_ref.read_token();
+                    let ret: $first = rd_ref.parse_token(tk);
                     ret
                 },
                 $({
                     rd_ref.expect_space();
-                    let ret: $rest = rd_ref.parse_token_without_range();
+                    let tk = rd_ref.read_token();
+                    let ret: $rest = rd_ref.parse_token(tk);
                     ret
                 }),*
             );
@@ -206,7 +208,9 @@ macro_rules! read_into_iter {
             if i != 0 {
                 rd_ref.expect_space();
             }
-            let item: $type = rd_ref.parse_token(&range);
+            let tk = rd_ref.read_token();
+            let item: $type = rd_ref.parse_token(tk);
+            rd_ref.check_range(&item, &range);
             i += 1;
             if i == cap {
                 rd_ref.expect_newline();
@@ -229,7 +233,9 @@ macro_rules! read_array {
             if i != 0 {
                 rd_ref.expect_space();
             }
-            let item: $type = rd_ref.parse_token(&range);
+            let tk = rd_ref.read_token();
+            let item: $type = rd_ref.parse_token(tk);
+            rd_ref.check_range(&item, &range);
             ret.push(item);
         }
         rd_ref.expect_newline();

@@ -90,3 +90,57 @@ where
         validating_reader::new(next_file_as_buf()),
     )
 }
+
+#[macro_export]
+macro_rules! read_maybe_array {
+    ($rd:expr, $size:expr, $type:ty, $range:expr) => {{
+        let rd_ref = &mut $rd;
+        let cap = $size;
+        assert!(cap > 0);
+
+        let first_token = rd_ref.read_token();
+        let ret = if first_token == "-1" {
+            None
+        } else {
+            let range = $range;
+            let mut ret = Vec::with_capacity(cap);
+
+            let first: $type = rd_ref.parse_token(first_token);
+            rd_ref.check_range(&first, &range);
+            ret.push(first);
+
+            for _ in 1..cap {
+                rd_ref.expect_space();
+                let tk = rd_ref.read_token();
+                let item: $type = rd_ref.parse_token(tk);
+                rd_ref.check_range(&item, &range);
+                ret.push(item);
+            }
+            Some(ret)
+        };
+        rd_ref.expect_newline();
+        ret
+    }};
+}
+
+#[macro_export]
+macro_rules! read_maybe_single {
+    ($rd:expr, $type:ty, $range:expr) => {{
+        let rd_ref = &mut $rd;
+
+        let tk = rd_ref.read_token();
+        let ret = if tk == "-1" {
+            None
+        } else {
+            let ret: $type = rd_ref.parse_token(tk);
+            rd_ref.check_range(&ret, &$range);
+            Some(ret)
+        };
+        rd_ref.expect_newline();
+        ret
+    }};
+}
+
+
+#[cfg(test)]
+mod tests;
