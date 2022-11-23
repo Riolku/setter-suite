@@ -50,7 +50,7 @@ def main(args):
 
 class Generator:
     def __init__(self):
-        self.generator_executor = get_executor(env.get("generator", "gen.cpp"))
+        self.generator_executor = get_executor(env.generator)
 
         if env.get("generator_type") == "double":
             self.generate = self.generate_double

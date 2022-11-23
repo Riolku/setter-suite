@@ -89,7 +89,14 @@ class Env:
 
     @property
     def generator(self):
-        return self.env.get("generator", "gen.cpp")
+        gen_file = self.env.get("generator")
+        if gen_file is None:
+            if os.path.exists("gen.cpp"):
+                gen_file = "gen.cpp"
+            if os.path.exists("gen.rs"):
+                gen_file = "gen.rs"
+
+        return gen_file
 
     @property
     def timeout(self):

@@ -151,8 +151,8 @@ pub mod prelude {
         ConcreteRng, InputGenerator, InputGeneratorRef, InputStreamWriteable, LiteralInput,
         LiteralTest, ManyCases, OutputStreamWriteable, StreamWriteable, TestCase,
     };
-    pub use rand::seq::{IteratorRandom, SliceRandom};
-    pub use rand::{self, distributions::Uniform, Rng};
+    pub use rand::prelude::*;
+    pub use rand::distributions::Uniform;
     pub use std::io::Write;
     pub use std::iter;
 }
