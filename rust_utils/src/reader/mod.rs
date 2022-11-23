@@ -10,7 +10,7 @@ where
     EH: ErrorHandler,
 {
     tokenizer: TK,
-    handler: EH,
+    pub handler: EH,
 }
 pub fn new<TK, EH>(tokenizer: TK, handler: EH) -> Reader<TK, EH>
 where
