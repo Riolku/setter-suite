@@ -3,16 +3,16 @@ void assert_permutation(const List<int, 1> &arr) {
   assert(arr.all_of([&check](int x) { return ++check[x] == 1; }));
 }
 
+class validator_out_of_range {};
+class wrong_whitespace {};
+class invalid_integer {};
+
 class ValidatingReaderBase : public BaseReader {
 protected:
-  void externalRangeError() override { throw runtime_error("EXTERNAL_RANGE"); }
-  void internalRangeError() override { throw runtime_error("INTERNAL_RANGE"); }
-  void wrongWhitespaceError() override {
-    throw runtime_error("WRONG_WHITESPACE");
-  }
-  void invalidIntegerError() override {
-    throw runtime_error("INVALID_INTEGER");
-  }
+  void externalRangeError() override { throw validator_out_of_range(); }
+  void internalRangeError() override { throw validator_out_of_range(); }
+  void wrongWhitespaceError() override { throw wrong_whitespace(); }
+  void invalidIntegerError() override { throw invalid_integer(); }
 
 public:
   using BaseReader::BaseReader;
