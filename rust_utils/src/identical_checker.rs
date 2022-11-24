@@ -9,7 +9,7 @@ pub struct ErrorHandler<F> {
 
 impl<F> ErrorHandler<F>
 where
-    F: FnOnce() -> Option<i32>,
+    F: FnOnce() -> Option<u8>,
 {
     pub fn new(checker: Checker<F>) -> Self {
         Self { checker }
@@ -18,7 +18,7 @@ where
 
 impl<F> reader::ErrorHandler for ErrorHandler<F>
 where
-    F: FnOnce() -> Option<i32>,
+    F: FnOnce() -> Option<u8>,
 {
     fn wrong_whitespace(&self) -> ! {
         self.checker.exit(codes::PE);
@@ -31,14 +31,14 @@ where
     }
 }
 
-pub fn new_checker<F: FnOnce() -> Option<i32>>(
+pub fn new_checker<F: FnOnce() -> Option<u8>>(
     src: impl BufRead,
     checker: Checker<F>,
 ) -> Reader<identical_whitespace::Tokenizer<impl AsciiStream>, ErrorHandler<F>> {
     reader::new(identical_whitespace::new(src), ErrorHandler::new(checker))
 }
 
-pub fn entry<F: FnOnce() -> Option<i32>>(
+pub fn entry<F: FnOnce() -> Option<u8>>(
     f: F,
 ) -> (
     Checker<F>,

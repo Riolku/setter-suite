@@ -8,11 +8,11 @@ use std::io::BufReader;
 use std::rc::Rc;
 
 pub mod codes {
-    pub const AC: i32 = 0;
-    pub const WA: i32 = 1;
-    pub const PE: i32 = 2;
-    pub const IE: i32 = 3;
-    pub const PARTIAL: i32 = 7;
+    pub const AC: u8 = 0;
+    pub const WA: u8 = 1;
+    pub const PE: u8 = 2;
+    pub const IE: u8 = 3;
+    pub const PARTIAL: u8 = 7;
 }
 
 pub struct Checker<F> {
@@ -27,7 +27,7 @@ impl<F> Clone for Checker<F> {
     }
 }
 
-pub fn partial(num: i32, denom: i32) -> i32 {
+pub fn partial(num: i32, denom: i32) -> u8 {
     eprintln!("partial {num}/{denom}\n");
     print!("{num}/{denom} points");
     return codes::PARTIAL;
@@ -35,7 +35,7 @@ pub fn partial(num: i32, denom: i32) -> i32 {
 
 impl<F> Checker<F>
 where
-    F: FnOnce() -> Option<i32>,
+    F: FnOnce() -> Option<u8>,
 {
     pub fn new(pre_error: F) -> Self {
         Self {
@@ -43,7 +43,7 @@ where
         }
     }
 
-    pub fn assert_or_code(&self, cond: bool, code: i32) {
+    pub fn assert_or_code(&self, cond: bool, code: u8) {
         if !cond {
             self.exit(code);
         }
@@ -57,9 +57,9 @@ where
         self.assert_or_code(cond, codes::PE);
     }
 
-    pub fn exit(&self, code: i32) -> ! {
+    pub fn exit(&self, code: u8) -> ! {
         let pre_error_code = (self.pre_error.take().unwrap())();
-        std::process::exit(pre_error_code.unwrap_or(code));
+        std::process::exit(i32::from(pre_error_code.unwrap_or(code)));
     }
 }
 
@@ -74,7 +74,7 @@ pub fn entry<Constructor, ErrorFunc, HandlerType, TokenizerType>(
 )
 where
     Constructor: FnOnce(BufReader<File>, Checker<ErrorFunc>) -> Reader<TokenizerType, HandlerType>,
-    ErrorFunc: FnOnce() -> Option<i32>,
+    ErrorFunc: FnOnce() -> Option<u8>,
     HandlerType: ErrorHandler,
     TokenizerType: Tokenizer,
 {
@@ -125,7 +125,7 @@ macro_rules! read_maybe_array {
 
 #[macro_export]
 macro_rules! read_maybe_single {
-    ($rd:expr, $type:ty, $range:expr) => {{
+    ($rd:expr, $range:expr, $type:ty) => {{
         let rd_ref = &mut $rd;
 
         let tk = rd_ref.read_token();
