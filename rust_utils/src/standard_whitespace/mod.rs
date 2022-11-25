@@ -1,7 +1,7 @@
 use super::reader::{self, AsciiStream, StandardWhitespace, TokenizerResult, WRONG_WHITESPACE};
 use std::io::BufRead;
 
-#[derive(Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 enum WhitespaceFlag {
     NoWhitespace,
     Space,
@@ -57,31 +57,28 @@ where
             WhitespaceFlag::NoWhitespace => {}
             WhitespaceFlag::Space => {
                 match self.src.next() {
-                    Some(c) if Self::is_non_line_whitespace(c) => {}
                     Some(c) => {
                         assert!(
                             c.is_ascii_whitespace(),
                             "Found non-whitespace right after token!"
                         );
-                        return Err(WRONG_WHITESPACE);
+                        if Self::is_line_whitespace(c) {
+                            return Err(WRONG_WHITESPACE);
+                        }
+                        self.skip_non_line_whitespace();
                     }
                     None => return Err(WRONG_WHITESPACE),
                 }
-
-                self.skip_non_line_whitespace();
             }
             WhitespaceFlag::Newline => {
                 match self.src.peek() {
-                    Some(c) if c.is_ascii_whitespace() => {}
-                    _ => {
-                        panic!("Found non-whitespace right after token!");
+                    Some(c) => {
+                        assert!(c.is_ascii_whitespace(), "Found non-whitespace right after token!");
+                        if !self.has_line_before_next_token() {
+                            return Err(WRONG_WHITESPACE);
+                        }
                     }
-                }
-
-                if !Self::is_line_whitespace(self.src.next().unwrap())
-                    & !self.has_line_before_next_token()
-                {
-                    return Err(WRONG_WHITESPACE);
+                    None => return Err(WRONG_WHITESPACE),
                 }
             }
             WhitespaceFlag::All => {
@@ -89,7 +86,7 @@ where
                     self.src.next();
                 }
             }
-        };
+        }
         self.flag = WhitespaceFlag::NoWhitespace;
         Ok(())
     }

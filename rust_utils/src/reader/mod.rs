@@ -38,6 +38,7 @@ pub fn to_ascii_stream(src: impl BufRead) -> impl AsciiStream {
     src.bytes().map(|res| res.unwrap() as char).peekable()
 }
 
+#[derive(Debug)]
 pub enum TokenizerError {
     WhitespaceError,
 }

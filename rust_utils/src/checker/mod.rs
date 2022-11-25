@@ -141,6 +141,5 @@ macro_rules! read_maybe_single {
     }};
 }
 
-
 #[cfg(test)]
 mod tests;

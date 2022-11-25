@@ -50,6 +50,16 @@ fn panics_if_no_newline() {
 
 #[test]
 #[should_panic(expected = "wrong whitespace")]
+fn panics_if_no_whitespace_before_eof() {
+    let mut reader = test_reader("2");
+    assert_eq!(reader.read_token(), "2");
+    reader.expect_newline();
+    reader.read_token();
+    panic!("Should have died");
+}
+
+#[test]
+#[should_panic(expected = "wrong whitespace")]
 fn panics_if_no_whitespace_before_newline() {
     let mut reader = test_reader("a\nb");
     assert_eq!(reader.read_token(), "a");
