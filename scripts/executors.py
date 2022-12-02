@@ -159,6 +159,10 @@ class PyExecutor(Executor):
 class RustExecutor(CompiledExecutor):
     ext = RUST_EXT
 
+    def compile(self, args: list, *, debug: bool, force_compile: bool) -> None:
+        subprocess.run(["rustfmt", self.file])
+        super().compile(args, debug=debug, force_compile=force_compile)
+
     def get_compiler_cmd(self, args: list, *, debug: bool):
         # TODO: do we have to hardcode these paths?
         cmd = [
