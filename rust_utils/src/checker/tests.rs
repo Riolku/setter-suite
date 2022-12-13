@@ -28,7 +28,7 @@ fn new_test_reader(
     panic_error_handler::Handler,
 > {
     reader::new(
-        identical_whitespace::new(contents.as_bytes()),
+        identical_whitespace::new(reader::FullAsciiStream::new(contents.as_bytes())),
         panic_error_handler::Handler::new(),
     )
 }

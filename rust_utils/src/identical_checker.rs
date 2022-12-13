@@ -1,7 +1,6 @@
 use super::checker::{self, codes, Checker};
 use super::identical_whitespace;
 use super::reader::{self, AsciiStream, Reader, Tokenizer};
-use std::io::BufRead;
 
 pub struct ErrorHandler<F> {
     checker: Checker<F>,
@@ -32,7 +31,7 @@ where
 }
 
 pub fn new_checker<F: FnOnce() -> Option<u8>>(
-    src: impl BufRead,
+    src: impl AsciiStream,
     checker: Checker<F>,
 ) -> Reader<identical_whitespace::Tokenizer<impl AsciiStream>, ErrorHandler<F>> {
     reader::new(identical_whitespace::new(src), ErrorHandler::new(checker))

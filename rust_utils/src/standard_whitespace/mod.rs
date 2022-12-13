@@ -1,5 +1,4 @@
-use super::reader::{self, AsciiStream, StandardWhitespace, TokenizerResult, WRONG_WHITESPACE};
-use std::io::BufRead;
+use super::reader::{self, wrong_whitespace, AsciiStream, StandardWhitespace, TokenizerResult};
 
 #[derive(Debug, Eq, PartialEq)]
 enum WhitespaceFlag {
@@ -13,9 +12,9 @@ pub struct Tokenizer<S: AsciiStream> {
     src: S,
     flag: WhitespaceFlag,
 }
-pub fn new(src: impl BufRead) -> Tokenizer<impl AsciiStream> {
+pub fn new<S: AsciiStream>(src: S) -> Tokenizer<S> {
     Tokenizer {
-        src: reader::to_ascii_stream(src),
+        src,
         flag: WhitespaceFlag::All,
     }
 }
@@ -25,27 +24,26 @@ where
     S: AsciiStream,
 {
     fn is_non_line_whitespace(c: char) -> bool {
-        c.is_ascii_whitespace() && !Self::is_line_whitespace(c)
-    }
-    fn is_line_whitespace(c: char) -> bool {
-        c == '\n' || c == '\r'
+        !c.is_ascii_graphic() && c != '\n'
     }
     fn skip_non_line_whitespace(&mut self) {
-        while matches!(self.src.peek(), Some(c) if Self::is_non_line_whitespace(*c)) {
-            self.src.next();
-        }
+        while self
+            .src
+            .next_if(|c| Self::is_non_line_whitespace(*c))
+            .is_some()
+        {}
     }
     fn raw_read_token(&mut self) -> String {
         let mut token = String::with_capacity(32);
-        while matches!(self.src.peek(), Some(c) if !c.is_ascii_whitespace()) {
-            token.push(self.src.next().unwrap());
+        while let Some(c) = self.src.next_if(char::is_ascii_graphic) {
+            token.push(c);
         }
         token
     }
     fn has_line_before_next_token(&mut self) -> bool {
         let mut any_line = false;
-        while matches!(self.src.peek(), Some(c) if c.is_ascii_whitespace()) {
-            if Self::is_line_whitespace(self.src.next().unwrap()) {
+        while let Some(c) = self.src.next_if(|c| !c.is_ascii_graphic()) {
+            if c == '\n' {
                 any_line = true;
             }
         }
@@ -55,37 +53,32 @@ where
     fn consume_flag(&mut self) -> TokenizerResult<()> {
         match self.flag {
             WhitespaceFlag::NoWhitespace => {}
-            WhitespaceFlag::Space => {
-                match self.src.next() {
-                    Some(c) => {
-                        assert!(
-                            c.is_ascii_whitespace(),
-                            "Found non-whitespace right after token!"
-                        );
-                        if Self::is_line_whitespace(c) {
-                            return Err(WRONG_WHITESPACE);
-                        }
-                        self.skip_non_line_whitespace();
+            WhitespaceFlag::Space => match self.src.next() {
+                Some(c) => {
+                    assert!(
+                        !c.is_ascii_graphic(),
+                        "Found non-whitespace right after token!"
+                    );
+                    if c == '\n' {
+                        return wrong_whitespace();
                     }
-                    None => return Err(WRONG_WHITESPACE),
+                    self.skip_non_line_whitespace();
                 }
-            }
-            WhitespaceFlag::Newline => {
-                match self.src.peek() {
-                    Some(c) => {
-                        assert!(c.is_ascii_whitespace(), "Found non-whitespace right after token!");
-                        if !self.has_line_before_next_token() {
-                            return Err(WRONG_WHITESPACE);
-                        }
+                None => return wrong_whitespace(),
+            },
+            WhitespaceFlag::Newline => match self.src.peek() {
+                Some(c) => {
+                    assert!(
+                        !c.is_ascii_graphic(),
+                        "Found non-whitespace right after token!"
+                    );
+                    if !self.has_line_before_next_token() {
+                        return wrong_whitespace();
                     }
-                    None => return Err(WRONG_WHITESPACE),
                 }
-            }
-            WhitespaceFlag::All => {
-                while matches!(self.src.peek(), Some(c) if c.is_ascii_whitespace()) {
-                    self.src.next();
-                }
-            }
+                None => return wrong_whitespace(),
+            },
+            WhitespaceFlag::All => while self.src.next_if(|c| !c.is_ascii_graphic()).is_some() {},
         }
         self.flag = WhitespaceFlag::NoWhitespace;
         Ok(())
@@ -116,7 +109,7 @@ where
         self.flag = WhitespaceFlag::All;
         self.consume_flag()?;
         if self.src.next().is_some() {
-            Err(WRONG_WHITESPACE)
+            wrong_whitespace()
         } else {
             Ok(())
         }
@@ -125,7 +118,7 @@ where
         self.consume_flag()?;
         let token = self.raw_read_token();
         if token.len() == 0 {
-            Err(WRONG_WHITESPACE)
+            wrong_whitespace()
         } else {
             Ok(token)
         }
@@ -166,7 +159,7 @@ where
                 );
                 // Force a newline to appear if there are still tokens
                 if !any_line {
-                    Err(WRONG_WHITESPACE)
+                    wrong_whitespace()
                 } else {
                     Ok(true)
                 }

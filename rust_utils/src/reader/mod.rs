@@ -1,6 +1,5 @@
 use std::fmt::Debug;
-use std::io::BufRead;
-use std::iter::Peekable;
+use std::io::Read;
 use std::ops::RangeBounds;
 use std::str::FromStr;
 
@@ -23,39 +22,139 @@ where
     }
 }
 
-pub trait AsciiStream: Iterator<Item = char> {
-    fn peek(&mut self) -> Option<&char>;
+pub trait AsciiStream {
+    fn next(&mut self) -> Option<char>;
+    fn peek(&mut self) -> Option<char>;
+    fn next_if<F>(&mut self, f: F) -> Option<char>
+    where
+        F: FnOnce(&char) -> bool;
 }
-impl<I> AsciiStream for Peekable<I>
-where
-    I: Iterator<Item = char>,
-{
-    fn peek(&mut self) -> Option<&char> {
-        self.peek()
+
+pub struct BufferedAsciiStream<R> {
+    src: R,
+    buf: Vec<u8>,
+    buf_pos: usize,
+    buf_size: usize,
+}
+
+impl<R: Read> BufferedAsciiStream<R> {
+    pub fn new(src: R, buf_size: usize) -> Self {
+        Self {
+            src,
+            buf: Vec::new(),
+            buf_pos: 0,
+            buf_size,
+        }
+    }
+    #[cold]
+    fn reset_buf(&mut self) -> Option<()> {
+        self.buf_pos = 0;
+        self.buf.resize(self.buf_size, 0u8);
+        let buf_len = self.src.read(&mut *self.buf).unwrap();
+        self.buf.truncate(buf_len);
+        if buf_len == 0 {
+            None
+        } else {
+            Some(())
+        }
+    }
+    fn fill_buf(&mut self) -> Option<()> {
+        if self.buf_pos == self.buf.len() {
+            self.reset_buf()
+        } else {
+            Some(())
+        }
     }
 }
-pub fn to_ascii_stream(src: impl BufRead) -> impl AsciiStream {
-    src.bytes().map(|res| res.unwrap() as char).peekable()
+
+impl<R: Read> AsciiStream for BufferedAsciiStream<R> {
+    fn next(&mut self) -> Option<char> {
+        self.fill_buf()?;
+        self.buf_pos += 1;
+        Some(char::from(self.buf[self.buf_pos - 1]))
+    }
+    fn peek(&mut self) -> Option<char> {
+        self.fill_buf()?;
+        Some(char::from(self.buf[self.buf_pos]))
+    }
+    fn next_if<F>(&mut self, f: F) -> Option<char>
+    where
+        F: FnOnce(&char) -> bool,
+    {
+        match self.next() {
+            Some(c) => {
+                if f(&c) {
+                    Some(char::from(c))
+                } else {
+                    self.buf_pos -= 1;
+                    None
+                }
+            }
+            None => None,
+        }
+    }
+}
+
+pub struct FullAsciiStream {
+    buf: Vec<u8>,
+    buf_pos: usize,
+}
+impl FullAsciiStream {
+    pub fn new(mut src: impl Read) -> Self {
+        let mut buf = Vec::new();
+        src.read_to_end(&mut buf).unwrap();
+        Self { buf, buf_pos: 0 }
+    }
+}
+impl AsciiStream for FullAsciiStream {
+    fn next(&mut self) -> Option<char> {
+        if self.buf_pos == self.buf.len() {
+            None
+        } else {
+            self.buf_pos += 1;
+            Some(char::from(self.buf[self.buf_pos - 1]))
+        }
+    }
+    fn peek(&mut self) -> Option<char> {
+        if self.buf_pos == self.buf.len() {
+            None
+        } else {
+            Some(char::from(self.buf[self.buf_pos]))
+        }
+    }
+    fn next_if<F>(&mut self, f: F) -> Option<char>
+    where
+        F: FnOnce(&char) -> bool,
+    {
+        match self.next() {
+            Some(c) => {
+                if f(&c) {
+                    Some(char::from(c))
+                } else {
+                    self.buf_pos -= 1;
+                    None
+                }
+            }
+            None => None,
+        }
+    }
 }
 
 #[derive(Debug)]
 pub enum TokenizerError {
     WhitespaceError,
 }
-pub const WRONG_WHITESPACE: TokenizerError = TokenizerError::WhitespaceError;
 pub type TokenizerResult<T> = Result<T, TokenizerError>;
+#[cold]
+pub fn wrong_whitespace<T>() -> TokenizerResult<T> {
+    Err(TokenizerError::WhitespaceError)
+}
 
 pub trait Tokenizer {
     fn expect_space(&mut self) -> TokenizerResult<()>;
     fn expect_newline(&mut self) -> TokenizerResult<()>;
     fn expect_eof(&mut self) -> TokenizerResult<()>;
     fn read_token(&mut self) -> TokenizerResult<String>;
-}
-
-pub trait ExactWhitespaceTokenizer {
-    fn read_line(&mut self) -> TokenizerResult<String>;
-    fn peek(&mut self) -> Option<&char>;
-    fn next(&mut self) -> Option<char>;
 }
 
 pub trait StandardWhitespace {
@@ -117,17 +216,6 @@ where
             let res = self.tokenizer.expect_eof();
             self.from_tk_result(res)
         }
-    }
-}
-
-impl<TK, EH> Reader<TK, EH>
-where
-    TK: Tokenizer + ExactWhitespaceTokenizer,
-    EH: ErrorHandler,
-{
-    pub fn read_line(&mut self) -> String {
-        let res = self.tokenizer.read_line();
-        self.from_tk_result(res)
     }
 }
 

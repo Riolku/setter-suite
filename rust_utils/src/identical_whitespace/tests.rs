@@ -1,6 +1,6 @@
 #[test]
 fn basic() {
-    let mut reader = new_test_reader("a  b \n cdef\n abc l m n o p\n");
+    let mut reader = new_test_reader("a  b \n cdef\n abc\n");
     assert_eq!(reader.read_token(), "a");
     reader.expect_space();
     reader.expect_space();
@@ -14,8 +14,7 @@ fn basic() {
 
     reader.expect_space();
     assert_eq!(reader.read_token(), "abc");
-    reader.expect_space();
-    assert_eq!(reader.read_line(), "l m n o p");
+    reader.expect_newline();
 
     drop(reader);
 }
@@ -47,23 +46,13 @@ fn panics_when_extra_whitespace_before_token() {
     panic!("Should have died");
 }
 
-#[test]
-#[should_panic(expected = "wrong whitespace")]
-fn panics_when_no_newline_on_readline() {
-    let mut reader = new_test_reader("abc woo");
-    reader.read_line();
-
-    // necessary because otherwise reader's destructor might panic, passing the test.
-    panic!("Should have died");
-}
-
 use super::super::{panic_error_handler, reader::Reader};
 use super::*;
 fn new_test_reader(
     contents: &str,
 ) -> Reader<Tokenizer<impl AsciiStream + '_>, panic_error_handler::Handler> {
     reader::new(
-        new(contents.as_bytes()),
+        new(reader::FullAsciiStream::new(contents.as_bytes())),
         panic_error_handler::Handler::new(),
     )
 }

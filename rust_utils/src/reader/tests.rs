@@ -66,7 +66,7 @@ fn new_test_reader(
     contents: &str,
 ) -> Reader<identical_whitespace::Tokenizer<impl AsciiStream + '_>, panic_error_handler::Handler> {
     new(
-        identical_whitespace::new(contents.as_bytes()),
+        identical_whitespace::new(FullAsciiStream::new(contents.as_bytes())),
         panic_error_handler::Handler::new(),
     )
 }

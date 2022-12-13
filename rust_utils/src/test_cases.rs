@@ -137,7 +137,10 @@ where
     }
 }
 
-impl<F, I> InputGenerator for F where F: FnOnce(&mut ConcreteRng) -> I {
+impl<F, I> InputGenerator for F
+where
+    F: FnOnce(&mut ConcreteRng) -> I,
+{
     type Input = I;
     fn generate(self, rng: &mut ConcreteRng) -> I {
         (self)(rng)

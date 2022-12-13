@@ -1,10 +1,9 @@
-use super::reader::{ErrorHandler, Reader, Tokenizer};
+use super::reader::{BufferedAsciiStream, ErrorHandler, Reader, Tokenizer};
 use super::validating_reader;
 
 use std::cell::Cell;
 use std::env;
 use std::fs::File;
-use std::io::BufReader;
 use std::rc::Rc;
 
 pub mod codes {
@@ -73,7 +72,8 @@ pub fn entry<Constructor, ErrorFunc, HandlerType, TokenizerType>(
     Reader<impl Tokenizer, impl ErrorHandler>,
 )
 where
-    Constructor: FnOnce(BufReader<File>, Checker<ErrorFunc>) -> Reader<TokenizerType, HandlerType>,
+    Constructor:
+        FnOnce(BufferedAsciiStream<File>, Checker<ErrorFunc>) -> Reader<TokenizerType, HandlerType>,
     ErrorFunc: FnOnce() -> Option<u8>,
     HandlerType: ErrorHandler,
     TokenizerType: Tokenizer,
@@ -81,13 +81,13 @@ where
     let check = Checker::new(f);
     let mut arg_iter = env::args();
     arg_iter.next();
-    let mut next_file_as_buf =
-        || BufReader::with_capacity(1048576, File::open(arg_iter.next().unwrap()).unwrap());
+    let mut next_file_as_stream =
+        || BufferedAsciiStream::new(File::open(arg_iter.next().unwrap()).unwrap(), 1048576);
     (
         check.clone(),
-        validating_reader::new(next_file_as_buf()),
-        reader_constructor(next_file_as_buf(), check),
-        validating_reader::new(next_file_as_buf()),
+        validating_reader::new(next_file_as_stream()),
+        reader_constructor(next_file_as_stream(), check),
+        validating_reader::new(next_file_as_stream()),
     )
 }
 
@@ -125,7 +125,7 @@ macro_rules! read_maybe_array {
 
 #[macro_export]
 macro_rules! read_maybe_single {
-    ($rd:expr, $range:expr, $type:ty) => {{
+    ($rd:expr, $type:ty, $range:expr) => {{
         let rd_ref = &mut $rd;
 
         let tk = rd_ref.read_token();

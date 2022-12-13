@@ -103,7 +103,7 @@ fn test_reader(
     contents: &str,
 ) -> Reader<Tokenizer<impl AsciiStream + '_>, panic_error_handler::Handler> {
     reader::new(
-        new(contents.as_bytes()),
+        new(reader::FullAsciiStream::new(contents.as_bytes())),
         panic_error_handler::Handler::new(),
     )
 }
