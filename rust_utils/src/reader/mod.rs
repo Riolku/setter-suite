@@ -24,11 +24,11 @@ where
 }
 
 pub trait AsciiStream {
-    fn next(&mut self) -> Option<char>;
-    fn peek(&mut self) -> Option<char>;
-    fn next_if<F>(&mut self, f: F) -> Option<char>
+    fn next(&mut self) -> Option<u8>;
+    fn peek(&mut self) -> Option<u8>;
+    fn read_while<F>(&mut self, f: F) -> &[u8]
     where
-        F: FnOnce(&char) -> bool;
+        F: FnOnce(&u8) -> bool;
 }
 
 #[derive(Debug)]
@@ -70,29 +70,23 @@ impl<R: Read> BufferedAsciiStream<R> {
 }
 
 impl<R: Read> AsciiStream for BufferedAsciiStream<R> {
-    fn next(&mut self) -> Option<char> {
+    fn next(&mut self) -> Option<u8> {
         self.fill_buf()?;
         self.buf_pos += 1;
-        Some(char::from(self.buf[self.buf_pos - 1]))
+        Some(self.buf[self.buf_pos - 1])
     }
     fn peek(&mut self) -> Option<char> {
         self.fill_buf()?;
-        Some(char::from(self.buf[self.buf_pos]))
+        Some(self.buf[self.buf_pos])
     }
-    fn next_if<F>(&mut self, f: F) -> Option<char>
+    fn read_while<F>(&mut self, f: F) -> &[u8]
     where
         F: FnOnce(&char) -> bool,
     {
-        match self.next() {
-            Some(c) => {
-                if f(&c) {
-                    Some(char::from(c))
-                } else {
-                    self.buf_pos -= 1;
-                    None
-                }
-            }
-            None => None,
+        let start = self.buf_pos;
+        while self.buf_pos < self.buf.len() {
+            
+            self.buf_pos += 1;
         }
     }
 }
@@ -125,17 +119,17 @@ impl AsciiStream for FullAsciiStream {
             Some(char::from(self.buf[self.buf_pos]))
         }
     }
-    fn next_if<F>(&mut self, f: F) -> Option<char>
+    fn read_while<F>(&mut self, f: F) -> &str
     where
         F: FnOnce(&char) -> bool,
     {
         match self.next() {
             Some(c) => {
-                if f(&c) {
-                    Some(char::from(c))
-                } else {
+                if !f(&c) {
                     self.buf_pos -= 1;
                     None
+                } else {
+                    Some(char::from(c))
                 }
             }
             None => None,
