@@ -8,13 +8,16 @@ enum WhitespaceFlag {
     All,
 }
 
+#[derive(Debug)]
 pub struct Tokenizer<S: AsciiStream> {
     src: S,
+    token: String,
     flag: WhitespaceFlag,
 }
 pub fn new<S: AsciiStream>(src: S) -> Tokenizer<S> {
     Tokenizer {
         src,
+        token: String::new(),
         flag: WhitespaceFlag::All,
     }
 }
@@ -33,12 +36,11 @@ where
             .is_some()
         {}
     }
-    fn raw_read_token(&mut self) -> String {
-        let mut token = String::with_capacity(32);
+    fn raw_read_token(&mut self) {
+        self.token.clear();
         while let Some(c) = self.src.next_if(char::is_ascii_graphic) {
-            token.push(c);
+            self.token.push(c);
         }
-        token
     }
     fn has_line_before_next_token(&mut self) -> bool {
         let mut any_line = false;
@@ -114,13 +116,13 @@ where
             Ok(())
         }
     }
-    fn read_token(&mut self) -> TokenizerResult<String> {
+    fn read_token(&mut self) -> TokenizerResult<&str> {
         self.consume_flag()?;
-        let token = self.raw_read_token();
-        if token.len() == 0 {
+        self.raw_read_token();
+        if self.token.len() == 0 {
             wrong_whitespace()
         } else {
-            Ok(token)
+            Ok(&*self.token)
         }
     }
 }
@@ -129,7 +131,7 @@ impl<S> StandardWhitespace for Tokenizer<S>
 where
     S: AsciiStream,
 {
-    fn next_token_on_line(&mut self) -> Option<String> {
+    fn next_token_on_line(&mut self) -> Option<&str> {
         assert!(
             self.flag == WhitespaceFlag::NoWhitespace,
             "You must not call `next_token_on_line` after any whitespace method."
@@ -137,11 +139,11 @@ where
 
         self.skip_non_line_whitespace();
 
-        let token = self.raw_read_token();
-        if token.len() == 0 {
+        self.raw_read_token();
+        if self.token.len() == 0 {
             None
         } else {
-            Some(token)
+            Some(&*self.token)
         }
     }
     fn has_token_in_stream(&mut self) -> TokenizerResult<bool> {

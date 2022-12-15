@@ -99,20 +99,19 @@ macro_rules! read_maybe_array {
         assert!(cap > 0);
 
         let first_token = rd_ref.read_token();
-        let ret = if first_token == "-1" {
+        let ret = if first_token.get() == "-1" {
             None
         } else {
             let range = $range;
             let mut ret = Vec::with_capacity(cap);
 
-            let first: $type = rd_ref.parse_token(first_token);
+            let first: $type = first_token.parse();
             rd_ref.check_range(&first, &range);
             ret.push(first);
 
             for _ in 1..cap {
                 rd_ref.expect_space();
-                let tk = rd_ref.read_token();
-                let item: $type = rd_ref.parse_token(tk);
+                let item: $type = rd_ref.read_token().parse();
                 rd_ref.check_range(&item, &range);
                 ret.push(item);
             }
@@ -129,10 +128,10 @@ macro_rules! read_maybe_single {
         let rd_ref = &mut $rd;
 
         let tk = rd_ref.read_token();
-        let ret = if tk == "-1" {
+        let ret = if tk.get() == "-1" {
             None
         } else {
-            let ret: $type = rd_ref.parse_token(tk);
+            let ret: $type = tk.parse();
             rd_ref.check_range(&ret, &$range);
             Some(ret)
         };

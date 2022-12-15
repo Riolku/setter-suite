@@ -92,9 +92,9 @@ fn can_get_all_tokens_on_line() {
     assert_eq!(reader.read_token(), "1");
     reader.expect_space();
     assert_eq!(reader.read_token(), "2");
-    assert_eq!(reader.next_token_on_line(), Some("3".to_string()));
-    assert_eq!(reader.next_token_on_line(), Some("4".to_string()));
-    assert_eq!(reader.next_token_on_line(), None);
+    assert!(reader.next_token_on_line().map_or(false, |s| s == "3"));
+    assert!(reader.next_token_on_line().map_or(false, |s| s == "4"));
+    assert!(reader.next_token_on_line().is_none());
 }
 
 use super::super::{panic_error_handler, reader::Reader};

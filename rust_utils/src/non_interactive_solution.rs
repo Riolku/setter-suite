@@ -1,4 +1,4 @@
-use super::reader::{BufferedAsciiStream, ErrorHandler, FullAsciiStream, Reader, Tokenizer};
+use super::reader::{BufferedAsciiStream, ErrorHandler, Reader, Tokenizer};
 use super::validating_reader;
 use std::io;
 

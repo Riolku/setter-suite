@@ -1,5 +1,6 @@
 use super::reader::ErrorHandler;
 
+#[derive(Debug)]
 pub struct Handler;
 
 impl Handler {

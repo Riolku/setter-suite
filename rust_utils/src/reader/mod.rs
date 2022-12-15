@@ -3,6 +3,7 @@ use std::io::Read;
 use std::ops::RangeBounds;
 use std::str::FromStr;
 
+#[derive(Debug)]
 pub struct Reader<TK, EH>
 where
     TK: Tokenizer,
@@ -30,6 +31,7 @@ pub trait AsciiStream {
         F: FnOnce(&char) -> bool;
 }
 
+#[derive(Debug)]
 pub struct BufferedAsciiStream<R> {
     src: R,
     buf: Vec<u8>,
@@ -95,6 +97,7 @@ impl<R: Read> AsciiStream for BufferedAsciiStream<R> {
     }
 }
 
+#[derive(Debug)]
 pub struct FullAsciiStream {
     buf: Vec<u8>,
     buf_pos: usize,
@@ -154,11 +157,11 @@ pub trait Tokenizer {
     fn expect_space(&mut self) -> TokenizerResult<()>;
     fn expect_newline(&mut self) -> TokenizerResult<()>;
     fn expect_eof(&mut self) -> TokenizerResult<()>;
-    fn read_token(&mut self) -> TokenizerResult<String>;
+    fn read_token(&mut self) -> TokenizerResult<&str>;
 }
 
 pub trait StandardWhitespace {
-    fn next_token_on_line(&mut self) -> Option<String>;
+    fn next_token_on_line(&mut self) -> Option<&str>;
     fn has_token_in_stream(&mut self) -> TokenizerResult<bool>;
 }
 
@@ -175,22 +178,16 @@ where
 {
     pub fn expect_space(&mut self) {
         let res = self.tokenizer.expect_space();
-        self.from_tk_result(res)
+        Self::from_tk_result(&self.handler, res)
     }
     pub fn expect_newline(&mut self) {
         let res = self.tokenizer.expect_newline();
-        self.from_tk_result(res)
+        Self::from_tk_result(&self.handler, res)
     }
-    pub fn read_token(&mut self) -> String {
+    pub fn read_token(&mut self) -> BorrowedToken<'_, EH> {
         let res = self.tokenizer.read_token();
-        self.from_tk_result(res)
-    }
-    pub fn parse_token<T>(&self, token: String) -> T
-    where
-        T: FromStr,
-        T::Err: Debug,
-    {
-        token.parse().unwrap_or_else(|_| self.handler.parse_error())
+        let borrowed_token = Self::from_tk_result(&self.handler, res);
+        BorrowedToken::new(borrowed_token, &self.handler)
     }
     pub fn check_range<T>(&self, val: &T, range: &impl RangeBounds<T>)
     where
@@ -200,8 +197,8 @@ where
             self.handler.out_of_range();
         }
     }
-    fn from_tk_result<T>(&self, res: TokenizerResult<T>) -> T {
-        res.unwrap_or_else(|_| self.handler.wrong_whitespace())
+    fn from_tk_result<T>(handler: &EH, res: TokenizerResult<T>) -> T {
+        res.unwrap_or_else(|_| handler.wrong_whitespace())
     }
 }
 
@@ -214,7 +211,7 @@ where
         // If the thread is panicking, let it panic. We only run EOF checks when we aren't panicking.
         if !std::thread::panicking() {
             let res = self.tokenizer.expect_eof();
-            self.from_tk_result(res)
+            Self::from_tk_result(&self.handler, res)
         }
     }
 }
@@ -224,12 +221,42 @@ where
     TK: Tokenizer + StandardWhitespace,
     EH: ErrorHandler,
 {
-    pub fn next_token_on_line(&mut self) -> Option<String> {
-        self.tokenizer.next_token_on_line()
+    pub fn next_token_on_line(&mut self) -> Option<BorrowedToken<'_, EH>> {
+        match self.tokenizer.next_token_on_line() {
+            Some(s) => Some(BorrowedToken::new(s, &self.handler)),
+            None => None,
+        }
     }
     pub fn has_token_in_stream(&mut self) -> bool {
         let res = self.tokenizer.has_token_in_stream();
-        self.from_tk_result(res)
+        Self::from_tk_result(&self.handler, res)
+    }
+}
+
+#[derive(Debug)]
+pub struct BorrowedToken<'a, EH> {
+    token: &'a str,
+    handler: &'a EH,
+}
+
+impl<'a, EH> BorrowedToken<'a, EH> where EH: ErrorHandler {
+    pub fn new(token: &'a str, handler: &'a EH) -> Self {
+        Self { token, handler }
+    }
+    pub fn get(&self) -> &str {
+        self.token
+    }
+    pub fn parse<T>(self) -> T
+    where
+        T: FromStr,
+        T::Err: Debug,
+    {
+        self.token.parse().unwrap_or_else(|_| self.handler.parse_error())
+    }
+}
+impl<'a, EH> PartialEq<&str> for BorrowedToken<'a, EH> {
+    fn eq(&self, other: &&str) -> bool {
+        self.token == *other
     }
 }
 
@@ -240,15 +267,13 @@ macro_rules! read_sep {
             let rd_ref = &mut $rd;
             let ret = (
                 {
-                    let tk = rd_ref.read_token();
-                    let ret: $first = rd_ref.parse_token(tk);
+                    let ret: $first = rd_ref.read_token().parse();
                     rd_ref.check_range(&ret, &$range);
                     ret
                 },
                 $({
                     rd_ref.expect_space();
-                    let tk = rd_ref.read_token();
-                    let ret: $rest = rd_ref.parse_token(tk);
+                    let ret: $rest = rd_ref.read_token().parse();
                     rd_ref.check_range(&ret, &$range);
                     ret
                 }),*
@@ -266,14 +291,12 @@ macro_rules! read_sep_without_range {
             let rd_ref = &mut $rd;
             let ret = (
                 {
-                    let tk = rd_ref.read_token();
-                    let ret: $first = rd_ref.parse_token(tk);
+                    let ret: $first = rd_ref.read_token().parse();
                     ret
                 },
                 $({
                     rd_ref.expect_space();
-                    let tk = rd_ref.read_token();
-                    let ret: $rest = rd_ref.parse_token(tk);
+                    let ret: $rest = rd_ref.read_token().parse();
                     ret
                 }),*
             );
@@ -295,8 +318,7 @@ macro_rules! read_array {
             if i != 0 {
                 rd_ref.expect_space();
             }
-            let tk = rd_ref.read_token();
-            let item: $type = rd_ref.parse_token(tk);
+            let item: $type = rd_ref.read_token().parse();
             rd_ref.check_range(&item, &range);
             ret.push(item);
         }

@@ -2,9 +2,10 @@ use super::reader::{self, wrong_whitespace, AsciiStream, TokenizerResult};
 
 pub struct Tokenizer<S> {
     src: S,
+    token: String,
 }
 pub fn new<S: AsciiStream>(src: S) -> Tokenizer<S> {
-    Tokenizer { src }
+    Tokenizer { src, token: String::new() }
 }
 
 impl<S> reader::Tokenizer for Tokenizer<S>
@@ -29,17 +30,15 @@ where
             _ => wrong_whitespace(),
         }
     }
-    fn read_token(&mut self) -> TokenizerResult<String> {
+    fn read_token(&mut self) -> TokenizerResult<&str> {
         match self.src.next() {
             Some(mut c) if c.is_ascii_graphic() => {
-                let mut token = String::with_capacity(32);
+                self.token.clear();
                 loop {
-                    token.push(c);
-                    if let Some(next_char) = self.src.next_if(char::is_ascii_graphic) {
-                        c = next_char;
-                    }
-                    else {
-                        break Ok(token);
+                    self.token.push(c);
+                    match self.src.next_if(char::is_ascii_graphic) {
+                        Some(next_char) => c = next_char,
+                        None => break Ok(&*self.token),
                     }
                 }
             }
