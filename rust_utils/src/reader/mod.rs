@@ -26,9 +26,11 @@ where
 pub trait AsciiStream {
     fn next(&mut self) -> Option<u8>;
     fn peek(&mut self) -> Option<u8>;
+    fn next_if<F>(&mut self, f: F) -> Option<u8> where
+        F: FnOnce(&u8) -> bool;
     fn read_while<F>(&mut self, f: F) -> &[u8]
     where
-        F: FnOnce(&u8) -> bool;
+        F: FnMut(&u8) -> bool;
 }
 
 #[derive(Debug)]
@@ -37,6 +39,7 @@ pub struct BufferedAsciiStream<R> {
     buf: Vec<u8>,
     buf_pos: usize,
     buf_size: usize,
+    token: Vec<u8>,
 }
 
 impl<R: Read> BufferedAsciiStream<R> {
@@ -46,6 +49,7 @@ impl<R: Read> BufferedAsciiStream<R> {
             buf: Vec::new(),
             buf_pos: 0,
             buf_size,
+            token: Vec::new(),
         }
     }
     #[cold]
@@ -67,6 +71,27 @@ impl<R: Read> BufferedAsciiStream<R> {
             Some(())
         }
     }
+
+    #[cold]
+    fn read_while_no_buf<F>(&mut self, start: usize, mut f: F) -> &[u8]
+    where
+        F: FnMut(&u8) -> bool,
+    {
+        self.token.clear();
+        self.token.extend_from_slice(&self.buf[start..]);
+        loop {
+            match self.next() {
+                Some(b) => {
+                    if !f(&b) {
+                        self.buf_pos -= 1;
+                        break &self.token[..];
+                    }
+                    self.token.push(b);
+                }
+                None => break &self.token[..],
+            }
+        }
+    }
 }
 
 impl<R: Read> AsciiStream for BufferedAsciiStream<R> {
@@ -75,19 +100,37 @@ impl<R: Read> AsciiStream for BufferedAsciiStream<R> {
         self.buf_pos += 1;
         Some(self.buf[self.buf_pos - 1])
     }
-    fn peek(&mut self) -> Option<char> {
+    fn peek(&mut self) -> Option<u8> {
         self.fill_buf()?;
         Some(self.buf[self.buf_pos])
     }
-    fn read_while<F>(&mut self, f: F) -> &[u8]
+    fn next_if<F>(&mut self, f: F) -> Option<u8> where
+        F: FnOnce(&u8) -> bool {
+        match self.next() {
+            Some(b) => {
+                if ! f(&b) {
+                    self.buf_pos -= 1;
+                    None
+                }
+                else {
+                    Some(b)
+                }
+            }
+            None => None,
+        }
+    }
+    fn read_while<F>(&mut self, mut f: F) -> &[u8]
     where
-        F: FnOnce(&char) -> bool,
+        F: FnMut(&u8) -> bool,
     {
         let start = self.buf_pos;
         while self.buf_pos < self.buf.len() {
-            
+            if !f(&self.buf[self.buf_pos]) {
+                return &self.buf[start..self.buf_pos];
+            }
             self.buf_pos += 1;
         }
+        self.read_while_no_buf(start, f)
     }
 }
 
@@ -104,36 +147,48 @@ impl FullAsciiStream {
     }
 }
 impl AsciiStream for FullAsciiStream {
-    fn next(&mut self) -> Option<char> {
+    fn next(&mut self) -> Option<u8> {
         if self.buf_pos == self.buf.len() {
             None
         } else {
             self.buf_pos += 1;
-            Some(char::from(self.buf[self.buf_pos - 1]))
+            Some(self.buf[self.buf_pos - 1])
         }
     }
-    fn peek(&mut self) -> Option<char> {
+    fn peek(&mut self) -> Option<u8> {
         if self.buf_pos == self.buf.len() {
             None
         } else {
-            Some(char::from(self.buf[self.buf_pos]))
+            Some(self.buf[self.buf_pos])
         }
     }
-    fn read_while<F>(&mut self, f: F) -> &str
-    where
-        F: FnOnce(&char) -> bool,
-    {
+    fn next_if<F>(&mut self, f: F) -> Option<u8> where
+        F: FnOnce(&u8) -> bool {
         match self.next() {
-            Some(c) => {
-                if !f(&c) {
+            Some(b) => {
+                if ! f(&b) {
                     self.buf_pos -= 1;
                     None
-                } else {
-                    Some(char::from(c))
+                }
+                else {
+                    Some(b)
                 }
             }
             None => None,
         }
+    }
+    fn read_while<F>(&mut self, mut f: F) -> &[u8]
+    where
+        F: FnMut(&u8) -> bool,
+    {
+        let start = self.buf_pos;
+        while self.buf_pos < self.buf.len() {
+            if !f(&self.buf[self.buf_pos]) {
+                break;
+            }
+            self.buf_pos += 1;
+        }
+        &self.buf[start..self.buf_pos]
     }
 }
 
@@ -151,11 +206,11 @@ pub trait Tokenizer {
     fn expect_space(&mut self) -> TokenizerResult<()>;
     fn expect_newline(&mut self) -> TokenizerResult<()>;
     fn expect_eof(&mut self) -> TokenizerResult<()>;
-    fn read_token(&mut self) -> TokenizerResult<&str>;
+    fn read_token(&mut self) -> TokenizerResult<&[u8]>;
 }
 
 pub trait StandardWhitespace {
-    fn next_token_on_line(&mut self) -> Option<&str>;
+    fn next_token_on_line(&mut self) -> Option<&[u8]>;
     fn has_token_in_stream(&mut self) -> TokenizerResult<bool>;
 }
 
@@ -163,6 +218,7 @@ pub trait ErrorHandler {
     fn out_of_range(&self) -> !;
     fn parse_error(&self) -> !;
     fn wrong_whitespace(&self) -> !;
+    fn non_ascii(&self) -> !;
 }
 
 impl<TK, EH> Reader<TK, EH>
@@ -180,8 +236,8 @@ where
     }
     pub fn read_token(&mut self) -> BorrowedToken<'_, EH> {
         let res = self.tokenizer.read_token();
-        let borrowed_token = Self::from_tk_result(&self.handler, res);
-        BorrowedToken::new(borrowed_token, &self.handler)
+        let borrowed_bytes = Self::from_tk_result(&self.handler, res);
+        Self::to_borrowed_token(&self.handler, borrowed_bytes)
     }
     pub fn check_range<T>(&self, val: &T, range: &impl RangeBounds<T>)
     where
@@ -193,6 +249,15 @@ where
     }
     fn from_tk_result<T>(handler: &EH, res: TokenizerResult<T>) -> T {
         res.unwrap_or_else(|_| handler.wrong_whitespace())
+    }
+    fn to_borrowed_token<'a>(handler: &'a EH, borrowed_bytes: &'a [u8]) -> BorrowedToken<'a, EH> {
+        if ! borrowed_bytes.is_ascii() {
+            handler.non_ascii();
+        }
+
+        // Since the string is ascii, it's also valid UTF8.
+        let borrowed_token = unsafe { std::str::from_utf8_unchecked(borrowed_bytes) };
+        BorrowedToken::new(borrowed_token, handler)
     }
 }
 
@@ -217,7 +282,7 @@ where
 {
     pub fn next_token_on_line(&mut self) -> Option<BorrowedToken<'_, EH>> {
         match self.tokenizer.next_token_on_line() {
-            Some(s) => Some(BorrowedToken::new(s, &self.handler)),
+            Some(token_bytes) => Some(Self::to_borrowed_token(&self.handler, token_bytes)),
             None => None,
         }
     }
@@ -233,7 +298,10 @@ pub struct BorrowedToken<'a, EH> {
     handler: &'a EH,
 }
 
-impl<'a, EH> BorrowedToken<'a, EH> where EH: ErrorHandler {
+impl<'a, EH> BorrowedToken<'a, EH>
+where
+    EH: ErrorHandler,
+{
     pub fn new(token: &'a str, handler: &'a EH) -> Self {
         Self { token, handler }
     }
@@ -245,7 +313,9 @@ impl<'a, EH> BorrowedToken<'a, EH> where EH: ErrorHandler {
         T: FromStr,
         T::Err: Debug,
     {
-        self.token.parse().unwrap_or_else(|_| self.handler.parse_error())
+        self.token
+            .parse()
+            .unwrap_or_else(|_| self.handler.parse_error())
     }
 }
 impl<'a, EH> PartialEq<&str> for BorrowedToken<'a, EH> {

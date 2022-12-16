@@ -11,13 +11,11 @@ enum WhitespaceFlag {
 #[derive(Debug)]
 pub struct Tokenizer<S: AsciiStream> {
     src: S,
-    token: String,
     flag: WhitespaceFlag,
 }
 pub fn new<S: AsciiStream>(src: S) -> Tokenizer<S> {
     Tokenizer {
         src,
-        token: String::new(),
         flag: WhitespaceFlag::All,
     }
 }
@@ -26,26 +24,20 @@ impl<S> Tokenizer<S>
 where
     S: AsciiStream,
 {
-    fn is_non_line_whitespace(c: char) -> bool {
-        !c.is_ascii_graphic() && c != '\n'
+    fn is_non_line_whitespace(b: &u8) -> bool {
+        !b.is_ascii_graphic() && *b != b'\n'
     }
     fn skip_non_line_whitespace(&mut self) {
         while self
             .src
-            .next_if(|c| Self::is_non_line_whitespace(*c))
+            .next_if(Self::is_non_line_whitespace)
             .is_some()
         {}
     }
-    fn raw_read_token(&mut self) {
-        self.token.clear();
-        while let Some(c) = self.src.next_if(char::is_ascii_graphic) {
-            self.token.push(c);
-        }
-    }
     fn has_line_before_next_token(&mut self) -> bool {
         let mut any_line = false;
-        while let Some(c) = self.src.next_if(|c| !c.is_ascii_graphic()) {
-            if c == '\n' {
+        while let Some(b) = self.src.next_if(|b| !b.is_ascii_graphic()) {
+            if b == b'\n' {
                 any_line = true;
             }
         }
@@ -56,12 +48,12 @@ where
         match self.flag {
             WhitespaceFlag::NoWhitespace => {}
             WhitespaceFlag::Space => match self.src.next() {
-                Some(c) => {
+                Some(b) => {
                     assert!(
-                        !c.is_ascii_graphic(),
+                        !b.is_ascii_graphic(),
                         "Found non-whitespace right after token!"
                     );
-                    if c == '\n' {
+                    if b == b'\n' {
                         return wrong_whitespace();
                     }
                     self.skip_non_line_whitespace();
@@ -69,10 +61,11 @@ where
                 None => return wrong_whitespace(),
             },
             WhitespaceFlag::Newline => match self.src.peek() {
-                Some(c) => {
+                Some(b) => {
                     assert!(
-                        !c.is_ascii_graphic(),
-                        "Found non-whitespace right after token!"
+                        !b.is_ascii_graphic(),
+                        "Found non-whitespace {} right after token!",
+                        b
                     );
                     if !self.has_line_before_next_token() {
                         return wrong_whitespace();
@@ -80,7 +73,7 @@ where
                 }
                 None => return wrong_whitespace(),
             },
-            WhitespaceFlag::All => while self.src.next_if(|c| !c.is_ascii_graphic()).is_some() {},
+            WhitespaceFlag::All => while self.src.next_if(|b| !b.is_ascii_graphic()).is_some() {},
         }
         self.flag = WhitespaceFlag::NoWhitespace;
         Ok(())
@@ -116,13 +109,13 @@ where
             Ok(())
         }
     }
-    fn read_token(&mut self) -> TokenizerResult<&str> {
+    fn read_token(&mut self) -> TokenizerResult<&[u8]> {
         self.consume_flag()?;
-        self.raw_read_token();
-        if self.token.len() == 0 {
+        let token_bytes = self.src.read_while(u8::is_ascii_graphic);
+        if token_bytes.len() == 0 {
             wrong_whitespace()
         } else {
-            Ok(&*self.token)
+            Ok(token_bytes)
         }
     }
 }
@@ -131,7 +124,7 @@ impl<S> StandardWhitespace for Tokenizer<S>
 where
     S: AsciiStream,
 {
-    fn next_token_on_line(&mut self) -> Option<&str> {
+    fn next_token_on_line(&mut self) -> Option<&[u8]> {
         assert!(
             self.flag == WhitespaceFlag::NoWhitespace,
             "You must not call `next_token_on_line` after any whitespace method."
@@ -139,11 +132,11 @@ where
 
         self.skip_non_line_whitespace();
 
-        self.raw_read_token();
-        if self.token.len() == 0 {
+        let token_bytes = self.src.read_while(u8::is_ascii_graphic);
+        if token_bytes.len() == 0 {
             None
         } else {
-            Some(&*self.token)
+            Some(token_bytes)
         }
     }
     fn has_token_in_stream(&mut self) -> TokenizerResult<bool> {

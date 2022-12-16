@@ -28,6 +28,10 @@ where
     fn parse_error(&self) -> ! {
         self.checker.exit(codes::WA);
     }
+    fn non_ascii(&self) -> ! {
+        // Uhh... PE, I guess?
+        self.checker.exit(codes::PE);
+    }
 }
 
 pub fn new_checker<F: FnOnce() -> Option<u8>>(

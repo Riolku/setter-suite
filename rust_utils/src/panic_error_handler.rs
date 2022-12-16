@@ -19,4 +19,7 @@ impl ErrorHandler for Handler {
     fn wrong_whitespace(&self) -> ! {
         panic!("wrong whitespace")
     }
+    fn non_ascii(&self) -> ! {
+        panic!("non ascii");
+    }
 }
