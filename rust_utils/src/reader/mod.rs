@@ -203,7 +203,7 @@ pub trait Tokenizer {
     fn expect_space(&mut self) -> TokenizerResult<()>;
     fn expect_newline(&mut self) -> TokenizerResult<()>;
     fn expect_eof(&mut self) -> TokenizerResult<()>;
-    fn read_token(&mut self) -> TokenizerResult<&[u8]>;
+    fn read_token(&mut self) -> TokenizerResult<&str>;
 }
 
 pub trait StandardWhitespace {
@@ -233,8 +233,8 @@ where
     }
     pub fn read_token(&mut self) -> BorrowedToken<'_, EH> {
         let res = self.tokenizer.read_token();
-        let borrowed_bytes = Self::from_tk_result(&self.handler, res);
-        Self::to_borrowed_token(&self.handler, borrowed_bytes)
+        let borrowed_token = Self::from_tk_result(&self.handler, res);
+        BorrowedToken::new(borrowed_token, &self.handler)
     }
     pub fn check_range<T>(&self, val: &T, range: &impl RangeBounds<T>)
     where

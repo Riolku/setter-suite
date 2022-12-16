@@ -29,12 +29,13 @@ where
             _ => wrong_whitespace(),
         }
     }
-    fn read_token(&mut self) -> TokenizerResult<&[u8]> {
-        let bytes = self.src.read_while(u8::is_ascii_graphic);
-        if bytes.len() == 0 {
+    fn read_token(&mut self) -> TokenizerResult<&str> {
+        let token_bytes = self.src.read_while(u8::is_ascii_graphic);
+        if token_bytes.len() == 0 {
             wrong_whitespace()
         } else {
-            Ok(bytes)
+            // Safety: all the bytes in the token are ascii.
+            Ok(unsafe { std::str::from_utf8_unchecked(token_bytes) })
         }
     }
 }
