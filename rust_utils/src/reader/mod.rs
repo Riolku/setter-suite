@@ -182,10 +182,7 @@ impl AsciiStream for FullAsciiStream {
         F: FnMut(&u8) -> bool,
     {
         let start = self.buf_pos;
-        while self.buf_pos < self.buf.len() {
-            if !f(&self.buf[self.buf_pos]) {
-                break;
-            }
+        while self.buf_pos < self.buf.len() && f(&self.buf[self.buf_pos]) {
             self.buf_pos += 1;
         }
         &self.buf[start..self.buf_pos]
