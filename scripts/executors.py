@@ -174,6 +174,8 @@ class RustExecutor(CompiledExecutor):
             f"rand={SETTER_DIR}/rust_utils/target/debug/deps/librand-d26ebf01dbcb67f8.rlib",
             "--extern",
             f"rand_xoshiro={SETTER_DIR}/rust_utils/target/debug/deps/librand_xoshiro-28a93eac8ba0cb71.rlib",
+            "--extern",
+            f"libc={SETTER_DIR}/rust_utils/target/debug/deps/liblibc-ee12cdda081a1eff.rlib",
             "--edition=2021",
             self.file,
         ] + args
