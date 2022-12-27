@@ -9,8 +9,7 @@ fn get_gen() -> ConcreteRng {
 #[test]
 fn test_binary_array() {
     let mut gen = get_gen();
-    for _ in 0..10 {
-        let n = gen.gen_range(0..=20);
+    for n in 0..=20 {
         let k = gen.gen_range(0..=n);
         let arr = gen.binary_array(n, k);
         assert!(arr.iter().filter(|&x| *x).count() == k);
@@ -20,8 +19,7 @@ fn test_binary_array() {
 #[test]
 fn test_array_with_sum() {
     let mut gen = get_gen();
-    for _ in 0..10 {
-        let n = gen.gen_range(0..=20);
+    for n in 1..=20 {
         let sum = gen.gen_range(0..=1000);
         let arr = gen.array_with_sum(n, sum);
         assert!(arr.iter().sum::<usize>() == sum);
