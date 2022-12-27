@@ -147,7 +147,7 @@ macro_rules! many_cases {
 }
 
 pub mod prelude {
-    pub use super::super::random_arrays::{IntoVec, RandomArrayExtension};
+    pub use super::super::random_arrays::{CollectIntoVec, RandomArrayExtension};
     pub use super::super::test_cases::{
         ConcreteRng, InputGenerator, InputGeneratorRef, InputStreamWriteable, LiteralInput,
         LiteralTest, ManyCases, OutputStreamWriteable, StreamWriteable, TestCase,

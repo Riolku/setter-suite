@@ -1,9 +1,8 @@
-pub trait IntoVec {
+pub trait CollectIntoVec {
     type Item;
     fn collect_vec(self) -> Vec<Self::Item>;
 }
-
-impl<I> IntoVec for I where I: Iterator {
+impl<I> CollectIntoVec for I where I: Iterator {
     type Item = I::Item;
     fn collect_vec(self) -> Vec<Self::Item> {
         self.collect()
@@ -34,7 +33,7 @@ impl<R> RandomArrayExtension for R where R: Rng {
         ans.push(sum);
         let distro = Uniform::new_inclusive(0, sum);
         ans.extend(self.sample_iter(distro).take(n - 1));
-        ans[1..n].sort_unstable_by(|x, y| Ord::cmp(x, y).reverse());
+        ans[1..n].sort_unstable_by(|x, y| Ord::cmp(y, x));
         ans.push(0);
         for i in 0..n {
             ans[i] -= ans[i + 1];
