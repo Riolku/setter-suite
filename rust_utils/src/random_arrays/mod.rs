@@ -24,7 +24,7 @@ impl<R> RandomArrayExtension for R where R: Rng {
         for i in (0..n).choose_multiple(self, ones) {
             ans[i] = true;
         }
-        debug_assert!(ans.iter().filter(|x| **x).count() == ones);
+        debug_assert!(ans.iter().filter(|&x| *x).count() == ones);
         ans
     }
     fn array_with_sum(&mut self, n: usize, sum: usize) -> Vec<usize> {
