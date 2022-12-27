@@ -22,6 +22,9 @@ pub mod output;
 #[cfg(feature = "panic_error_handler")]
 pub mod panic_error_handler;
 
+#[cfg(feature = "random_arrays")]
+pub mod random_arrays;
+
 #[cfg(feature = "reader")]
 pub mod reader;
 
