@@ -63,7 +63,7 @@ macro_rules! generator_main {
 
 #[macro_export]
 macro_rules! bind_solution_test {
-    ($solve:ident, $input_type:ty, $output_type:ty) => {
+    ($solve:expr, $input_type:ty, $output_type:ty) => {
         struct SolutionTest;
 
         use dmoj_rust_utils::test_cases::AbstractSolutionTest;
