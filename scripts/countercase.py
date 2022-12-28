@@ -77,6 +77,7 @@ class CounterCaser:
                     + f"{generator_res.stderr}"
                     + "===LiteralTest Config===\n"
                     + f"make_shared<LiteralTest>({inp_rep}, {out_rep}),\n"
+                    + f"LiteralTest::new({inp_rep}, {out_rep}),\n"
                     + "=========\n"
                 )
 
