@@ -26,7 +26,8 @@ where
 pub trait AsciiStream {
     fn next(&mut self) -> Option<u8>;
     fn peek(&mut self) -> Option<u8>;
-    fn next_if<F>(&mut self, f: F) -> Option<u8> where
+    fn next_if<F>(&mut self, f: F) -> Option<u8>
+    where
         F: FnOnce(&u8) -> bool;
     fn read_while<F>(&mut self, f: F) -> &[u8]
     where
@@ -104,15 +105,16 @@ impl<R: Read> AsciiStream for BufferedAsciiStream<R> {
         self.fill_buf()?;
         Some(self.buf[self.buf_pos])
     }
-    fn next_if<F>(&mut self, f: F) -> Option<u8> where
-        F: FnOnce(&u8) -> bool {
+    fn next_if<F>(&mut self, f: F) -> Option<u8>
+    where
+        F: FnOnce(&u8) -> bool,
+    {
         match self.next() {
             Some(b) => {
-                if ! f(&b) {
+                if !f(&b) {
                     self.buf_pos -= 1;
                     None
-                }
-                else {
+                } else {
                     Some(b)
                 }
             }
@@ -162,15 +164,16 @@ impl AsciiStream for FullAsciiStream {
             Some(self.buf[self.buf_pos])
         }
     }
-    fn next_if<F>(&mut self, f: F) -> Option<u8> where
-        F: FnOnce(&u8) -> bool {
+    fn next_if<F>(&mut self, f: F) -> Option<u8>
+    where
+        F: FnOnce(&u8) -> bool,
+    {
         match self.next() {
             Some(b) => {
-                if ! f(&b) {
+                if !f(&b) {
                     self.buf_pos -= 1;
                     None
-                }
-                else {
+                } else {
                     Some(b)
                 }
             }
@@ -248,7 +251,7 @@ where
         res.unwrap_or_else(|_| handler.wrong_whitespace())
     }
     fn to_borrowed_token<'a>(handler: &'a EH, borrowed_bytes: &'a [u8]) -> BorrowedToken<'a, EH> {
-        if ! borrowed_bytes.is_ascii() {
+        if !borrowed_bytes.is_ascii() {
             handler.non_ascii();
         }
 

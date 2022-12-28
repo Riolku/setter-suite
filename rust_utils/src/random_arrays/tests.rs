@@ -1,5 +1,5 @@
-use super::*;
 use super::super::test_cases::ConcreteRng;
+use super::*;
 
 fn get_gen() -> ConcreteRng {
     use rand::SeedableRng;

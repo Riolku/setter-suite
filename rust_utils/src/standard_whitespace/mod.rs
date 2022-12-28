@@ -28,11 +28,7 @@ where
         !b.is_ascii_graphic() && *b != b'\n'
     }
     fn skip_non_line_whitespace(&mut self) {
-        while self
-            .src
-            .next_if(Self::is_non_line_whitespace)
-            .is_some()
-        {}
+        while self.src.next_if(Self::is_non_line_whitespace).is_some() {}
     }
     fn has_line_before_next_token(&mut self) -> bool {
         let mut any_line = false;

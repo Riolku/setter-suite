@@ -2,7 +2,10 @@ pub trait CollectIntoVec {
     type Item;
     fn collect_vec(self) -> Vec<Self::Item>;
 }
-impl<I> CollectIntoVec for I where I: Iterator {
+impl<I> CollectIntoVec for I
+where
+    I: Iterator,
+{
     type Item = I::Item;
     fn collect_vec(self) -> Vec<Self::Item> {
         self.collect()
@@ -12,12 +15,19 @@ impl<I> CollectIntoVec for I where I: Iterator {
 pub trait RandomArrayExtension {
     fn binary_array(&mut self, n: usize, ones: usize) -> Vec<bool>;
     fn array_with_sum(&mut self, n: usize, sum: usize) -> Vec<usize>;
+    fn build_array<T>(&mut self, builder: Vec<(usize, T, T)>) -> Vec<T>
+    where
+        T: SampleUniform;
 }
 
-use rand::Rng;
+use rand::distributions::uniform::SampleUniform;
 use rand::distributions::Uniform;
 use rand::seq::IteratorRandom;
-impl<R> RandomArrayExtension for R where R: Rng {
+use rand::Rng;
+impl<R> RandomArrayExtension for R
+where
+    R: Rng,
+{
     fn binary_array(&mut self, n: usize, ones: usize) -> Vec<bool> {
         assert!(ones <= n);
         let mut ans = vec![false; n];
@@ -39,7 +49,19 @@ impl<R> RandomArrayExtension for R where R: Rng {
             ans[i] -= ans[i + 1];
         }
         ans.pop();
+        ans.shrink_to_fit();
         debug_assert!(ans.iter().sum::<usize>() == sum);
+        ans
+    }
+    fn build_array<T>(&mut self, builder: Vec<(usize, T, T)>) -> Vec<T>
+    where
+        T: SampleUniform,
+    {
+        let mut ans = Vec::new();
+        for (c, l, r) in builder {
+            let distro = Uniform::new_inclusive(l, r);
+            ans.extend(self.sample_iter(distro).take(c));
+        }
         ans
     }
 }
