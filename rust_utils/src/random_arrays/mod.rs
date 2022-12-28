@@ -38,7 +38,10 @@ where
         ans
     }
     fn array_with_sum(&mut self, n: usize, sum: usize) -> Vec<usize> {
-        assert!(n > 0);
+        if n == 0 {
+            assert!(sum == 0);
+            return vec![];
+        }
         let mut ans = Vec::with_capacity(n + 1);
         ans.push(sum);
         let distro = Uniform::new_inclusive(0, sum);
