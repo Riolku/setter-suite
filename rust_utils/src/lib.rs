@@ -28,6 +28,9 @@ pub mod random_arrays;
 #[cfg(feature = "reader")]
 pub mod reader;
 
+#[cfg(feature = "slice_validation")]
+pub mod slice_validation;
+
 #[cfg(feature = "standard_checker")]
 pub mod standard_checker;
 

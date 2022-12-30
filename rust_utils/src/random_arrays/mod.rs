@@ -47,7 +47,7 @@ where
         let distro = Uniform::new_inclusive(0, sum);
         ans.extend(self.sample_iter(distro).take(n - 1));
         ans[1..n].sort_unstable_by(|x, y| Ord::cmp(y, x));
-        for i in 0..n-1 {
+        for i in 0..n - 1 {
             ans[i] -= ans[i + 1];
         }
         debug_assert!(ans.iter().sum::<usize>() == sum);
