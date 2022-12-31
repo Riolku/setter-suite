@@ -15,9 +15,12 @@ where
 pub trait RandomArrayExtension {
     fn binary_array(&mut self, n: usize, ones: usize) -> Vec<bool>;
     fn array_with_sum(&mut self, n: usize, sum: usize) -> Vec<usize>;
-    fn build_array<T>(&mut self, builder: Vec<(usize, T, T)>) -> Vec<T>
+    fn build_array<I, T>(&mut self, builder: I) -> Vec<T>
     where
+        I: IntoIterator<Item = (usize, T, T)>,
         T: SampleUniform;
+    // Get n distinct numbers in [0, upper)
+    fn choose_multiple_large_range(&mut self, n: usize, upper: usize) -> Vec<usize>;
 }
 
 use rand::distributions::uniform::SampleUniform;
@@ -53,8 +56,9 @@ where
         debug_assert!(ans.iter().sum::<usize>() == sum);
         ans
     }
-    fn build_array<T>(&mut self, builder: Vec<(usize, T, T)>) -> Vec<T>
+    fn build_array<I, T>(&mut self, builder: I) -> Vec<T>
     where
+        I: IntoIterator<Item = (usize, T, T)>,
         T: SampleUniform,
     {
         let mut ans = Vec::new();
@@ -63,6 +67,9 @@ where
             ans.extend(self.sample_iter(distro).take(c));
         }
         ans
+    }
+    fn choose_multiple_large_range(&mut self, n: usize, upper: usize) -> Vec<usize> {
+        rand::seq::index::sample(self, upper, n).into_vec()
     }
 }
 
