@@ -42,7 +42,15 @@ fn test_build_array() {
 fn test_choose_multiple_large_range() {
     let mut gen = get_gen();
     for n in 1..=20 {
-        for upper in [n, n + 1, n + 2, n + 3, 1000, 1_000_000, 1_000_000_000_000_000] {
+        for upper in [
+            n,
+            n + 1,
+            n + 2,
+            n + 3,
+            1000,
+            1_000_000,
+            1_000_000_000_000_000,
+        ] {
             let mut arr = gen.choose_multiple_large_range(n, upper);
             assert!(arr.iter().all(|x| (0..upper).contains(x)));
             arr.sort_unstable();

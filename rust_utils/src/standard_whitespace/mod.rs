@@ -1,6 +1,6 @@
 use super::reader::{self, wrong_whitespace, AsciiStream, StandardWhitespace, TokenizerResult};
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
 enum WhitespaceFlag {
     NoWhitespace,
     Space,
@@ -39,7 +39,6 @@ where
         }
         any_line
     }
-
     fn consume_flag(&mut self) -> TokenizerResult<()> {
         match self.flag {
             WhitespaceFlag::NoWhitespace => {}
@@ -75,12 +74,9 @@ where
         Ok(())
     }
     fn poke_flag(&mut self, flag: WhitespaceFlag) {
-        assert!(
-            self.flag == WhitespaceFlag::NoWhitespace,
-            "Do not call two whitespace methods in a row. \
-            This error may also appear because you called a whitespace method immediately after initialization."
-        );
-        self.flag = flag;
+        if flag > self.flag {
+            self.flag = flag;
+        }
     }
 }
 
@@ -97,7 +93,7 @@ where
         Ok(())
     }
     fn expect_eof(&mut self) -> TokenizerResult<()> {
-        self.flag = WhitespaceFlag::All;
+        self.poke_flag(WhitespaceFlag::All);
         self.consume_flag()?;
         if self.src.next().is_some() {
             wrong_whitespace()
