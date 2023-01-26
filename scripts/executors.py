@@ -112,7 +112,7 @@ class CppExecutor(CompiledExecutor):
 
     def get_compiler_cmd(self, args: list, *, debug: bool):
         cmd = [
-            "g++",
+            "clang++",
             "-Wall",
             "-std=c++17",
             "-g",
@@ -132,7 +132,7 @@ class CExecutor(CompiledExecutor):
 
     def get_compiler_cmd(self, args: list, *, debug: bool):
         cmd = [
-            "gcc",
+            "clang",
             "-Wall",
             "-std=c99",
             "-g",
