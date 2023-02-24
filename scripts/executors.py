@@ -164,18 +164,31 @@ class RustExecutor(CompiledExecutor):
         super().compile(args, debug=debug, force_compile=force_compile)
 
     def get_compiler_cmd(self, args: list, *, debug: bool):
-        # TODO: do we have to hardcode these paths?
+        LIBRARY_PATH = f"{SETTER_DIR}/rust_utils/target/debug/deps"
+        def find_lib(lib_name):
+            candidates = []
+            for path in os.listdir(f"{LIBRARY_PATH}"):
+                if path.startswith(f"lib{lib_name}-") and path.endswith(".rlib"):
+                    candidates.append(path)
+
+            assert len(candidates) > 0, f"Can't find {lib_name}!"
+            assert len(candidates) < 2, f"Can't choose between {candidates}!"
+            return f"{LIBRARY_PATH}/{candidates[0]}"
+
+        def add_lib(lib_name):
+            return f"{lib_name}={find_lib(lib_name)}"
+
         cmd = [
             "rustc",
             "-g",
             "-L",
-            f"{SETTER_DIR}/rust_utils/target/debug/deps",
+            LIBRARY_PATH,
             "--extern",
-            f"rand={SETTER_DIR}/rust_utils/target/debug/deps/librand-d26ebf01dbcb67f8.rlib",
+            add_lib("rand"),
             "--extern",
-            f"rand_xoshiro={SETTER_DIR}/rust_utils/target/debug/deps/librand_xoshiro-28a93eac8ba0cb71.rlib",
+            add_lib("rand_xoshiro"),
             "--extern",
-            f"libc={SETTER_DIR}/rust_utils/target/debug/deps/liblibc-ee12cdda081a1eff.rlib",
+            add_lib("libc"),
             "--edition=2021",
             self.file,
         ] + args
