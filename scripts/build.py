@@ -4,13 +4,8 @@ from .env import env
 
 
 def main(args):
-    if os.path.exists("old-build"):
-        os.system("rm -r old-build")
-
-    try:
-        os.rename("build", "old-build")
-    except FileNotFoundError:
-        pass
+    if os.path.exists("build"):
+        os.system("rm -r build")
 
     os.mkdir("build")
 
