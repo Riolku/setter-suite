@@ -11,13 +11,8 @@ def main(args):
     print("---Generating Data---")
     gen = Generator()
 
-    if os.path.exists("old-data"):
-        os.system("rm -r old-data")
-
-    try:
-        os.rename("data", "old-data")
-    except FileNotFoundError:
-        pass
+    if os.path.exists("data"):
+        os.system("rm -r data")
 
     os.mkdir("data")
 
