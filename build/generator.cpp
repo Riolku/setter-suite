@@ -1,4 +1,4 @@
-// Built with `init-template gen_entry` on 2022-08-16
+// Built with `init-template gen_entry` on 2023-06-13
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -39,6 +39,7 @@ FILE *stream = stdout;
 
 void set_stream(FILE *st) { stream = st; }
 
+// Simple Types
 void print_impl(bool x) { fprintf(stream, "%d", x); }
 void print_impl(int x) { fprintf(stream, "%d", x); }
 void print_impl(ll x) { fprintf(stream, "%lld", x); }
@@ -46,6 +47,23 @@ void print_impl(size_t x) { fprintf(stream, "%lu", x); }
 void print_impl(const char *x) { fprintf(stream, "%s", x); }
 void print_impl(const string &x) { print_impl(x.c_str()); }
 void print_impl(char x) { fprintf(stream, "%c", x); }
+
+// Recursive types. First, declare all overloads
+template <typename T> void print_impl(const T &);
+template <typename A, typename B> void print_impl(const pair<A, B> &);
+template <typename... Ts> void print_impl(const tuple<Ts...> &t);
+template <typename T, typename Container> void print_impl(queue<T, Container>);
+template <typename T, typename Container, typename Compare>
+void print_impl(priority_queue<T, Container, Compare>);
+template <typename T> void print_impl(const set<T> &);
+template <typename T> void print_impl(const vector<T> &);
+template <typename T, size_t size> void print_impl(const array<T, size> &);
+template <typename T> void print_impl(const unordered_set<T> &);
+
+// Recursive type definitions
+template <typename T> void print_impl(const T &x) {
+  print_impl(x.get_printable());
+}
 
 template <typename A, typename B> void print_impl(const pair<A, B> &p) {
   print_impl(p.first);
@@ -72,7 +90,7 @@ template <typename... Ts> void print_impl(const tuple<Ts...> &t) {
   print_tuple<sizeof...(Ts)>(t);
 }
 
-template <typename T> void print_impl(const T &arr) {
+template <typename T> void print_iterable(const T &arr) {
   bool first = true;
 
   for (auto x : arr) {
@@ -85,10 +103,41 @@ template <typename T> void print_impl(const T &arr) {
   }
 }
 
-void print_many() {}
+template <typename T> void print_impl(const set<T> &arr) {
+  print_iterable(arr);
+}
+template <typename T> void print_impl(const vector<T> &arr) {
+  print_iterable(arr);
+}
+template <typename T> void print_impl(const unordered_set<T> &arr) {
+  print_iterable(arr);
+}
+template <typename T, size_t size> void print_impl(const array<T, size> &arr) {
+  print_iterable(arr);
+}
+template <typename T, typename Container>
+void print_impl(queue<T, Container> q) {
+  vector<T> dummy;
+  dummy.reserve(q.size());
+  while (!q.empty()) {
+    dummy.push_back(move(q.front()));
+    q.pop_front();
+  }
+  print_impl(dummy);
+}
 
+template <typename T, typename Container, typename Compare>
+void print_impl(priority_queue<T, Container, Compare> pq) {
+  vector<T> dummy;
+  dummy.reserve(pq.size());
+  while (!pq.empty()) {
+    dummy.push_back(move(pq.top()));
+    pq.pop();
+  }
+  print_impl(dummy);
+}
+// print_many helper
 template <typename T> void print_many(const T &arg) { print_impl(arg); }
-
 template <typename T, typename... Ts>
 void print_many(const T &arg, Ts &&...args) {
   print_impl(arg);
@@ -96,12 +145,16 @@ void print_many(const T &arg, Ts &&...args) {
   print_many(forward<Ts>(args)...);
 }
 
-void print() { fprintf(stream, "\n"); }
-
 template <typename... Ts> void print(Ts &&...args) {
   print_many(forward<Ts>(args)...);
 
   print();
+}
+template <> void print() { fprintf(stream, "\n"); }
+template <typename T> void print_map(const T &mp) {
+  for (auto p : mp) {
+    print(p);
+  }
 }
 
 template <typename R> void print_items(const R &r) {
@@ -109,10 +162,25 @@ template <typename R> void print_items(const R &r) {
     print(x);
   }
 }
+
+template <typename K, typename V>
+void print_items(const unordered_map<K, V> &mp) {
+  print_map(mp);
+}
+template <typename K, typename V> void print_items(const map<K, V> &mp) {
+  print_map(mp);
+}
+
+template <typename T> void print_yes_no(const T &xs) {
+  for (const auto &x : xs)
+    print_yes_no(x);
+}
+template <> void print_yes_no(const bool &x) { print(x ? "YES" : "NO"); }
 }; // namespace Printer
 
 using Printer::print;
 using Printer::print_items;
+using Printer::print_yes_no;
 using Printer::set_stream;
 
 template <typename T, int offset = 0> class List : public vector<T> {
@@ -127,14 +195,16 @@ public:
   template <typename F> void for_each(F f) { ::for_each(all(*this), f); }
   template <typename F> void for_each(F f) const { ::for_each(all(*this), f); }
   template <typename F> void for_each_pair(F f) {
-    ::for_each(all(*this), [&f](const T &p) -> void {
-      auto a = get<0>(p), b = get<1>(p);
+    ::for_each(all(*this), [&f](T &p) -> void {
+      decltype(p.first) &a = get<0>(p);
+      decltype(p.second) &b = get<1>(p);
       f(a, b);
     });
   }
   template <typename F> void for_each_pair(F f) const {
     ::for_each(all(*this), [&f](const T &p) -> void {
-      auto a = get<0>(p), b = get<1>(p);
+      const decltype(p.first) &a = get<0>(p);
+      const decltype(p.second) &b = get<1>(p);
       f(a, b);
     });
   }
@@ -176,13 +246,11 @@ public:
   }
 
   List<T, offset> &operator+=(const List<T, offset> &other) {
-    this->reserve(this->size() + other.size());
     for (const T &elem : other)
       this->push_back(elem);
     return *this;
   }
   List<T, offset> &operator+=(List<T, offset> &&other) {
-    this->reserve(this->size() + other.size());
     for (auto &&elem : other)
       this->push_back(move(elem));
     return *this;
@@ -282,6 +350,8 @@ public:
     }
     return ret;
   }
+
+  const vector<T> &get_printable() const { return *this; }
 };
 
 template <int offset = 0, typename F>
@@ -321,85 +391,9 @@ template <typename T, typename F> void exhaust_queue(queue<T> &q, F f) {
   while (!q.empty()) {
     T x(move(q.front()));
     q.pop();
-    f(x);
+    f(move(x));
   }
 }
-
-template <typename T = ll> class Range {
-  T l, r;
-
-  class iterator {
-    T cur;
-
-    iterator(T cur) : cur(move(cur)) {}
-
-  public:
-    using difference_type = decltype(declval<T>() - declval<T>());
-    using value_type = T;
-    using pointer = void;
-    using reference = void;
-    using iterator_category = random_access_iterator_tag;
-
-    iterator &operator++() {
-      ++cur;
-      return *this;
-    }
-    iterator &operator--() {
-      --cur;
-      return *this;
-    }
-    value_type operator*() { return cur; }
-    value_type operator[](const T &offset) { return cur + offset; }
-
-    iterator operator+(const T &offset) const { return iterator(cur + offset); }
-    iterator operator-(const T &offset) const { return iterator(cur - offset); }
-    difference_type operator-(const iterator &other) const {
-      return cur - other.cur;
-    }
-    iterator &operator-=(const T &offset) {
-      cur -= offset;
-      return *this;
-    }
-    iterator &operator+=(const T &offset) {
-      cur += offset;
-      return *this;
-    }
-
-    bool operator>=(const iterator &other) const { return cur >= other.cur; }
-    bool operator<=(const iterator &other) const { return cur <= other.cur; }
-    bool operator>(const iterator &other) const { return cur > other.cur; }
-    bool operator<(const iterator &other) const { return cur < other.cur; }
-    bool operator!=(const iterator &other) const { return cur != other.cur; }
-    bool operator==(const iterator &other) const { return cur == other.cur; }
-
-    friend class Range;
-  };
-
-public:
-  Range(T l, T r) : l(move(l)), r(move(r)) {}
-  Range(T r) : l(T()), r(move(r)) {}
-
-  template <typename F> bool any_of(F f) const {
-    return ::any_of(all(*this), f);
-  }
-  template <typename F> bool all_of(F f) const {
-    return ::any_of(all(*this), f);
-  }
-
-  template <typename F> void for_each(F f) const { ::for_each(all(*this), f); }
-
-  template <typename F>
-  auto map_new(F f) const -> List<decltype(f(declval<T>()))> {
-    List<decltype(f(declval<T>()))> ret;
-    ret.reserve(this->size());
-    ::transform(all(*this), back_inserter(ret), f);
-    return ret;
-  }
-
-  decltype(declval<T>() - declval<T>()) size() const { return r - l; }
-  iterator begin() const { return iterator(l); }
-  iterator end() const { return iterator(r); }
-};
 
 using default_rng = mt19937_64;
 
@@ -466,7 +460,7 @@ template <typename T> List<T> distinct_array(int N, T lo, T hi) {
 }
 
 template <typename T> List<T> array_with_sum(int N, T sum, T lo) {
-  List<T> ret = random_sorted_array_with_gaps(N - 1, 0, sum, lo);
+  List<T> ret = random_sorted_array_with_gaps(N - 1, lo, sum - lo, lo);
   ret.reserve(N);
   ret.push_back(sum);
   adjacent_difference(all(ret), ret.begin());
@@ -483,7 +477,7 @@ List<int> binary_array_with_sum(int N, int one_count) {
   return ret;
 }
 
-template <typename T> class ArrayBuilder {
+template <typename T> class RandomArrayBuilder {
 public:
   using BuilderInstruction = tuple<int, T, T>;
   using BuilderInstructionList = List<BuilderInstruction>;
@@ -492,20 +486,19 @@ protected:
   BuilderInstructionList instructions;
 
 public:
-  ArrayBuilder(List<BuilderInstruction> instructions)
+  RandomArrayBuilder(BuilderInstructionList instructions)
       : instructions(move(instructions)) {}
 
   List<T> build() {
     List<T> ret;
     int list_size = 0;
     for (auto tp : instructions) {
-      int c, l, r;
-      tie(c, l, r) = tp;
-      list_size += c;
+      list_size += get<0>(tp);
     }
     ret.reserve(list_size);
     for (auto tp : instructions) {
-      int c, l, r;
+      int c;
+      T l, r;
       tie(c, l, r) = tp;
       for (int i = 0; i < c; ++i) {
         ret.push_back(randint(l, r));
@@ -516,8 +509,85 @@ public:
   }
 };
 
-using IntArrayBuilder = ArrayBuilder<int>;
-using LongArrayBuilder = ArrayBuilder<ll>;
+using IntArrayBuilder = RandomArrayBuilder<int>;
+using LongArrayBuilder = RandomArrayBuilder<ll>;
+
+template <typename T> struct ListBuilder {
+  virtual List<T> build() = 0;
+
+  virtual ~ListBuilder() {}
+};
+
+template <typename T> class SingleElement : public ListBuilder<T> {
+  T x;
+
+public:
+  List<T> build() override { return {x}; }
+
+  SingleElement(T x) : x(move(x)) {}
+};
+
+template <typename T> class MultipleElements : public ListBuilder<T> {
+  List<T> elems;
+
+public:
+  List<T> build() override { return elems; }
+
+  MultipleElements(List<T> elems) : elems(move(elems)) {}
+};
+
+template <typename T> class SerialElements : public ListBuilder<T> {
+  using PartType = ListBuilder<T>;
+  using PartPtr = unique_ptr<PartType>;
+  using PartList = List<PartPtr>;
+
+  PartList to_parts(PartList cur) { return cur; }
+  template <typename... Ts>
+  PartList to_parts(PartList cur, PartPtr ptr, Ts &&...rest) {
+    cur.push_back(move(ptr));
+    return to_parts(move(cur), forward<Ts>(rest)...);
+  }
+  template <typename... Ts>
+  PartList to_parts(PartList cur, T elem, Ts &&...rest) {
+    return to_parts(move(cur), make_unique<SingleElement<T>>(move(elem)),
+                    forward<Ts>(rest)...);
+  }
+
+  PartList parts;
+
+public:
+  template <typename... Ts>
+  SerialElements(Ts &&...rest)
+      : parts(to_parts(PartList{}, forward<Ts>(rest)...)) {}
+
+  List<T> build() override {
+    List<T> ret;
+    for (const auto &part : parts) {
+      ret += part->build();
+    }
+    return ret;
+  }
+};
+
+template <typename T> class RepeatElement : public ListBuilder<T> {
+  int N;
+  unique_ptr<ListBuilder<T>> part;
+
+public:
+  RepeatElement(int N, unique_ptr<ListBuilder<T>> part)
+      : N(N), part(move(part)) {}
+
+  RepeatElement(int N, T elem)
+      : RepeatElement(N, make_unique<SingleElement<T>>(move(elem))) {}
+
+  List<T> build() {
+    List<T> ret;
+    for (int i = 0; i < N; ++i) {
+      ret += part->build();
+    }
+    return ret;
+  }
+};
 
 struct Test {
   virtual void generate() = 0;
@@ -538,6 +608,103 @@ public:
   }
 };
 
+class SolutionTestBase : public Test {
+  virtual void get_input() = 0;
+  virtual void print_input() = 0;
+  virtual void solve_input() = 0;
+
+public:
+  void generate() override {
+    get_input();
+    set_stream(stdout);
+    print_input();
+    set_stream(stderr);
+    solve_input();
+  }
+};
+
+// For the classic "T tests" problems
+class MultipleTests : public Test {
+  unique_ptr<ListBuilder<shared_ptr<Test>>> builder;
+
+public:
+  MultipleTests(unique_ptr<ListBuilder<shared_ptr<Test>>> builder)
+      : builder(move(builder)) {}
+
+  void generate() override {
+    auto tests = builder->build();
+    shuffle(tests);
+    print(tests.size());
+    for (const auto &test : tests) {
+      test->generate();
+    }
+  }
+};
+
+template <typename T> class RandomTestUnion : public ListBuilder<T> {
+  T first, second;
+  int num, denom;
+
+public:
+  RandomTestUnion(T first, T second, int num = 1, int denom = 2)
+      : first(move(first)), second(move(second)), num(num), denom(denom) {}
+
+  List<T> build() { return {randint(1, denom) <= num ? first : second}; }
+};
+
+class MultipleTestsWithSumUnit : public SolutionTestBase {
+public:
+  // When tests are duplicated, they share the same memory, and as such doing
+  // initialization will overwrite The idea is to get the unit value which may
+  // be constant, but is likely random, (but still does not modify the object)
+  // And then store it before calling generate()
+  virtual int get_unit_value() const = 0;
+  virtual void store_unit_value(int) = 0;
+};
+
+class MultipleTestsWithSum : public Test {
+  int max_total;
+  unique_ptr<ListBuilder<shared_ptr<MultipleTestsWithSumUnit>>> builder;
+
+public:
+  MultipleTestsWithSum(
+      int max_total,
+      unique_ptr<ListBuilder<shared_ptr<MultipleTestsWithSumUnit>>> builder)
+      : max_total(max_total), builder(move(builder)) {}
+
+  void generate() override {
+    List<shared_ptr<MultipleTestsWithSumUnit>, 1> tests = builder->build();
+    int cur_total = 0;
+    int test_count = 0;
+    List<int, 1> test_sizes(tests.size(), -1);
+
+    // Basically do greedy knapsack
+    for (size_t ti = 1; ti <= tests.size(); ++ti) {
+      int v = tests[ti]->get_unit_value();
+      if (cur_total + v <= max_total) {
+        ++test_count;
+        cur_total += v;
+        test_sizes[ti] = v;
+      }
+    }
+    print(test_count);
+    List<pair<shared_ptr<MultipleTestsWithSumUnit>, int>, 1> used_tests;
+    used_tests.reserve(test_count);
+    for (size_t ti = 1; ti <= tests.size(); ++ti) {
+      int sz = test_sizes[ti];
+      if (sz != -1) {
+        used_tests.emplace_back(tests[ti], sz);
+      }
+    }
+    shuffle(used_tests);
+
+    for (auto [test, sz] : used_tests) {
+      test->store_unit_value(sz);
+      test->generate();
+    }
+  }
+};
+
 // clang-format off
 List<List<shared_ptr<Test>, 1>, 1> cases = {
   {
@@ -546,7 +713,7 @@ List<List<shared_ptr<Test>, 1>, 1> cases = {
 };
 // clang-format on
 
-const int _PAGE_SZ = 1 << 12;
+const int _PAGE_SZ = 4096;
 const int _BUF_SZ = _PAGE_SZ * 16;
 char _out_buf[_BUF_SZ], _err_buf[_BUF_SZ];
 

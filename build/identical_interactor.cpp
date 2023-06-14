@@ -1,4 +1,4 @@
-// Built with `init-template identical_interactor_entry` on 2022-08-16
+// Built with `init-template identical_interactor_entry` on 2023-06-13
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -39,6 +39,7 @@ FILE *stream = stdout;
 
 void set_stream(FILE *st) { stream = st; }
 
+// Simple Types
 void print_impl(bool x) { fprintf(stream, "%d", x); }
 void print_impl(int x) { fprintf(stream, "%d", x); }
 void print_impl(ll x) { fprintf(stream, "%lld", x); }
@@ -46,6 +47,23 @@ void print_impl(size_t x) { fprintf(stream, "%lu", x); }
 void print_impl(const char *x) { fprintf(stream, "%s", x); }
 void print_impl(const string &x) { print_impl(x.c_str()); }
 void print_impl(char x) { fprintf(stream, "%c", x); }
+
+// Recursive types. First, declare all overloads
+template <typename T> void print_impl(const T &);
+template <typename A, typename B> void print_impl(const pair<A, B> &);
+template <typename... Ts> void print_impl(const tuple<Ts...> &t);
+template <typename T, typename Container> void print_impl(queue<T, Container>);
+template <typename T, typename Container, typename Compare>
+void print_impl(priority_queue<T, Container, Compare>);
+template <typename T> void print_impl(const set<T> &);
+template <typename T> void print_impl(const vector<T> &);
+template <typename T, size_t size> void print_impl(const array<T, size> &);
+template <typename T> void print_impl(const unordered_set<T> &);
+
+// Recursive type definitions
+template <typename T> void print_impl(const T &x) {
+  print_impl(x.get_printable());
+}
 
 template <typename A, typename B> void print_impl(const pair<A, B> &p) {
   print_impl(p.first);
@@ -72,7 +90,7 @@ template <typename... Ts> void print_impl(const tuple<Ts...> &t) {
   print_tuple<sizeof...(Ts)>(t);
 }
 
-template <typename T> void print_impl(const T &arr) {
+template <typename T> void print_iterable(const T &arr) {
   bool first = true;
 
   for (auto x : arr) {
@@ -85,10 +103,41 @@ template <typename T> void print_impl(const T &arr) {
   }
 }
 
-void print_many() {}
+template <typename T> void print_impl(const set<T> &arr) {
+  print_iterable(arr);
+}
+template <typename T> void print_impl(const vector<T> &arr) {
+  print_iterable(arr);
+}
+template <typename T> void print_impl(const unordered_set<T> &arr) {
+  print_iterable(arr);
+}
+template <typename T, size_t size> void print_impl(const array<T, size> &arr) {
+  print_iterable(arr);
+}
+template <typename T, typename Container>
+void print_impl(queue<T, Container> q) {
+  vector<T> dummy;
+  dummy.reserve(q.size());
+  while (!q.empty()) {
+    dummy.push_back(move(q.front()));
+    q.pop_front();
+  }
+  print_impl(dummy);
+}
 
+template <typename T, typename Container, typename Compare>
+void print_impl(priority_queue<T, Container, Compare> pq) {
+  vector<T> dummy;
+  dummy.reserve(pq.size());
+  while (!pq.empty()) {
+    dummy.push_back(move(pq.top()));
+    pq.pop();
+  }
+  print_impl(dummy);
+}
+// print_many helper
 template <typename T> void print_many(const T &arg) { print_impl(arg); }
-
 template <typename T, typename... Ts>
 void print_many(const T &arg, Ts &&...args) {
   print_impl(arg);
@@ -96,12 +145,16 @@ void print_many(const T &arg, Ts &&...args) {
   print_many(forward<Ts>(args)...);
 }
 
-void print() { fprintf(stream, "\n"); }
-
 template <typename... Ts> void print(Ts &&...args) {
   print_many(forward<Ts>(args)...);
 
   print();
+}
+template <> void print() { fprintf(stream, "\n"); }
+template <typename T> void print_map(const T &mp) {
+  for (auto p : mp) {
+    print(p);
+  }
 }
 
 template <typename R> void print_items(const R &r) {
@@ -109,10 +162,25 @@ template <typename R> void print_items(const R &r) {
     print(x);
   }
 }
+
+template <typename K, typename V>
+void print_items(const unordered_map<K, V> &mp) {
+  print_map(mp);
+}
+template <typename K, typename V> void print_items(const map<K, V> &mp) {
+  print_map(mp);
+}
+
+template <typename T> void print_yes_no(const T &xs) {
+  for (const auto &x : xs)
+    print_yes_no(x);
+}
+template <> void print_yes_no(const bool &x) { print(x ? "YES" : "NO"); }
 }; // namespace Printer
 
 using Printer::print;
 using Printer::print_items;
+using Printer::print_yes_no;
 using Printer::set_stream;
 
 // modified from a template by wleung_bvg
@@ -356,14 +424,16 @@ public:
   template <typename F> void for_each(F f) { ::for_each(all(*this), f); }
   template <typename F> void for_each(F f) const { ::for_each(all(*this), f); }
   template <typename F> void for_each_pair(F f) {
-    ::for_each(all(*this), [&f](const T &p) -> void {
-      auto a = get<0>(p), b = get<1>(p);
+    ::for_each(all(*this), [&f](T &p) -> void {
+      decltype(p.first) &a = get<0>(p);
+      decltype(p.second) &b = get<1>(p);
       f(a, b);
     });
   }
   template <typename F> void for_each_pair(F f) const {
     ::for_each(all(*this), [&f](const T &p) -> void {
-      auto a = get<0>(p), b = get<1>(p);
+      const decltype(p.first) &a = get<0>(p);
+      const decltype(p.second) &b = get<1>(p);
       f(a, b);
     });
   }
@@ -405,13 +475,11 @@ public:
   }
 
   List<T, offset> &operator+=(const List<T, offset> &other) {
-    this->reserve(this->size() + other.size());
     for (const T &elem : other)
       this->push_back(elem);
     return *this;
   }
   List<T, offset> &operator+=(List<T, offset> &&other) {
-    this->reserve(this->size() + other.size());
     for (auto &&elem : other)
       this->push_back(move(elem));
     return *this;
@@ -511,6 +579,8 @@ public:
     }
     return ret;
   }
+
+  const vector<T> &get_printable() const { return *this; }
 };
 
 template <int offset = 0, typename F>
@@ -550,7 +620,7 @@ template <typename T, typename F> void exhaust_queue(queue<T> &q, F f) {
   while (!q.empty()) {
     T x(move(q.front()));
     q.pop();
-    f(x);
+    f(move(x));
   }
 }
 
@@ -559,16 +629,16 @@ void assert_permutation(const List<int, 1> &arr) {
   assert(arr.all_of([&check](int x) { return ++check[x] == 1; }));
 }
 
+class validator_out_of_range {};
+class wrong_whitespace {};
+class invalid_integer {};
+
 class ValidatingReaderBase : public BaseReader {
 protected:
-  void externalRangeError() override { throw runtime_error("EXTERNAL_RANGE"); }
-  void internalRangeError() override { throw runtime_error("INTERNAL_RANGE"); }
-  void wrongWhitespaceError() override {
-    throw runtime_error("WRONG_WHITESPACE");
-  }
-  void invalidIntegerError() override {
-    throw runtime_error("INVALID_INTEGER");
-  }
+  void externalRangeError() override { throw validator_out_of_range(); }
+  void internalRangeError() override { throw validator_out_of_range(); }
+  void wrongWhitespaceError() override { throw wrong_whitespace(); }
+  void invalidIntegerError() override { throw invalid_integer(); }
 
 public:
   using BaseReader::BaseReader;
