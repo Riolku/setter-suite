@@ -18,8 +18,8 @@ where
     EH: ErrorHandler,
 {
     Reader {
-        tokenizer: tokenizer,
-        handler: handler,
+        tokenizer,
+        handler,
     }
 }
 
