@@ -1,134 +1,53 @@
 checker_utils:
 - reader
 
-dsu:
-- list
-- integer_range
-
 exact_whitespace_mixin: []
-
-gen_dependencies:
-- DUMMY
-- output
-- random_arrays
-- test_generation
-
-gen_entry:
-- gen_dependencies
-
-graphs:
-- output
-- reader
-- list
-
-identical_checker_entry:
-- output
-- validation
-- identical_checker
 
 identical_checker:
 - checker_utils
 - exact_whitespace_mixin
 
-identical_interactor_entry:
-- output
+identical_checker_entry:
 - validation
-- identical_interactor
+- identical_checker
 
 identical_interactor:
 - identical_checker
 - interaction
 
+identical_interactor_entry:
+- validation
+- identical_interactor
+
 interaction:
 - checker_utils
-
-list_builder:
-- list
-
-list:
-- sys_deps
-- utils
-
-negint:
-- sys_deps
-- utils
-
-output:
-- sys_deps
-- utils
-
-pairs:
-- sys_deps
-- utils
-
-random_arrays:
-- list
-- random
-
-random_graphs:
-- graphs
-- random_arrays
-- pairs
-
-random_pairs:
-- pairs
-- random
-
-random_set:
-- list
-- random
-- set_with_bit
-
-random:
-- sys_deps
-- utils
 
 reader:
 - sys_deps
 - utils
 
-set_with_bit:
-- list
-
-sol_dependencies:
-- DUMMY
-- output
-- validation
-- list
-
-sol_entry:
-- sol_dependencies
-
-standard_checker_entry:
-- output
-- validation
-- standard_checker
-
 standard_checker:
 - checker_utils
 
-standard_interactor_entry:
-- output
+standard_checker_entry:
 - validation
-- standard_interactor
+- standard_checker
 
 standard_interactor:
 - standard_checker
 - interaction
 
-sys_deps: []
+standard_interactor_entry:
+- validation
+- standard_interactor
 
-test_generation:
-- list_builder
-- output
+sys_deps: []
 
 utils: []
 
 validation:
 - reader
 - exact_whitespace_mixin
-- list
 
 validator_entry:
-- output
 - validation

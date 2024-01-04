@@ -1,6 +1,6 @@
-void assert_permutation(const List<int, 1> &arr) {
-  List<int, 1> check(arr.size(), 0);
-  assert(arr.all_of([&check](int x) { return ++check[x] == 1; }));
+void assert_permutation(const vector<int> &arr) {
+  vector<int> check(arr.size(), 0);
+  assert(std::all_of(arr.begin(), arr.end(), [&check](int x) { return ++check[x - 1] == 1; }));
 }
 
 class validator_out_of_range {};

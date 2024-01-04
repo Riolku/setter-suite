@@ -8,5 +8,3 @@ setter-utils init-template identical_checker_entry > build/identical_checker.cpp
 setter-utils init-template standard_interactor_entry > build/standard_interactor.cpp
 setter-utils init-template identical_interactor_entry > build/identical_interactor.cpp
 setter-utils init-template validator_entry > build/validator.cpp
-setter-utils init-template gen_entry > build/generator.cpp
-setter-utils init-template sol_entry > build/solution.cpp
